@@ -1,0 +1,19 @@
+{
+  "name": "game_instance_framework",
+  "version": "0.0.1",
+  "description": "Framework for WebSocket gamestate storage",
+  "main": "./src/server/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marc Vousden",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.4",
+    "express-session": "^1.15.5",
+    "http": "0.0.0",
+    "url": "^0.11.0",
+    "uuid": "^3.1.0",
+    "ws": "^3.1.0"
+  }
+}
