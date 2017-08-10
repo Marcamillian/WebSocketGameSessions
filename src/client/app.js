@@ -25,7 +25,8 @@
     };
 
     logout.onclick = () =>{
-        fetch('/logout', {method: 'POST', credentials: 'same-origin'})
+        console.log("doing this click")
+        fetch('/logout', {method: 'DELETE', credentials: 'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=> showMessage(err.message) )

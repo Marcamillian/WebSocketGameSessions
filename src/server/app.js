@@ -9,7 +9,7 @@ const WebSocket = require('ws');
  
 const app = express();
 
-// we need tyhe same instance of the session parser in express and websocket servers
+// we need the same instance of the session parser in express and websocket servers
 
 const sessionParser = session({
     saveUninitialized: false,
@@ -27,14 +27,14 @@ app.post('/login', (req, res)=>{
 
     console.log(`Updating session for user ${id}`);
     req.session.userId = id;
-    res.send({result:"OK", message: 'Session updated'})
+    res.send({result:"OK", message: 'Session updated '})
 })
 
-app.delete('./logout', (req, res)=>{
-    console.log('Destroying session');
-    req.session.destroy();
-    response.send({result:'OK', message:'Session destroyed'})
-})
+app.delete('/logout', (request, response) => {
+  console.log('Destroying session');
+  request.session.destroy();
+  response.send({ result: 'OK', message: 'Session destroyed' });
+});
 
 // create the http server ourselves
 const server = http.createServer(app)
@@ -43,7 +43,7 @@ const wss = new WebSocket.Server({
     verifyClient: (info, done)=>{
         console.log('Parsing session from request....')
         sessionParser(info.req, {}, ()=>{
-            console.log("Session is parsed!")
+            console.log(`Session is parsed for user: ${info.req.session.userId}`)
 
             // we can reject the connection by returning false to done(). For example, reject here is uses is unknown
             done(info.req.session.userId)
