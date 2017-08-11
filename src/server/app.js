@@ -36,6 +36,15 @@ app.delete('/logout', (request, response) => {
   response.send({ result: 'OK', message: 'Session destroyed' });
 });
 
+app.post('/gameinstance', (req,res)=>{
+    if(req.session.gameinstance){ // if already has a game instance
+        res.send({result:"OK", message: `In game ${req.session.gameinstance}`}) // send back what game they are in
+    }else{
+        req.session.gameinstance = "Game 1";
+        res.send({result: "OK", message: `Joined game ${req.session.gameinstance}`})
+    }
+})
+
 // create the http server ourselves
 const server = http.createServer(app)
 

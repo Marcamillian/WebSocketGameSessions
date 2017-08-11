@@ -5,6 +5,7 @@
     const wsButton = document.querySelector('#wsButton');
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
+    const createGame = document.querySelector('#createGame')
 
     const showMessage = (message)=>{
         messages.textContent += `\n${message}`;
@@ -46,4 +47,12 @@
         ws.onclose = ()=> showMessage('WebSocket connection closed')
         
     }
+
+    createGame.onclick = ()=>{
+        fetch('/gameinstance', {method:'POST', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=> showMessage(err.message))
+    }
+        
 })();
