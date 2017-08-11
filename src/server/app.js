@@ -1,26 +1,33 @@
 `use strict`;
-
+// npm imports
 const session = require('express-session')
 const express = require('express');
 const http = require('http');
 const uuid = require('uuid')
-
 const WebSocket = require('ws');
  
-const app = express();
+
+// game objects
+const app = express();  // express app - for handelling routes
+const sesssionParser;   // for handelling sessions
+const server;           // http server
+const wss;              // websocket server
+
+
 
 // we need the same instance of the session parser in express and websocket servers
-
-const sessionParser = session({
+sessionParser = session({
     saveUninitialized: false,
     secret: 'passOpen',
     resave: false
 })
 
-// serve files from the right folder
+// CONFIGURE EXPRESS APP - serve files from the right folder
 app.use(express.static('./../client'));
 app.use(sessionParser);
 
+
+// EXPRESS APP - ROUTING TRIGGERS
 app.post('/login', (req, res)=>{
     // "Log in" user and set userId to session
     const id= uuid.v4();
@@ -45,10 +52,14 @@ app.post('/gameinstance', (req,res)=>{
     }
 })
 
-// create the http server ourselves
-const server = http.createServer(app)
 
-const wss = new WebSocket.Server({
+
+// CREATE THE HTTP SERVER
+server = http.createServer(app)
+
+
+// CREATE THE WEBSOCKET SERVER
+wss = new WebSocket.Server({
     verifyClient: (info, done)=>{
         console.log('Parsing session from request....')
         sessionParser(info.req, {}, ()=>{
@@ -60,7 +71,7 @@ const wss = new WebSocket.Server({
     },
     server
 })
-
+// CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
     ws.on('message', (message)=>{
         // Here we can now use session parameters
@@ -70,5 +81,5 @@ wss.on('connection', (ws,req)=>{
 });
 
 
-// Start the server
+// START THE SERVER
 server.listen(8080, ()=> console.log('Listening on http://localhost:8080'))
