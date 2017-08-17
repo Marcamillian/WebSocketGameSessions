@@ -16,7 +16,7 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    const stringifyMessage = (jsonMessage)=>{
+    const stringifyObject = (jsonMessage)=>{
         return JSON.stringify(jsonMessage,null,2)
     }
 
@@ -27,7 +27,11 @@
     }
     
     const processGameRef = (responseObject)=>{
-        return responseObject.gameRef
+        if (responseObject.gameRef){
+            return responseObject.gameRef
+        }else{
+            throw new Error("No gamRef in response")
+        }
     }
 
     const setGameRef = ( gameRef )=>{
@@ -36,8 +40,15 @@
         return gameRef
     }
 
-    const getGameState = (gameRef)=>{
-       
+    const getGameState = (gameState)=>{
+        fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(updateGameState)
+            .catch((err)=> showMessage(err.message))
+    }
+
+    const updateGameState = (response)=>{
+        console.log(response.gameState)
     }
 
     // BUTTON CLICK FUNCTIONS
@@ -45,7 +56,7 @@
     login.onclick = ()=>{
         fetch('/login', {method: 'POST', credentials: 'same-origin'})
             .then(handleResponse)
-            .then(stringifyMessage)
+            .then(stringifyObject)
             .then(showMessage)
             .catch((err)=> showMessage(err.message) )
     };
@@ -53,7 +64,7 @@
     logout.onclick = () =>{
         fetch('/logout', {method: 'DELETE', credentials: 'same-origin'})
             .then(handleResponse)
-            .then(stringifyMessage)
+            .then(stringifyObject)
             .then(showMessage)
             .catch((err)=> showMessage(err.message) )
     }
@@ -72,11 +83,11 @@
     }
 
     createGame.onclick = ()=>{
-        fetch('/gameInstance', {method:'PUT', credentials:'same-origin'} ) // returns the reference key of the game you made
+        fetch('/gameinstance', {method:'PUT', credentials:'same-origin'} ) // returns the reference key of the game you made
             .then(handleResponse)
             .then(processGameRef)
             .then(setGameRef)
-            .then(showMessage)
+            .then(getGameState)
             .catch((err)=> showMessage(err.message))
 
     }

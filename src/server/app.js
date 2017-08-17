@@ -28,7 +28,7 @@ app.use(express.static('./src/client'));
 app.use(sessionParser);
 
 
-// EXPRESS APP - ROUTING TRIGGERS
+// ===  EXPRESS APP - ROUTING TRIGGERS == 
 app.post('/login', (req, res)=>{
     // "Log in" user and set userId to session
     const id= uuid.v4();
@@ -51,7 +51,6 @@ app.put('/gameinstance', (req, res)=>{
     res.send({'result':"OK", 'gameRef': gameRef})
     
 })
-
 // get information about a game / an instance  TODO:: take the game ref from the url
 app.post('/gameinstance', (req,res)=>{  
     if(req.session.gameinstance){ // if already has a game instance
@@ -61,6 +60,15 @@ app.post('/gameinstance', (req,res)=>{
         res.send({result: "OK", message: `Joined game ${req.session.gameinstance}`})
     }
 })
+
+// -- game instance routes -- using "route parameters"
+app.get('/gameinstance/:gameRef', (req, res)=>{
+    let gameState = stateManager.getGameState(req.params.gameRef)
+    console.log(gameState)
+    res.send({result: 'OK', gameState: gameState})
+})
+
+
 
 // CREATE THE HTTP SERVER
 server = http.createServer(app)
