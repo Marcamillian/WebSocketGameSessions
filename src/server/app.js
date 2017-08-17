@@ -6,12 +6,14 @@ const http = require('http');
 const uuid = require('uuid')
 const WebSocket = require('ws');
  
+const GameStateManager = require('./GameStateManager')
 
 // game objects
 var app = express();  // express app - for handelling routes
 var sessionParser;   // for handelling sessions
 var server;           // http server
 var wss;              // websocket server
+var stateManager = GameStateManager()   
 
 
 // we need the same instance of the session parser in express and websocket servers
@@ -22,7 +24,7 @@ sessionParser = session({
 })
 
 // CONFIGURE EXPRESS APP - serve files from the right folder
-app.use(express.static('./../client'));
+app.use(express.static('./src/client'));
 app.use(sessionParser);
 
 
@@ -42,7 +44,16 @@ app.delete('/logout', (request, response) => {
   response.send({ result: 'OK', message: 'Session destroyed' });
 });
 
-app.post('/gameinstance', (req,res)=>{
+// create a new game session
+app.put('/gameinstance', (req, res)=>{
+    let gameRef = stateManager.createNewGame() // create the session - returns the ref
+
+    res.send({'result':"OK", 'gameRef': gameRef})
+    
+})
+
+// get information about a game / an instance  TODO:: take the game ref from the url
+app.post('/gameinstance', (req,res)=>{  
     if(req.session.gameinstance){ // if already has a game instance
         res.send({result:"OK", message: `In game ${req.session.gameinstance}`}) // send back what game they are in
     }else{
@@ -50,8 +61,6 @@ app.post('/gameinstance', (req,res)=>{
         res.send({result: "OK", message: `Joined game ${req.session.gameinstance}`})
     }
 })
-
-
 
 // CREATE THE HTTP SERVER
 server = http.createServer(app)
