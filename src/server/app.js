@@ -8,11 +8,10 @@ const WebSocket = require('ws');
  
 
 // game objects
-const app = express();  // express app - for handelling routes
-const sesssionParser;   // for handelling sessions
-const server;           // http server
-const wss;              // websocket server
-
+var app = express();  // express app - for handelling routes
+var sessionParser;   // for handelling sessions
+var server;           // http server
+var wss;              // websocket server
 
 
 // we need the same instance of the session parser in express and websocket servers
@@ -79,7 +78,6 @@ wss.on('connection', (ws,req)=>{
         console.log(`WS message ${message} from user ${req.session.userId}`)
     })
 });
-
 
 // START THE SERVER
 server.listen(8080, ()=> console.log('Listening on http://localhost:8080'))

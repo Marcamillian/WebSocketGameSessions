@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tap tests/server/*.js",
+    "test-client": "tap tests/client/*.js",
+    "test-server": "tap tests/server/*.js"
   },
   "author": "Marc Vousden",
   "license": "MIT",
@@ -13,6 +15,8 @@
     "express": "^4.15.4",
     "express-session": "^1.15.5",
     "http": "0.0.0",
+    "tap": "^10.7.2",
+    "tape": "^4.8.0",
     "url": "^0.11.0",
     "uuid": "^3.1.0",
     "ws": "^3.1.0"
