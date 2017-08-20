@@ -5,22 +5,34 @@
     <head>
         <meta charset="utf-8">
         <title> Express Session Demo</title>
+        <link rel="stylesheet" type="text/css" href="styles.css"/>
     </head>
 
     <body>
-        <h1> Choose an action</h1>
+        <button id="wsButton" type="button" title="Open WebSocket connection">
+            Connect to server
+        </button>
+
         <button id="login" type="button" title="Simulate login">
             Simulate login
         </button>
         <button id="logout" type="button" title="Simulate logout">
             Simulate Logout
         </button>
-        <button id="wsButton" type="button" title="Open WebSocket connection">
-            Send WebSocket message
-        </button>
+        
         <button id="createGame" type="button" title="Start new game instance">
             Start new Game instance
         </button>
+
+        <h2> Players</h2>
+        <ul id="player-list">
+            <li> Some Player</li>
+        </ul>
+
+        <h2> Scores </h2>
+        <p id="score-display">none</p>
+
+
         <pre id="messages" style="height: 400px; overflow:scroll"></pre>
         <script src="app.js"></script> 
     </body>

@@ -34,6 +34,14 @@ let gameStateManager = function(){
         }
     }
 
+    let joinGame = (sessionKey, playerKey)=>{
+        if(gameStates[sessionKey]){
+            return gameStates[sessionKey].players.push(playerKey)
+        }else{
+            throw new Error( "session doesn't exist")
+        }
+    }
+
     return Object.create({
         createNewGame: createNewGame,
         getGameState: getGameState,

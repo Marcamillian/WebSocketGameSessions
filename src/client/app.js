@@ -6,11 +6,14 @@
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
     const createGame = document.querySelector('#createGame')
+    let playerDisplay = document.querySelector('#player-display')
+    let scoreDisplay = document.querySelector('#score-display')
     let ws;
 
     // game session variables
     let currentGameRef;
 
+    // utility funtions
     const showMessage = (message)=>{
         messages.textContent += `\n${message}`;
         messages.scrollTop = messages.scrollHeight;
@@ -26,6 +29,22 @@
             : Promise.reject(new Error('Unexpected response'))
     }
     
+    // display functions
+    const hideElements = ( gamePhase )=>{
+        console.log("hide: ", ws)
+        if(ws){ // if we are logged in
+            login.classList.add('hide')
+        }else{
+            login.classList.remove('hide')
+        }
+        if(currentGameRef){
+            createGame.classList.add("hide")
+        }else{
+            createGame.classList.add("remove")
+        }
+    }
+
+    // geme functions
     const processGameRef = (responseObject)=>{
         if (responseObject.gameRef){
             return responseObject.gameRef
@@ -48,7 +67,14 @@
     }
 
     const updateGameState = (response)=>{
-        console.log(response.gameState)
+        showScore(response.gameState)
+    }
+
+    const showPlayers = (gameState)=>{
+    }
+
+    const showScore = (gameState)=>{
+        scoreDisplay.textContent = gameState.score
     }
 
     // BUTTON CLICK FUNCTIONS
@@ -58,6 +84,7 @@
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
+            .then(hideElements)
             .catch((err)=> showMessage(err.message) )
     };
 
@@ -66,9 +93,10 @@
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
+            .then(hideElements)
             .catch((err)=> showMessage(err.message) )
     }
-
+ 
     wsButton.onclick = ()=>{
         if(ws){
             ws.onerror = ws.onopen = ws.onclose = null;
@@ -88,8 +116,9 @@
             .then(processGameRef)
             .then(setGameRef)
             .then(getGameState)
+            .then(hideElements)
             .catch((err)=> showMessage(err.message))
 
     }
-        
+
 })();

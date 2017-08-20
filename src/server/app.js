@@ -51,7 +51,7 @@ app.put('/gameinstance', (req, res)=>{
     res.send({'result':"OK", 'gameRef': gameRef})
     
 })
-// get information about a game / an instance  TODO:: take the game ref from the url
+// 
 app.post('/gameinstance', (req,res)=>{  
     if(req.session.gameinstance){ // if already has a game instance
         res.send({result:"OK", message: `In game ${req.session.gameinstance}`}) // send back what game they are in
@@ -61,7 +61,7 @@ app.post('/gameinstance', (req,res)=>{
     }
 })
 
-// -- game instance routes -- using "route parameters"
+// get the gamestate for the session with the reference in the URL
 app.get('/gameinstance/:gameRef', (req, res)=>{
     let gameState = stateManager.getGameState(req.params.gameRef)
     console.log(gameState)
@@ -91,8 +91,11 @@ wss = new WebSocket.Server({
 wss.on('connection', (ws,req)=>{
     ws.on('message', (message)=>{
         // Here we can now use session parameters
-
         console.log(`WS message ${message} from user ${req.session.userId}`)
+    })
+
+    ws.on('joinGame', (message)=>{
+        //console.log(`Trying to join ${}`)
     })
 });
 
