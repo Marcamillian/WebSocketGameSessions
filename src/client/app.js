@@ -6,6 +6,10 @@
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
     const createGame = document.querySelector('#createGame')
+    const leaveGame = document.querySelector('#leaveGame')
+
+    const playerNameInput = document.querySelector('#player_name')
+    const gameRefInput = document.querySelector('#game_ref')
     let playerDisplay = document.querySelector('#player-display')
     let scoreDisplay = document.querySelector('#score-display')
     let ws;
@@ -31,16 +35,17 @@
     
     // display functions
     const hideElements = ( gamePhase )=>{
-        console.log("hide: ", ws)
         if(ws){ // if we are logged in
-            login.classList.add('hide')
+            wsButton.classList.add("hide")
         }else{
-            login.classList.remove('hide')
+            wsButton.classList.remove('hide')
         }
         if(currentGameRef){
             createGame.classList.add("hide")
+            leaveGame.classList.remove("hide")
         }else{
-            createGame.classList.add("remove")
+            createGame.classList.remove("hide")
+            leaveGame.classList.add("hide")
         }
     }
 
@@ -77,6 +82,14 @@
         scoreDisplay.textContent = gameState.score
     }
 
+    const getPlayerNameInput =()=>{
+        return playerNameInput.value
+    }
+
+    const getGameRefInput = ()=>{
+        return gameRefInput.value
+    }
+
     // BUTTON CLICK FUNCTIONS
 
     login.onclick = ()=>{
@@ -107,10 +120,16 @@
         ws.onerror = ()=> showMessage('WebSocket error')
         ws.onopen = ()=> showMessage(' Websocket connection established')
         ws.onclose = ()=> showMessage('WebSocket connection closed')
+
+        hideElements()
         
     }
 
     createGame.onclick = ()=>{
+
+        console.log("playerNameInput ", getPlayerNameInput())
+        console.log("gameRef Input ", getGameRefInput())
+
         fetch('/gameinstance', {method:'PUT', credentials:'same-origin'} ) // returns the reference key of the game you made
             .then(handleResponse)
             .then(processGameRef)
@@ -119,6 +138,11 @@
             .then(hideElements)
             .catch((err)=> showMessage(err.message))
 
+    }
+
+    leaveGame.onclick = ()=>{
+        currentGameRef = undefined;
+        hideElements()
     }
 
 })();

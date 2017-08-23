@@ -13,6 +13,11 @@
             Connect to server
         </button>
 
+        <form>
+            <input id="player_name" type="text" label="player_name">Player Name</input>
+            <input id="game_ref" type="text" label="game_ref">Game to Join</input>
+        </form>
+
         <button id="login" type="button" title="Simulate login">
             Simulate login
         </button>
@@ -21,8 +26,12 @@
         </button>
         
         <button id="createGame" type="button" title="Start new game instance">
-            Start new Game instance
+            Join Game
         </button>
+        <button id="leaveGame" type="button" title="Leave current game">
+            Leave Game
+        </button>
+
 
         <h2> Players</h2>
         <ul id="player-list">
