@@ -8,7 +8,7 @@
         <link rel="stylesheet" type="text/css" href="styles.css"/>
     </head>
 
-    <body>
+    <body class="connect">
         <button id="wsButton" type="button" title="Open WebSocket connection">
             Connect to server
         </button>
@@ -33,16 +33,25 @@
         </button>
 
 
-        <h2> Players</h2>
-        <ul id="player-list">
-            <li> Some Player</li>
-        </ul>
+        
+        <div id="player-list">
+            <h2 class="title"> Players</h2>
+            <ul class="content">
+                <li> Some Player</li>
+            </ul>
+        </div>
 
-        <h2> Scores </h2>
-        <p id="score-display">none</p>
+        <div id="score-display">
+            <h2 class="title"> Scores </h2>
+            <p class="content">none</p>
+        </div>
 
+        <div id="messages">
+            <pre class="content" style="height: 400px; overflow:scroll">
+                Some Messages
+            </pre>
+        <div>
 
-        <pre id="messages" style="height: 400px; overflow:scroll"></pre>
         <script src="app.js"></script> 
     </body>
 </html>

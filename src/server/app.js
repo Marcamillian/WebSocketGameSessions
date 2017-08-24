@@ -89,14 +89,61 @@ wss = new WebSocket.Server({
 })
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
-    ws.on('message', (message)=>{
-        // Here we can now use session parameters
-        console.log(`WS message ${message} from user ${req.session.userId}`)
-    })
+    ws.on('message', (messageString)=>{
 
-    ws.on('joinGame', (message)=>{
-        //console.log(`Trying to join ${}`)
+        // get a list of the connected clients - wss.clients
+
+        let message = JSON.parse(messageString)
+
+        switch(message.type){
+            case 'joinGame':
+                try{
+                    let response = {
+                        "result": "OK",
+                        "type": "joinGame",
+                        "data":{
+                            "gameRef": message.data.gameRef
+                        }
+                    }
+                    
+                    stateManager.getGameState(message.data.gameRef)
+                    ws.send(JSON.stringify(response))
+                }catch(e){
+                    console.error(e)
+                    
+                    let response = {
+                        "result": "Failed",
+                        "type": "joinGame",
+                        "data": {
+                            "errorMessage": `Couldn't find gameRef ${message.gameRef}`
+                        }
+                    }
+
+                    ws.send(JSON.stringify(response))
+                }
+            
+            break
+            case 'createGame':
+
+                let response = {
+                    "result":"OK",
+                    "type":"gameCreate",
+                    "data": {
+                        "gameRef": stateManager.createNewGame()
+                    }
+                }
+
+                console.log(`New game created ${response.data.gameRef}`)
+                ws.send(JSON.stringify(response)) // create a new game and return the reference
+            break;
+            default:
+                console.log("some message sent without a type", message)
+            break;
+
+        }
+
     })
+    
 });
 
 // START THE SERVER

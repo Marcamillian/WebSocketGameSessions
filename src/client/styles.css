@@ -1,3 +1,25 @@
-.hide{
-    display:none
+body div,
+body form,
+body button{
+    display:none;
+}
+
+.connect #wsButton{
+    display:block;
+}
+
+.join-game form,
+.join-game form input,
+.join-game #createGame{
+    display:block;
+}
+
+.lobby #player-list,
+.lobby #leaveGame{
+    display:block;
+}
+
+.in-game #messages,
+.in-game {
+    display:block;
 }

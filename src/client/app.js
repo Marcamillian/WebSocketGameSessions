@@ -1,21 +1,23 @@
 /* global fetch, Websocket, location */
 
 (()=>{
-    const messages = document.querySelector('#messages');
+    const messages = document.querySelector('#messages .content');
     const wsButton = document.querySelector('#wsButton');
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
     const createGame = document.querySelector('#createGame')
     const leaveGame = document.querySelector('#leaveGame')
+    const displayBody = document.querySelector('body');
 
     const playerNameInput = document.querySelector('#player_name')
     const gameRefInput = document.querySelector('#game_ref')
-    let playerDisplay = document.querySelector('#player-display')
-    let scoreDisplay = document.querySelector('#score-display')
+    let playerDisplay = document.querySelector('#player-display .content')
+    let scoreDisplay = document.querySelector('#score-display .content')
     let ws;
 
     // game session variables
     let currentGameRef;
+    let gamePhase;
 
     // utility funtions
     const showMessage = (message)=>{
@@ -33,23 +35,58 @@
             : Promise.reject(new Error('Unexpected response'))
     }
     
-    // display functions
-    const hideElements = ( gamePhase )=>{
-        if(ws){ // if we are logged in
-            wsButton.classList.add("hide")
-        }else{
-            wsButton.classList.remove('hide')
-        }
-        if(currentGameRef){
-            createGame.classList.add("hide")
-            leaveGame.classList.remove("hide")
-        }else{
-            createGame.classList.remove("hide")
-            leaveGame.classList.add("hide")
+    const gameStateDisplay = ( gamePhase ) =>{
+
+        displayBody.classList.remove("connect", "join-game", "lobby", "in-game")
+
+        switch( gamePhase ){
+            case "connect":
+                displayBody.classList.add("connect")
+            break
+            case "joinGame":
+                displayBody.classList.add("join-game")
+            break
+            case "lobby":
+                displayBody.classList.add("lobby")
+            break
+            case "inGame":
+                displayBody.classList.add("in-game")
+            break
         }
     }
 
-    // geme functions
+    const setupWsSession = ()=>{
+        if(ws){
+            ws.onerror = ws.onopen = ws.onclose = null;
+            ws.close()
+        }
+
+        ws = new WebSocket(`ws://${location.host}`)
+        ws.onerror = ()=> showMessage('WebSocket error')
+        ws.onopen = ()=> showMessage(' Websocket connection established')
+        ws.onclose = ()=> showMessage('WebSocket connection closed')
+        ws.onmessage = (messageString)=>{
+            let message = JSON.parse(messageString.data)
+            
+            if(message.result != 'OK'){
+                console.error(`${message.type} : ERROR - ${message.data.errorMessage}`)
+            }
+
+            switch(message.type){
+                case "gameCreate":
+                    console.log(`Created & joined game ${message.data.gameRef}`)
+                break
+                case "joinGame":
+                    console.log(`Joined game ${message.data.gameRef}`)
+                break
+            }
+            
+
+        }
+
+    }
+
+    // game functions
     const processGameRef = (responseObject)=>{
         if (responseObject.gameRef){
             return responseObject.gameRef
@@ -97,7 +134,6 @@
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
-            .then(hideElements)
             .catch((err)=> showMessage(err.message) )
     };
 
@@ -106,43 +142,57 @@
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
-            .then(hideElements)
             .catch((err)=> showMessage(err.message) )
     }
  
     wsButton.onclick = ()=>{
-        if(ws){
-            ws.onerror = ws.onopen = ws.onclose = null;
-            ws.close()
-        }
-
-        ws = new WebSocket(`ws://${location.host}`)
-        ws.onerror = ()=> showMessage('WebSocket error')
-        ws.onopen = ()=> showMessage(' Websocket connection established')
-        ws.onclose = ()=> showMessage('WebSocket connection closed')
-
-        hideElements()
         
+        fetch('/login', {method: 'POST', credentials: 'same-origin'})
+        .then(handleResponse)
+        .then(stringifyObject)
+        .then(showMessage)
+        .then(setupWsSession)
+        .then(()=>{ gameStateDisplay('joinGame') })
+        .catch((err)=> showMessage(err.message) )
     }
 
     createGame.onclick = ()=>{
+        
+        let gameRef = getGameRefInput();
+        if(gameRef == ""){
+            let response = {
+                'type':'createGame',
+                'data': {}
+            }
 
-        console.log("playerNameInput ", getPlayerNameInput())
-        console.log("gameRef Input ", getGameRefInput())
+            ws.send(JSON.stringify(response))
+        }else{
+            let response = {
+                'type':'joinGame',
+                'data': {
+                    'gameRef': gameRef,
+                    'playerName': getPlayerNameInput()
+                }
+            }
 
+            ws.send(JSON.stringify(response))
+        }
+        
+
+        /*
         fetch('/gameinstance', {method:'PUT', credentials:'same-origin'} ) // returns the reference key of the game you made
             .then(handleResponse)
             .then(processGameRef)
             .then(setGameRef)
             .then(getGameState)
-            .then(hideElements)
+            .then(()=>{gameStateDisplay('lobby')})
             .catch((err)=> showMessage(err.message))
+        */
 
     }
 
     leaveGame.onclick = ()=>{
         currentGameRef = undefined;
-        hideElements()
     }
 
 })();
