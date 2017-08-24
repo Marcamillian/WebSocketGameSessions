@@ -75,11 +75,24 @@
             switch(message.type){
                 case "gameCreate":
                     console.log(`Created & joined game ${message.data.gameRef}`)
+                    currentGameRef = message.data.gameRef
+                    gameStateDisplay('lobby')
                 break
                 case "joinGame":
                     console.log(`Joined game ${message.data.gameRef}`)
+                    console.log(message.data.gameState)
+                    currentGameRef = message.data.gameRef
+                    gameStateDisplay('lobby')
+                break
+                case "updateGameState":
+                    console.log(message.data)
+                break
+                default:
+                    console.log(`Message from server of type ${message.type}`) 
                 break
             }
+
+
             
 
         }

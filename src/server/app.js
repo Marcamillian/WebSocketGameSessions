@@ -88,6 +88,18 @@ wss = new WebSocket.Server({
     server
 })
 // CONFIGURE WEBSOCKET SERVER
+wss.broadcast = (gameRef)=>{
+    let response = {
+        "result": 'OK',
+        "type": 'updateGameState',
+        "data": 'some game state'
+    }
+    
+    wss.clients.forEach((ws)=>{
+        if(ws.gameJoined == gameRef) ws.send(JSON.stringify(response))
+    })
+}
+
 wss.on('connection', (ws,req)=>{
     ws.on('message', (messageString)=>{
 
@@ -102,12 +114,14 @@ wss.on('connection', (ws,req)=>{
                         "result": "OK",
                         "type": "joinGame",
                         "data":{
-                            "gameRef": message.data.gameRef
+                            "gameRef": message.data.gameRef,
+                            "gameState": stateManager.getGameState(message.data.gameRef)
                         }
                     }
+                    ws.gameJoined = message.data.gameRef
                     
-                    stateManager.getGameState(message.data.gameRef)
                     ws.send(JSON.stringify(response))
+                    wss.broadcast(message.data.gameRef)
                 }catch(e){
                     console.error(e)
                     
