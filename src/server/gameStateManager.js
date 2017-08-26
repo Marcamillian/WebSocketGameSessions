@@ -27,16 +27,21 @@ let gameStateManager = function(){
     }
 
     let getGameState = (sessionKey)=>{
+
         if(gameStates[sessionKey]){
-            return gameStates[sessionKey]
+            let states = gameStates[sessionKey];
+            let players = states.players.map( (playerInfo)=>{ return playerInfo.playerName } )
+            return players
         }else{
             throw new Error(`No game with the key ${sessionKey}`)
         }
+
+
     }
 
-    let joinGame = (sessionKey, playerKey)=>{
+    let joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
-            return gameStates[sessionKey].players.push(playerKey)
+            return gameStates[sessionKey].players.push({'playerRef':playerRef, 'playerName': playerName });
         }else{
             throw new Error( "session doesn't exist")
         }

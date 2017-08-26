@@ -5,6 +5,7 @@ const express = require('express');
 const http = require('http');
 const uuid = require('uuid')
 const WebSocket = require('ws');
+const util = require('util')
  
 const GameStateManager = require('./GameStateManager')
 
@@ -73,12 +74,21 @@ app.get('/gameinstance/:gameRef', (req, res)=>{
 })
 
 // joiningGame via URL
-app.put('/gameinstance/:gameRef', (req, res)=>{
+app.post('/gameinstance/:gameRef/players', (req, res)=>{
+    
+    let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
-    console.log(`Player ${req.session.userId} joined game ${gameRef}`)
-    stateManager.joinGame(gameRef, req.session.userId)
+    let myHeaders = new Headers({
+        
+    })
+
+    stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
+
     console.log(stateManager.getGameState(gameRef))
+
+    
+
     res.send({result:'OK'})
 })
 
@@ -158,9 +168,12 @@ wss.on('connection', (ws,req)=>{
     
 });
 
-wss.broadcast = ()=>{
-    wss.clients.forEach((client)=>{
-        console.log(client.userId)
+wss.broadcast = (gameRef)=>{
+
+    let playersInGame = undefined // some call to the state manager for the playerRefs
+    
+    wss.clients.forEach((client)=>{ // if the clients playerRef is included in game - broadcast to them 
+        console.log()
     })
 }
 

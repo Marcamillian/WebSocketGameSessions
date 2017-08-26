@@ -161,25 +161,12 @@
 
     createGame.onclick = ()=>{
         
-        let gameRef = getGameRefInput();
-        if(gameRef == ""){
-            let response = {
-                'type':'createGame',
-                'data': {}
-            }
-
-            ws.send(JSON.stringify(response))
-        }else{
-            let response = {
-                'type':'joinGame',
-                'data': {
-                    'gameRef': gameRef,
-                    'playerName': getPlayerNameInput()
-                }
-            }
-
-            ws.send(JSON.stringify(response))
+        let response = {
+            'type':'createGame',
+            'data': {}
         }
+
+        ws.send(JSON.stringify(response))
         
 
         /*
@@ -200,7 +187,11 @@
 
     urlJoinGame.onclick = ()=>{
         let gameRef = getGameRefInput()
-        fetch(`/gameinstance/${gameRef}`, { method: 'PUT', credentials:'same-origin' })
+        let myHeaders = new Headers({
+            "Player-Name": getPlayerNameInput()
+        })
+
+        fetch(`/gameinstance/${gameRef}/players`, { method: 'POST', credentials:'same-origin', headers: myHeaders })
             .then(handleResponse)
             .then(showMessage)
             .then(()=>{gameStateDisplay('lobby')})
