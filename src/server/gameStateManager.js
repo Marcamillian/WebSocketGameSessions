@@ -44,6 +44,7 @@ let gameStateManager = function(){
 
     return Object.create({
         createNewGame: createNewGame,
+        joinGame:joinGame,
         getGameState: getGameState,
         initGame: initGame
     })

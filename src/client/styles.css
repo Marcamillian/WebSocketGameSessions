@@ -10,7 +10,8 @@ body button{
 
 .join-game form,
 .join-game form input,
-.join-game #createGame{
+.join-game #createGame,
+.join-game #url-join{
     display:block;
 }
 

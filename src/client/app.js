@@ -8,6 +8,8 @@
     const createGame = document.querySelector('#createGame')
     const leaveGame = document.querySelector('#leaveGame')
     const displayBody = document.querySelector('body');
+    const urlJoinGame = document.querySelector('#url-join')
+
 
     const playerNameInput = document.querySelector('#player_name')
     const gameRefInput = document.querySelector('#game_ref')
@@ -21,6 +23,7 @@
 
     // utility funtions
     const showMessage = (message)=>{
+        console.log(message)
         messages.textContent += `\n${message}`;
         messages.scrollTop = messages.scrollHeight;
     }
@@ -193,6 +196,13 @@
 
     leaveGame.onclick = ()=>{
         currentGameRef = undefined;
+    }
+
+    urlJoinGame.onclick = ()=>{
+        let gameRef = getGameRefInput()
+        fetch(`/gameinstance/${gameRef}`, { method: 'PUT', credentials:'same-origin' })
+            .then(handleResponse)
+            .then(showMessage)
     }
 
 })();

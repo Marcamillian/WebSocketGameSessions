@@ -29,6 +29,8 @@ app.use(sessionParser);
 
 
 // ===  EXPRESS APP - ROUTING TRIGGERS == 
+
+// login to the game
 app.post('/login', (req, res)=>{
     // "Log in" user and set userId to session
     const id= uuid.v4();
@@ -38,6 +40,7 @@ app.post('/login', (req, res)=>{
     res.send({result:"OK", message: 'Session updated '})
 })
 
+// remove your login session
 app.delete('/logout', (request, response) => {
   console.log('Destroying session');
   request.session.destroy();
@@ -51,7 +54,8 @@ app.put('/gameinstance', (req, res)=>{
     res.send({'result':"OK", 'gameRef': gameRef})
     
 })
-// 
+
+// join a game session
 app.post('/gameinstance', (req,res)=>{  
     if(req.session.gameinstance){ // if already has a game instance
         res.send({result:"OK", message: `In game ${req.session.gameinstance}`}) // send back what game they are in
@@ -66,6 +70,16 @@ app.get('/gameinstance/:gameRef', (req, res)=>{
     let gameState = stateManager.getGameState(req.params.gameRef)
     console.log(gameState)
     res.send({result: 'OK', gameState: gameState})
+})
+
+// joiningGame via URL
+app.put('/gameinstance/:gameRef', (req, res)=>{
+    let gameRef = req.params.gameRef
+    console.log(`trying to join game ${gameRef}`)
+    console.log(`Req session ${req.session.userId}`)
+    stateManager.joinGame(gameRef, req.session.userId)
+    console.log(stateManager.getGameState(gameRef))
+    res.send({result:'OK'})
 })
 
 
