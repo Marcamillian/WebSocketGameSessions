@@ -75,14 +75,12 @@ app.get('/gameinstance/:gameRef', (req, res)=>{
 // joiningGame via URL
 app.put('/gameinstance/:gameRef', (req, res)=>{
     let gameRef = req.params.gameRef
-    console.log(`trying to join game ${gameRef}`)
-    console.log(`Req session ${req.session.userId}`)
+    console.log(`Player ${req.session.userId} joined game ${gameRef}`)
     stateManager.joinGame(gameRef, req.session.userId)
+    req.session.currentGame = gameRef
     console.log(stateManager.getGameState(gameRef))
     res.send({result:'OK'})
 })
-
-
 
 // CREATE THE HTTP SERVER
 server = http.createServer(app)
@@ -159,6 +157,12 @@ wss.on('connection', (ws,req)=>{
     })
     
 });
+
+wss.broadcast = ()=>{
+    wss.clients.forEach((client)=>{
+        console.log(client.userId)
+    })
+}
 
 // START THE SERVER
 server.listen(8080, ()=> console.log('Listening on http://localhost:8080'))

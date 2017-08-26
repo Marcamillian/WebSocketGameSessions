@@ -203,6 +203,8 @@
         fetch(`/gameinstance/${gameRef}`, { method: 'PUT', credentials:'same-origin' })
             .then(handleResponse)
             .then(showMessage)
+            .then(()=>{gameStateDisplay('lobby')})
+            .catch( (err)=>{ showMessage(err.message) })
     }
 
 })();
