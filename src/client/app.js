@@ -116,7 +116,7 @@
             addEl.innerText = playerName
 
             playerDisplay.appendChild(addEl)
-        })
+        }) 
 
     }
 
@@ -187,7 +187,14 @@
     }
 
     leaveGame.onclick = ()=>{
-        currentGameRef = undefined;
+
+        fetch(`/gameinstance/${currentGameRef}/players`, {method: 'DELETE', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(stringifyObject)
+            .then(showMessage)
+            .then(()=>{ gameStateDisplay('joinGame') })
+            .catch( (err)=>{ showMessage(err.message) } )
+            
     }
 
     urlJoinGame.onclick = ()=>{
@@ -195,6 +202,7 @@
         let myHeaders = new Headers({
             "Player-Name": getPlayerNameInput()
         })
+        currentGameRef = gameRef
 
         fetch(`/gameinstance/${gameRef}/players`, { method: 'POST', credentials:'same-origin', headers: myHeaders })
             .then(handleResponse)

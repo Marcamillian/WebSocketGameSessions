@@ -87,6 +87,17 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     res.send({result:'OK', 'gameState':stateManager.getGameState(gameRef)})
 })
 
+// leave game via URL
+app.delete('/gameinstance/:gameRef/players', (req, res)=>{
+    
+    let gameRef = req.params.gameRef
+    
+    stateManager.leaveGame(gameRef, req.session.userId)
+    delete req.session.currentGame
+
+    res.send({result:'OK', message:"Left the game"})
+})
+
 // CREATE THE HTTP SERVER
 server = http.createServer(app)
 

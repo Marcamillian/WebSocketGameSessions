@@ -51,11 +51,21 @@ let gameStateManager = function(){
         }
     }
 
+    let leaveGame = (sessionKey, playerRef)=>{
+        if(gameStates[sessionKey]){
+            gameStates[sessionKey].players = gameStates[sessionKey].players.filter((player)=>{ return player.playerRef != playerRef })
+            console.log(gameStates[sessionKey].players)
+        }else{
+            throw new Error("Session doesn't exist")
+        }
+    }
+
     return Object.create({
         createNewGame: createNewGame,
         joinGame:joinGame,
         getGameState: getGameState,
-        initGame: initGame
+        initGame: initGame,
+        leaveGame: leaveGame
     })
 
 }
