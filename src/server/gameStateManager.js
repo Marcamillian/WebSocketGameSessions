@@ -29,9 +29,13 @@ let gameStateManager = function(){
     let getGameState = (sessionKey)=>{
 
         if(gameStates[sessionKey]){
+
+            let returnState = {};
+
             let states = gameStates[sessionKey];
-            let players = states.players.map( (playerInfo)=>{ return playerInfo.playerName } )
-            return players
+            returnState['players'] = states.players.map( (playerInfo)=>{ return playerInfo.playerName } )
+
+            return returnState
         }else{
             throw new Error(`No game with the key ${sessionKey}`)
         }

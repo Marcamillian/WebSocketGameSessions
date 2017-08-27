@@ -78,18 +78,13 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
-    let myHeaders = new Headers({
-        
-    })
-
+    
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
 
     console.log(stateManager.getGameState(gameRef))
 
-    
-
-    res.send({result:'OK'})
+    res.send({result:'OK', 'gameState':stateManager.getGameState(gameRef)})
 })
 
 // CREATE THE HTTP SERVER

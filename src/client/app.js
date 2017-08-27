@@ -13,7 +13,7 @@
 
     const playerNameInput = document.querySelector('#player_name')
     const gameRefInput = document.querySelector('#game_ref')
-    let playerDisplay = document.querySelector('#player-display .content')
+    let playerDisplay = document.querySelector('#player-list .content')
     let scoreDisplay = document.querySelector('#score-display .content')
     let ws;
 
@@ -104,6 +104,22 @@
         return gameRef
     }
 
+    const processJoinState = ( serverResponse )=>{
+        
+        // 1-  remove the elements from the list
+        while(playerDisplay.children.length > 0){
+            playerDisplay.children[0].remove()
+        }
+        // 2- add the new names to the list
+        serverResponse.gameState.players.forEach((playerName)=>{
+            let addEl = document.createElement('li')
+            addEl.innerText = playerName
+
+            playerDisplay.appendChild(addEl)
+        })
+
+    }
+
     const getGameState = (gameState)=>{
         fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
             .then(handleResponse)
@@ -167,17 +183,6 @@
         }
 
         ws.send(JSON.stringify(response))
-        
-
-        /*
-        fetch('/gameinstance', {method:'PUT', credentials:'same-origin'} ) // returns the reference key of the game you made
-            .then(handleResponse)
-            .then(processGameRef)
-            .then(setGameRef)
-            .then(getGameState)
-            .then(()=>{gameStateDisplay('lobby')})
-            .catch((err)=> showMessage(err.message))
-        */
 
     }
 
@@ -193,7 +198,7 @@
 
         fetch(`/gameinstance/${gameRef}/players`, { method: 'POST', credentials:'same-origin', headers: myHeaders })
             .then(handleResponse)
-            .then(showMessage)
+            .then(processJoinState)
             .then(()=>{gameStateDisplay('lobby')})
             .catch( (err)=>{ showMessage(err.message) })
     }
