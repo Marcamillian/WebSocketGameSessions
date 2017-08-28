@@ -74,13 +74,23 @@
 
             switch(message.type){
                 case "gameCreate":
-                    console.log(`Created & joined game ${message.data.gameRef}`)
+                    console.log(`Created game ${message.data.gameRef}`)
                     currentGameRef = message.data.gameRef
+                    
+                    let response = {
+                        'type':'joinGame',
+                        'data': {
+                            'gameRef': currentGameRef,
+                            'playerName': "Something"
+                        }
+                    }
+                    // request to join the server
+                    ws.send(JSON.stringify(response))
+                    
                     gameStateDisplay('lobby')
                 break
                 case "joinGame":
                     console.log(`Joined game ${message.data.gameRef}`)
-                    console.log(message.data.gameState)
                     currentGameRef = message.data.gameRef
                     gameStateDisplay('lobby')
                 break
