@@ -68,7 +68,7 @@
         ws.onerror = ()=> showMessage('WebSocket error')
         ws.onopen = ()=> showMessage(' Websocket connection established')
         ws.onclose = ()=> showMessage('WebSocket connection closed')
-        ws.onmessage = (messageString)=>{
+        ws.onmessage = ( messageString )=>{
             let message = JSON.parse(messageString.data)
             
             if(message.result != 'OK'){
@@ -81,6 +81,9 @@
                 break
                 case "joinGame":
                     console.log(`Joined game ${message.data.gameRef}`)
+                break
+                case "updateGameState":
+                    console.log(message.data)
                 break
             }
             

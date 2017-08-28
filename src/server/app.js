@@ -56,16 +56,6 @@ app.put('/gameinstance', (req, res)=>{
     
 })
 
-// join a game session
-app.post('/gameinstance', (req,res)=>{  
-    if(req.session.gameinstance){ // if already has a game instance
-        res.send({result:"OK", message: `In game ${req.session.gameinstance}`}) // send back what game they are in
-    }else{
-        req.session.gameinstance = "Game 1";
-        res.send({result: "OK", message: `Joined game ${req.session.gameinstance}`})
-    }
-})
-
 // get the gamestate for the session with the reference in the URL
 app.get('/gameinstance/:gameRef', (req, res)=>{
     let gameState = stateManager.getGameState(req.params.gameRef)
@@ -78,13 +68,18 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
+
+    stateManager.getGameForPlayer(req.session.userId)
     
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
 
     console.log(stateManager.getGameState(gameRef))
-
+    
     res.send({result:'OK', 'gameState':stateManager.getGameState(gameRef)})
+
+    // broadcast the new gamestate
+    wss.broadcast(gameRef)
 })
 
 // leave game via URL
@@ -117,6 +112,9 @@ wss = new WebSocket.Server({
 })
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
+
+    ws.userId = req.session.userId  // adding the userID to the websocket you can get to
+
     ws.on('message', (messageString)=>{
 
         // get a list of the connected clients - wss.clients
@@ -175,11 +173,19 @@ wss.on('connection', (ws,req)=>{
 });
 
 wss.broadcast = (gameRef)=>{
+    let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
+    let gameState = stateManager.getGameState(gameRef)
 
-    let playersInGame = undefined // some call to the state manager for the playerRefs
-    
-    wss.clients.forEach((client)=>{ // if the clients playerRef is included in game - broadcast to them 
-        console.log()
+    let message = {
+        result: 'OK',
+        type: 'updateGameState',
+        data: gameState
+    }
+
+    wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
+        if(playersInGame.includes(ws.userId)){
+            ws.send(JSON.stringify(message)) // send the gamestate to the players in the game
+        }
     })
 }
 

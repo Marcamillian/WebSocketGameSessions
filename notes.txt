@@ -2,3 +2,16 @@ websocket express example - https://www.npmjs.com/package/ws#installing
 
 
 Example for browser communication - https://github.com/websockets/ws/blob/master/examples/express-session-parse/index.js
+
+
+
+===== websocket message structure
+{
+    'result': OK,
+    'type': 'sometype',
+    'data': {someObject}
+} 
+
+
+
+=====

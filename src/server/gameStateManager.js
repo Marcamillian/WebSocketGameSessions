@@ -60,12 +60,30 @@ let gameStateManager = function(){
         }
     }
 
+    let getPlayerRefs = ( gameRef )=>{
+        if(gameStates[gameRef]){
+            return gameStates[gameRef].players.map((playerInfo)=>{ return playerInfo.playerRef })
+        }else{
+            throw new Error (`No game with the key ${gameRef}`)
+        }
+    }
+
+    let getGameForPlayer= (playerRef)=>{
+        console.log(" == searching for player == ")
+        Object.keys(gameStates).forEach((gameState)=>{
+            console.log(gameState)
+            console.log(gameStates[gameState])
+        })
+    }
+
     return Object.create({
         createNewGame: createNewGame,
         joinGame:joinGame,
         getGameState: getGameState,
         initGame: initGame,
-        leaveGame: leaveGame
+        leaveGame: leaveGame,
+        getPlayerRefs: getPlayerRefs,
+        getGameForPlayer: getGameForPlayer
     })
 
 }
