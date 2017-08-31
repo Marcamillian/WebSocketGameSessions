@@ -1,22 +1,9 @@
 test = require('tape')
 GameStateManager = require('./../../src/server/GameStateManager.js')
+PlayerTemplate = require('./../../src/server/playerTemplate.js')
+StateTemplate = require('./../../src/server/stateTemplate.js')
 
-const stateTemplate = {
-        players:[], // collection of player objects
-        policyDraw:[], // collection of card objects
-        policyDiscard:[], // collection of card objects
-        voteFailTrack:[false, false, false]  // 
-    }
-const playerTemplate = {
-    playerRef: undefined, // string to link req.session
-    playerName: undefined, // string for display name
-    ready: false,           // ready to start the game
-    allignment: undefined, // string to show what side they are on
-    character: undefined, // if they are fascist/hitler/liberal
-    prevGov: false,       // if they were in the last successful gov 
-}
-
-test("Testing the gameCreation process", (t)=>{
+test.skip("Testing the gameCreation process", (t)=>{
 
     let gsManager = GameStateManager();
 
@@ -35,15 +22,44 @@ test("Testing the gameCreation process", (t)=>{
 
 test("Testing the getPlayerRefs method", (t)=>{
 
-    // mock up a gamestate to test
-    state1 = Object.assign({},stateTemplate)
-    player1_1 = Object.assign({},playerTemplate)
-    player1_2 = Object.assign({},playerTemplate)
+    let gsManager = GameStateManager();
 
-    state1.
+    // mock up a gamestate to test
+    state1 = StateTemplate()
+    player1_1 = PlayerTemplate()
+    player1_2 = PlayerTemplate()
 
     // test the function using the mock as a second argument
 
-    t.ok(true, "testing this")
+    t.ok(gsManager.update, "testing this")
+    t.end()
+})
+
+test("Testing the udpate method running the stateMachine", (t)=>{
+
+    let gsManager = GameStateManager();
+
+    // mock up a gamestate to test
+    state1 = StateTemplate()
+    player1_1 = PlayerTemplate()
+    player1_2 = PlayerTemplate()
+
+    // set the conditions
+    player1_1.ready = true;
+    
+    // add the players to the state
+    state1.players.push(player1_1)
+    state1.players.push(player1_2)
+
+    // test the function using the mock as a second argument
+    t.equals(gsManager.update(state1).gamePhase, "lobby" , "Stays in lobby if not everyone ready")
+
+
+    // udpate so that everyone ready
+    player1_2.ready = true
+
+    // test the function using the mock as a second argument
+    t.equals(gsManager.update(state1).gamePhase, "proposal" , "Leaves lobby if everyone ready")
+
     t.end()
 })

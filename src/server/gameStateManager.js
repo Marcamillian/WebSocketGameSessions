@@ -2,6 +2,7 @@ let gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
     const stateTemplate = {
+        gamePhase: 'lobby', // where in the state machine the state is
         players:[], // collection of player objects
         policyDraw:[], // collection of card objects
         policyDiscard:[], // collection of card objects
@@ -17,13 +18,30 @@ let gameStateManager = function(){
     }
 
     let update = (gameState)=>{
+        // updating game
         switch(gameState.gamePhase){
             case "lobby":
 
-                // if all voted
-                    // ==> proposal
-                // else
-                    // carry on
+                // array of ready values for the players
+                let playersReady = gameState.players.map((player)=>{
+                    return player.ready
+                })
+
+                console.log(playersReady , " - inclues false is :", playersReady.includes(false))
+
+                if(playersReady.includes(false)){ // if everyone is ready
+                    // do nothing
+                    console.log(playersReady)
+                    console.log("someone not ready")
+                    // do all the necessary things
+                        // generate the roles
+                        // assign them to players
+                }else{
+                    console.log(playersReady)
+                    console.log("everyone ready")
+                    gameState.gamePhase = 'proposal'    // go to the next step
+                }
+
             break;
             case "proposal":
                 // if president proposed
@@ -62,8 +80,10 @@ let gameStateManager = function(){
             case "endgame":
 
         }
-    }
 
+        return gameState // pass back the updated state
+    }
+    
     let createNewGame = ()=>{
         let sessionRef = createSessionKey(4)
 
@@ -151,12 +171,15 @@ let gameStateManager = function(){
 
     return Object.create({
         createNewGame: createNewGame,
+        initGame: initGame, // for testing purposes
         joinGame:joinGame,
-        getGameState: getGameState,
-        initGame: initGame,
         leaveGame: leaveGame,
+
+        getGameState: getGameState,
         getPlayerRefs: getPlayerRefs,
-        getGameForPlayer: getGameForPlayer
+        getGameForPlayer: getGameForPlayer,
+
+        update: update
     })
 
 }
