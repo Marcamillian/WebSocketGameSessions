@@ -27,40 +27,63 @@ let gameStateManager = function(){
                     return player.ready
                 })
 
-                console.log(playersReady , " - inclues false is :", playersReady.includes(false))
-
                 if(playersReady.includes(false)){ // if everyone is ready
                     // do nothing
-                    console.log(playersReady)
-                    console.log("someone not ready")
-                    // do all the necessary things
-                        // generate the roles
-                        // assign them to players
+
+                        
                 }else{
-                    console.log(playersReady)
-                    console.log("everyone ready")
                     gameState.gamePhase = 'proposal'    // go to the next step
+
+                    // generate the roles
+                        // assign them to players
+                        // send private information
                 }
 
             break;
             case "proposal":
-                // if president proposed
-                    // ==> election
-                // else
-                    // carry on
+
+                let chancellorProposition = gameState.players.map((player)=>{
+                    return player.proposedChancellor
+                })
+
+                if(chancellorProposition.includes(true)){
+                    gameState.gamePhase = 'election'
+                }else{
+                    // do nothing
+                }
+
             break;
             case "election":
-                // if everyone voted
-                    // if success
-                        // if hitler chancellor
-                            // ==> endgame
-                        // else
-                            // ==> legislative
-                    // else
-                        // ==> proposal
 
-                // else
-                    // carry on 
+                let voteResult = gameState.players.map((player)=>{
+                    return player.voteCast
+                })
+
+                console.log(`Vote result  :${voteResult}`)
+
+                if(voteResult.includes(undefined)){ // not all votes cast
+                    // stay in this state
+                }else{
+                    let positiveVotes = voteResult.reduce((sum, vote)=>{ return (vote) ? sum+1 : sum },0)
+                    let negativeVotes = voteResult.reduce((sum, vote)=>{ return (!vote) ? sum+1 : sum },0)
+                    //console.log(`JA: ${positiveVotes} | Nein: ${negativeVotes}`)
+
+                    if(positiveVotes > negativeVotes){ // vote passes
+                        // find hitler
+                        let chancellor = gameState.players.filter((player)=>{return player.proposedChancellor})[0]
+                        // TODO: also need check for facist policy track
+
+                        if(chancellor.character == "hitler"/* && policy track*/){ // if chancellor is hitler
+                            gameState.gamePhase = 'endGame'
+                        }else{
+                            gameState.gamePhase = 'legislative'
+                        }   
+                    }else{  // vote passes
+                        gameState.gamePhase = 'proposal'
+                    }
+                }
+
+
             break;
             case "legislative":
                 // if both discarded
