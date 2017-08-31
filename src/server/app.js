@@ -69,7 +69,7 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
 
-    stateManager.getGameForPlayer(req.session.userId)
+    console.log(`getting gameRef for the player posted - ${stateManager.getGameForPlayer(req.session.userId)}`)
     
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef

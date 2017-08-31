@@ -84,6 +84,10 @@
                 break
                 case "updateGameState":
                     console.log(message.data)
+                    showPlayers(message.data.players)
+                break
+                default:
+                    console.log(`Message Type ${message.type} : Unexpected type`)
                 break
             }
             
@@ -134,7 +138,18 @@
         showScore(response.gameState)
     }
 
-    const showPlayers = (gameState)=>{
+    const showPlayers = (playerArray)=>{
+        // 1-  remove the elements from the list
+        while(playerDisplay.children.length > 0){
+            playerDisplay.children[0].remove()
+        }
+        // 2- add the new names to the list
+        playerArray.forEach((playerName)=>{
+            let addEl = document.createElement('li')
+            addEl.innerText = playerName
+
+            playerDisplay.appendChild(addEl)
+        }) 
     }
 
     const showScore = (gameState)=>{

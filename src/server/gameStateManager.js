@@ -1,6 +1,69 @@
 let gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
+    const stateTemplate = {
+        players:[], // collection of player objects
+        policyDraw:[], // collection of card objects
+        policyDiscard:[], // collection of card objects
+        voteFailTrack:[false, false, false]  // 
+    }
+    const playerTemplate = {
+        playerRef: undefined, // string to link req.session
+        playerName: undefined, // string for display name
+        ready: false,           // ready to start the game
+        allignment: undefined, // string to show what side they are on
+        character: undefined, // if they are fascist/hitler/liberal
+        prevGov: false,       // if they were in the last successful gov 
+    }
+
+    let update = (gameState)=>{
+        switch(gameState.gamePhase){
+            case "lobby":
+
+                // if all voted
+                    // ==> proposal
+                // else
+                    // carry on
+            break;
+            case "proposal":
+                // if president proposed
+                    // ==> election
+                // else
+                    // carry on
+            break;
+            case "election":
+                // if everyone voted
+                    // if success
+                        // if hitler chancellor
+                            // ==> endgame
+                        // else
+                            // ==> legislative
+                    // else
+                        // ==> proposal
+
+                // else
+                    // carry on 
+            break;
+            case "legislative":
+                // if both discarded
+                    // if end of policy track
+                        // endgame
+                    // else
+                        // if power on policy track
+                            // ==>  power
+                        // else 
+                            // ==> proposal
+                // else carry on
+            break;
+            case "power":
+                // if power target selected
+                    // ==> proposal
+            break
+            case "endgame":
+
+        }
+    }
+
     let createNewGame = ()=>{
         let sessionRef = createSessionKey(4)
 
@@ -45,7 +108,7 @@ let gameStateManager = function(){
 
     let joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
-            return gameStates[sessionKey].players.push({'playerRef':playerRef, 'playerName': playerName });
+            return gameStates[sessionKey].players.push({'playerRef':playerRef, 'playerName': playerName, 'ready':false });
         }else{
             throw new Error( "session doesn't exist")
         }
@@ -60,20 +123,30 @@ let gameStateManager = function(){
         }
     }
 
-    let getPlayerRefs = ( gameRef )=>{
-        if(gameStates[gameRef]){
-            return gameStates[gameRef].players.map((playerInfo)=>{ return playerInfo.playerRef })
+    let getPlayerRefs = ( gameRef, suppliedStates )=>{
+
+        let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
+
+        if(states[gameRef]){
+            return states[gameRef].players.map((playerInfo)=>{ return playerInfo.playerRef })
         }else{
             throw new Error (`No game with the key ${gameRef}`)
         }
     }
+ 
+    let getGameForPlayer= (playerRef, suppliedStates)=>{
 
-    let getGameForPlayer= (playerRef)=>{
-        console.log(" == searching for player == ")
-        Object.keys(gameStates).forEach((gameState)=>{
-            console.log(gameState)
-            console.log(gameStates[gameState])
-        })
+        let states = (suppliedStates) ? suppliedStates : gameStates // alt test if you want to mock the gameStates
+        let stateRefs = Object.keys(states) // get the games of the gameStates
+
+        // loop over the gamestates - return the state key if 
+            // 
+
+
+    }
+
+    letReadyPlayer = (playerRef)=>{
+
     }
 
     return Object.create({
