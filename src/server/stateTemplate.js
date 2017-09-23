@@ -4,7 +4,11 @@ const StateTemplate = ()=>{
         players:[], // collection of player objects
         policyDraw:[], // collection of card objects
         policyDiscard:[], // collection of card objects
-        voteFailTrack:[false, false, false]  // 
+        policyHand:[],
+        voteFailTrack:[false, false, false],  // 
+        policyTrackFascist:[false, false, false, false, false, false], // 6 long
+        policyTrackLiberal:[false, false, false, false, false],  // 5 long
+        powerTarget: undefined
     }
 }
 

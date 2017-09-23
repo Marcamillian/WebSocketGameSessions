@@ -59,8 +59,6 @@ let gameStateManager = function(){
                     return player.voteCast
                 })
 
-                console.log(`Vote result  :${voteResult}`)
-
                 if(voteResult.includes(undefined)){ // not all votes cast
                     // stay in this state
                 }else{
@@ -86,15 +84,22 @@ let gameStateManager = function(){
 
             break;
             case "legislative":
-                // if both discarded
-                    // if end of policy track
-                        // endgame
-                    // else
-                        // if power on policy track
-                            // ==>  power
-                        // else 
-                            // ==> proposal
-                // else carry on
+
+                if(gameState.policyDraw.length == 1 ){
+                        let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
+                        let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
+                        if(fPolicy >= 6 || lPolicy >= 5){
+                            gameState.gamePhase = "endGame"
+                         }else{
+                            if(fPolicy > 2){
+                                gameState.gamePhase = "power"
+                            }else{
+                                gameState.gamePhase = "proposal"
+                            }
+                         }
+                }else{
+                    // carry on
+                }
             break;
             case "power":
                 // if power target selected
@@ -188,8 +193,19 @@ let gameStateManager = function(){
 
     }
 
-    letReadyPlayer = (playerRef)=>{
+    // === affect game state ===
 
+    let readyPlayer = (gameState, playerRef )=>{
+
+        if(gameState){
+            if(gameStates.players[playerRef]){
+                return gameStates.players[playerRef].ready = true
+            }else{
+                return new Error(`Player is not in game`)
+            }
+        }else{
+            return new Error("No gameState for this ref")
+        }
     }
 
     return Object.create({
@@ -202,7 +218,8 @@ let gameStateManager = function(){
         getPlayerRefs: getPlayerRefs,
         getGameForPlayer: getGameForPlayer,
 
-        update: update
+        update: update,
+        readyPlayer: readyPlayer
     })
 
 }

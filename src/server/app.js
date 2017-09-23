@@ -29,7 +29,7 @@ app.use(express.static('./src/client'));
 app.use(sessionParser);
 
 
-// ===  EXPRESS APP - ROUTING TRIGGERS == 
+// ===  EXPRESS APP - ROUTING TRIGGERS for PLAYER input 
 
 // login to the game
 app.post('/login', (req, res)=>{
@@ -93,7 +93,18 @@ app.delete('/gameinstance/:gameRef/players', (req, res)=>{
     res.send({result:'OK', message:"Left the game"})
 })
 
-// CREATE THE HTTP SERVER
+// ready up in the lobby
+app.post('/gameinstance/:gameRef/players', (req, res)=>{
+    let gameRef = req.params.gameRef;
+    let playerID = req.session.userId
+
+    let gameState = stateManager.readyPlayer(stateManager.getGameState(gameRef, playerID))
+    gameState = stateManager.update(gameState)
+
+    wss.broadcast( gameState )
+})
+
+//  ======  CREATE THE HTTP SERVER  ==== 
 server = http.createServer(app)
 
 

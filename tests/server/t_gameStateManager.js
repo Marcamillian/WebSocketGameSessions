@@ -84,7 +84,7 @@ test("Testing the stateMachine - proposal to vote transition", (t)=>{
     t.end()
 })
 
-test("Testing the stateMachine - vote to legislative/proposal transition/endGame", (t)=>{
+test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
     t.test("No votes", (ts)=>{
         let gsManager = GameStateManager()
@@ -198,6 +198,108 @@ test("Testing the stateMachine - vote to legislative/proposal transition/endGame
         gameState1.players.forEach((player)=>{player.voteCast = false})
 
         ts.equals(gsManager.update(gameState1).gamePhase, "proposal", "Unsuccessful gov election - elect another")
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
+    
+    
+    t.test("Fascist passed - no power", (ts)=>{
+        let gsManager = GameStateManager();
+
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = 'legislative'
+        gameState.policyDraw = ['fascist']
+
+        t.equals(gsManager.update(gameState).gamePhase, "proposal", "Policy Passes - next proposal")
+
+        ts.end()
+    })
+
+    t.test("Liberal passed - no power", (ts)=>{
+        let gsManager = GameStateManager();
+
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = 'legislative'
+        gameState.policyDraw = ['liberal']
+
+        t.equals(gsManager.update(gameState).gamePhase, "proposal", "Policy Passes - next proposal")
+
+        ts.end()
+    })
+
+    t.test("Fascist passed - Power Activated", (ts)=>{
+        let gsManager = GameStateManager();
+
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = 'legislative'
+        gameState.policyDraw = ['fascist']
+        gameState.policyTrackFascist = [true, true, true, false, false, false]
+
+        t.equals(gsManager.update(gameState).gamePhase, "power", "Policy Passes - power activated")
+
+        ts.end()
+    })
+
+    t.test("Fascist passed - Facisits win", (ts)=>{
+        let gsManager = GameStateManager();
+
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = 'legislative'
+        gameState.policyDraw = ['fascist']
+        gameState.policyTrackFascist = [true, true, true, true, true, true]
+
+        t.equals(gsManager.update(gameState).gamePhase, "endGame", "Fascists win")
+
+        ts.end()
+    })
+
+    t.test("Liberal passed - Game end", (ts)=>{
+        let gsManager = GameStateManager();
+
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = 'legislative'
+        gameState.policyDraw = ['liberal']
+        gameState.policyTrackLiberal = [true, true, true, true, true]
+
+        t.equals(gsManager.update(gameState).gamePhase, "endGame", "Liberals win")
+
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Testing player lobby ready up", (t)=>{
+    t.test("", (ts)=>{
+        let gsManager = GameStateManager();
+        let gameState = StateTemplate();
+
+        let player1 = PlayerTemplate();
+        let player2 = PlayerTemplate();
+
+        player1.playerRef = "player1"
+        player2.playerref = "player2"
+
+        gameState.gamePhase = "lobby";
+        gameState.players.push(player1, player2)
+
+        let result = gsManager.readyPlayer(gameState, "player1")
+
+        console.log(`this thing that I am looking at ${result}`)
+
+        ts.end()
+    })
+
+    t.test("", (ts)=>{
         ts.end()
     })
 
