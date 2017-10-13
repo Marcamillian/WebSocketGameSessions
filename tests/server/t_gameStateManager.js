@@ -3,6 +3,21 @@ GameStateManager = require('./../../src/server/GameStateManager.js')
 PlayerTemplate = require('./../../src/server/playerTemplate.js')
 StateTemplate = require('./../../src/server/stateTemplate.js')
 
+let getTestBase = ()=>{
+    let player1 = PlayerTemplate()
+    let player2 = PlayerTemplate()
+
+    player1.playerRef = "player1"
+    player2.playerRef = "player2"
+
+    return {
+        gsManager: GameStateManager(),
+        gs: StateTemplate(),
+        player1: player1,
+        player2: player2
+    }
+}
+
 test.skip("Testing the gameCreation process", (t)=>{
 
     let gsManager = GameStateManager();
@@ -270,7 +285,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.policyDraw = ['liberal']
         gameState.policyTrackLiberal = [true, true, true, true, true]
 
-        t.equals(gsManager.update(gameState).gamePhase, "endGame", "Liberals win")
+        ts.equals(gsManager.update(gameState).gamePhase, "endGame", "Liberals win")
 
         ts.end()
     })
@@ -278,8 +293,11 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
     t.end()
 })
 
-test("Testing player lobby ready up", (t)=>{
-    t.test("", (ts)=>{
+
+
+test("Testing interaction functions: player lobby ready up", (t)=>{ 
+   
+    t.test("ready up a single player", (ts)=>{
         let gsManager = GameStateManager();
         let gameState = StateTemplate();
 
@@ -294,12 +312,91 @@ test("Testing player lobby ready up", (t)=>{
 
         let result = gsManager.readyPlayer(gameState, "player1")
 
-        console.log(`this thing that I am looking at ${result}`)
+        let changedPlayer  = result.players.filter((player)=>{return player.playerRef == 'player1'})
+        ts.equals(changedPlayer[0].ready, true, "Is the players ready state changed")
+
+        ts.end()
+    })
+    
+    t.test("search for a player that doesn't exist", (ts)=>{
+        let gsManager = GameStateManager();
+        let gameState = StateTemplate();
+
+        let player1 = PlayerTemplate();
+        let player2 = PlayerTemplate();
+
+        player1.playerRef = "player1";
+        player2.playerRef = "player2";
+        
+        gameState.gamePhase = "lobby";
+        gameState.players.push(player1, player2);
+
+        //ts.throws(()=>{gsManager.readyPlayer(gameState, "player3")}, /Player not in game/i, "Player not in game to ready")
+
+        //ts.throws(()=>{gsManager.readyPlayer(gameState, "player3")},/Player not in game to ready/i, "Player not in game to ready")
+        ts.throws(()=>{gsManager.readyPlayer(gameState,"player3")}, /PlayerRef not in game/i, "Ready playerRef that doesn't exist" )
 
         ts.end()
     })
 
-    t.test("", (ts)=>{
+    t.test("search for a player with no players in the list", (ts)=>{
+        let gsManager = GameStateManager();
+        let gameState = StateTemplate();
+
+        gameState.gamePhase = "lobby";
+        ts.throws(()=>{ gsManager.readyPlayer(gameState, "player1"), /PlayerRef not in game/i, "Ready when no players in game" })
+
+        ts.end()
+    })
+
+    t.test("Search for a player that has duplicate playerIds in the gameState", (ts)=>{
+        
+        let gsManager = GameStateManager();
+        let gameState = StateTemplate();
+
+        let player1 = PlayerTemplate();
+        let player2 = PlayerTemplate();
+
+        player1.playerRef = "player1";
+        player2.playerRef = "player1";
+
+        gameState.gamePhase = "lobby";
+        gameState.players.push(player1, player2);
+
+        ts.throws(()=>{ gsManager.readyPlayer(gameState, "player1") }, /More than one player with that reference/i, "Multiple players matching PlayerRef")
+
+        ts.end()
+    })
+    
+    t.end()
+})
+
+test("Testing interaction functions: chancellor proposal", (t)=>{
+    t.test("Suggest a player for chancellor", (ts)=>{
+        let base = getTestBase()
+
+        base.gs.gamePhase = 'proposal';
+        base.gs.players.push(base.player1, base.player2)
+
+        let result = base.gsManager.proposeChancellor(base.gs, "player1")
+
+        let targetPlayer = result.players.filter((player)=>{return player.playerRef == 'player1'})[0]
+        ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
+
+        ts.end()
+    })
+
+    t.test("Suggest a playerRef not in the game", (ts)=>{
+        let base = getTestBase();
+
+        base.gs.gamePhase = 'proposal';
+        base.gs.players.push(base.player1, base.player2)
+
+        ts.throws(()=>{base.gsManager.proposeChancellor(base.gs, "player3")}, /No players with that playerRef/i, "Proposed chancellor not in game")
+        ts.end()
+    })
+
+    t.test("Suggest a playerRef that doesn't exist",(ts)=>{
         ts.end()
     })
 

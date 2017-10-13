@@ -198,14 +198,33 @@ let gameStateManager = function(){
     let readyPlayer = (gameState, playerRef )=>{
 
         if(gameState){
-            if(gameStates.players[playerRef]){
-                return gameStates.players[playerRef].ready = true
+            // look for the player that we are looking for
+            let targetPlayer = gameState.players.filter((player)=>{ return player.playerRef == playerRef})
+
+            if(targetPlayer.length == 1){ // if we have exactly one players that matches
+                targetPlayer[0].ready = true;
+            }else if(targetPlayer.length > 1){
+                throw new Error(`More than one player with that reference`)
             }else{
-                return new Error(`Player is not in game`)
+                //throw new Error("Player is not in game")
+                throw new Error(`PlayerRef not in game`)
             }
         }else{
-            return new Error("No gameState for this ref")
+            throw new Error("No gameState for this ref")
         }
+
+        return gameState
+    }
+
+    let proposeChancellor = (gameState, playerRef)=>{
+        let matchedPlayers = gameState.players.filter((player)=>{return player.playerRef == playerRef})
+        
+        if(matchedPlayers.length == 1){
+            matchedPlayers[0].proposedChancellor = true;
+        }else if(matchedPlayers.length >1)  throw new Error("Multiple players with this playerRef")
+        else throw new Error("No players with that playerRef")
+
+        return gameState
     }
 
     return Object.create({
@@ -219,7 +238,8 @@ let gameStateManager = function(){
         getGameForPlayer: getGameForPlayer,
 
         update: update,
-        readyPlayer: readyPlayer
+        readyPlayer: readyPlayer,
+        proposeChancellor: proposeChancellor
     })
 
 }

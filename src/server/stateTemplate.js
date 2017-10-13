@@ -1,6 +1,6 @@
 const StateTemplate = ()=>{
     return {
-        gamePhase: 'lobby',
+        gamePhase: 'lobby',     // 'lobby' || 'proposal' || 'election' || 'legislative' || 'power' || 'endgame'
         players:[], // collection of player objects
         policyDraw:[], // collection of card objects
         policyDiscard:[], // collection of card objects
