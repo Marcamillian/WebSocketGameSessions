@@ -227,6 +227,42 @@ let gameStateManager = function(){
         return gameState
     }
 
+    let castVote = (gameState, playerRef, vote)=>{
+
+        // throw if values not set
+        if(vote == undefined) throw new Error("Vote not defined")
+        if(playerRef == undefined) throw new Error("PlayerRef not defined")
+
+        let targetPlayer = gameState.players.filter((player)=>{ return player.playerRef == playerRef })
+
+        if(targetPlayer.length == 1){
+            targetPlayer[0].voteCast = vote
+        }else if(targetPlayer >1) throw new Error("Multiple players with this playerRef")
+        else throw new Error("No players with that playerRef")
+
+        return gameState
+    }
+
+    let policyDiscard = (gameState, policyType)=>{
+
+        let policyHand = gameState.policyHand
+        let policyIndex = policyHand.indexOf(policyType)
+
+        if(policyIndex != -1){ //if there is a policy of that hand
+            var head = policyHand.slice(0, policyIndex)
+            var tail = policyHand.slice(policyIndex)
+            var card = tail.shift()
+            
+            gameState.policyHand = head.concat(tail)
+            gameState.policyDiscardPile.push(card)
+
+        }else throw new Error("No policy of that type")
+
+        return gameState
+    }
+
+    // function to search for playerRef
+
     return Object.create({
         createNewGame: createNewGame,
         initGame: initGame, // for testing purposes
@@ -239,7 +275,9 @@ let gameStateManager = function(){
 
         update: update,
         readyPlayer: readyPlayer,
-        proposeChancellor: proposeChancellor
+        proposeChancellor: proposeChancellor,
+        castVote: castVote,
+        policyDiscard: policyDiscard
     })
 
 }

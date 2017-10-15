@@ -2,8 +2,8 @@ const StateTemplate = ()=>{
     return {
         gamePhase: 'lobby',     // 'lobby' || 'proposal' || 'election' || 'legislative' || 'power' || 'endgame'
         players:[], // collection of player objects
-        policyDraw:[], // collection of card objects
-        policyDiscard:[], // collection of card objects
+        policyDeck:[], // collection of card objects
+        policyDiscardPile:[], // collection of card objects
         policyHand:[],
         voteFailTrack:[false, false, false],  // 
         policyTrackFascist:[false, false, false, false, false, false], // 6 long

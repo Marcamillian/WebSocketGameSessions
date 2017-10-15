@@ -396,9 +396,123 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         ts.end()
     })
 
-    t.test("Suggest a playerRef that doesn't exist",(ts)=>{
+    t.test("Suggest a playerRef that matches multiples",(ts)=>{
+
+        let base = getTestBase();
+
+        base.gs.gamePhase = 'proposal';
+        base.player2.playerRef = "player1"
+        base.gs.players.push(base.player1, base.player2)
+
+        ts.throws(()=>{base.gsManager.proposeChancellor(base.gs, "player1"), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
+
         ts.end()
     })
 
     t.end()
 })
+
+test("Testing interaction functions: Election vote", (t)=>{
+    t.test("Positive vote for a proposed govornment", (ts)=>{
+        let base = getTestBase();
+
+        base.gs.gamePhase == 'election';
+        base.gs.players.push(base.player1, base.player2);
+
+        let result = base.gsManager.castVote(base.gs, "player1", true)
+        let targetPlayer = result.players.filter((player)=>{return player.playerRef == "player1"})[0]
+
+        ts.equal(targetPlayer.voteCast, true, "Vote for government")
+
+        ts.end()
+    }) 
+
+    t.test("Negative vote for a proposed govornment", (ts)=>{
+        let base = getTestBase();
+
+        base.gs.gamePhase == 'election';
+        base.gs.players.push(base.player1, base.player2);
+
+        let result = base.gsManager.castVote(base.gs, "player1", false)
+        let targetPlayer = result.players.filter((player)=>{return player.playerRef == "player1"})[0]
+
+        ts.equal(targetPlayer.voteCast, false, "Vote against government")
+
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Testing interaction: Policy discard", (t)=>{
+    t.test("3 policy - discard liberal", (ts)=>{
+        let gs = StateTemplate();
+        let gsManager = GameStateManager();
+
+        gs.policyHand = ['fascist', 'liberal', 'fascist']
+
+        let result = gsManager.policyDiscard(gs, 'liberal')
+        let liberalDraw = result.policyHand.filter((card)=>{return card == "liberal"})
+
+        ts.equal(result.policyHand.length, 2, "2 cards left in the policy draw")
+        ts.equal(liberalDraw.length, 0, "No liberal cards left")
+        ts.equal(result.policyDiscardPile[0], "liberal", "Card moved to discard")
+
+        ts.end()
+    })
+
+    t.test("3 policy - discard fascist",(ts)=>{
+        let gs = StateTemplate();
+        let gsManager = GameStateManager();
+
+        gs.policyHand = ['fascist','liberal','liberal']
+
+        let result = gsManager.policyDiscard(gs,'fascist')
+        let fascistDraw = result.policyHand.filter((card)=>{ return card == "fascist"})
+
+        ts.equal(result.policyHand.length, 2, "2 left in the policy draw")
+        ts.equal(fascistDraw.length, 0, "No fascist cards left")
+        ts.equal(result.policyDiscardPile[0], "fascist", "Card is moved to discard")
+
+        ts.end()
+    })
+
+    t.test("3 fascist - discard liberal", (ts)=>{
+        let gs = StateTemplate();
+        let gsManager = GameStateManager();
+
+        gs.policyHand = ['fascist', 'fascist','fascist']
+
+        ts.throws(()=>{gsManager.policyDiscard(gs,"liberal")}, /No policy of that type/i, "No liberal policy in hand")
+
+        ts.end()
+    })
+
+    t.test("2 policy - discard liberal", (ts)=>{
+        let gs = StateTemplate();
+        let gsManager = GameStateManager()
+
+        gs.policyHand = ['fascist', 'liberal'];
+
+        let result = gsManager.policyDiscard(gs, 'liberal')
+        let liberalDraw = result.policyHand.filter((card)=>{ return card == "liberal" })
+
+        ts.equal(result.policyHand.length,1, "1 card left in policy draw")
+        ts.equal(liberalDraw.length,0, "No liberal cards left")
+        ts.equal(result.policyDiscardPile[0], "liberal", "Card moved to discard")
+
+        ts.end()
+    })
+
+    t.test("no policies set",(ts)=>{
+        let gs = StateTemplate();
+        let gsManager = GameStateManager();
+
+        ts.throws(()=>{gsManager.policyDiscard(gs, 'liberal')}, /No policy of that type/i, "No policy cards drawn")
+
+        ts.end()
+    })
+
+    t.end()
+})
+
