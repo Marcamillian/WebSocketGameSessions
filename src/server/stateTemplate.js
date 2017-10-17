@@ -2,13 +2,13 @@ const StateTemplate = ()=>{
     return {
         gamePhase: 'lobby',     // 'lobby' || 'proposal' || 'election' || 'legislative' || 'power' || 'endgame'
         players:[], // collection of player objects
-        policyDeck:[], // collection of card objects
-        policyDiscardPile:[], // collection of card objects
-        policyHand:[],
-        voteFailTrack:[false, false, false],  // 
-        policyTrackFascist:[false, false, false, false, false, false], // 6 long
-        policyTrackLiberal:[false, false, false, false, false],  // 5 long
-        powerTarget: undefined
+        policyDeck:[], // collection of card objects to be drawn
+        policyDiscardPile:[], // collection of card objects discarded
+        policyHand:[],  // hand of cards for the govornment to pick
+        voteFailTrack:[false, false, false],  // prevent repeated failed elections
+        policyTrackFascist:[false, false, false, false, false, false], // 6 long - policies played
+        policyTrackLiberal:[false, false, false, false, false],  // 5 long - policies played
+        powerTarget: undefined  // target of the power 
     }
 }
 

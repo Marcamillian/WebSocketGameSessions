@@ -9,10 +9,13 @@
     </head>
 
     <body class="connect">
+
+        <!-- pre joining the game -->
         <button id="wsButton" type="button" title="Open WebSocket connection">
             Connect to server
         </button>
 
+        <!-- for joining a game session -->
         <form>
             <input id="player_name" type="text" label="player_name">Player Name</input>
             <input id="game_ref" type="text" label="game_ref">Game to Join</input>
@@ -34,7 +37,7 @@
         <button id="url-join" type="button"> URL Join </button>
 
 
-        
+        <!-- ingame player display -->
         <div id="player-list">
             <h2 class="title"> Players</h2>
             <ul class="content">
@@ -42,16 +45,14 @@
             </ul>
         </div>
 
+        <!-- ready button to whilst in lobby-->
+        <button id="lobby-ready"> ready up</button>
+
         <div id="score-display">
             <h2 class="title"> Scores </h2>
             <p class="content">none</p>
         </div>
 
-        <div id="messages">
-            <pre class="content" style="height: 400px; overflow:scroll">
-                Some Messages
-            </pre>
-        <div>
 
         <script src="app.js"></script> 
     </body>

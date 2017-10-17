@@ -97,7 +97,7 @@ app.delete('/gameinstance/:gameRef/players', (req, res)=>{
 // == GAME STATE ALTERING PLAYER INPUTS ==
 
 // ready up in the lobby
-app.post('/gameinstance/:gameRef/players', (req, res)=>{
+app.post('/gameinstance/:gameRef/players/ready', (req, res)=>{
     // get the game and player references
     let gameRef = req.params.gameRef;
     let playerID = req.session.userId
@@ -116,7 +116,6 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
 
 //  ======  CREATE THE HTTP SERVER  ==== 
 server = http.createServer(app)
-
 
 // CREATE THE WEBSOCKET SERVER
 wss = new WebSocket.Server({

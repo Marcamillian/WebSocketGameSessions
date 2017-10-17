@@ -15,6 +15,7 @@
     const gameRefInput = document.querySelector('#game_ref')
     let playerDisplay = document.querySelector('#player-list .content')
     let scoreDisplay = document.querySelector('#score-display .content')
+    let lobbyReadyButton = document.querySelector('#lobby-ready')
     let ws;
 
     // game session variables
@@ -24,8 +25,6 @@
     // utility funtions
     const showMessage = (message)=>{
         console.log(message)
-        messages.textContent += `\n${message}`;
-        messages.scrollTop = messages.scrollHeight;
     }
 
     const stringifyObject = (jsonMessage)=>{
@@ -221,5 +220,14 @@
             //.then(()=>{gameStateDisplay('lobby')})
             .catch( (err)=>{ showMessage(err.message) })
     }
+
+    lobbyReadyButton.onclick = ()=>{
+        fetch(`gameinstance/${currentGameRef}/players/ready`, {method:'POST', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=>{showMessage(err.message)})
+    }
+
+
 
 })();

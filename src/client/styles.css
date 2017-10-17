@@ -16,7 +16,8 @@ body button{
 }
 
 .lobby #player-list,
-.lobby #leaveGame{
+.lobby #leaveGame,
+.lobby #lobby-ready{
     display:block;
 }
 

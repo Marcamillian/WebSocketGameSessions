@@ -6,11 +6,11 @@ const PlayerTemplate = ()=>{
         allignment: undefined, // string to show what side they are on
         character: undefined, // if they are fascist/hitler/liberal
 
-        president: false,
-        chancellor: false,
+        president: false,   // currently govornment
+        chancellor: false,  // currently govornment
         // lobby phase
         ready: false,           // ready to start the game
-        // proposal pase
+        // proposal phase
         prevGov: false,       // if they were in the last successful gov
         proposedChancellor: false,
         // vote phase

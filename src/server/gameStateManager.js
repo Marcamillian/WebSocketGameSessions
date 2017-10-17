@@ -186,7 +186,7 @@ let gameStateManager = function(){
         }
     }
 
-    let getPlayerRefs = ( gameRef, suppliedStates )=>{
+    let getPlayerRefs = ( gameRef, suppliedStates )=>{ // TODO: is failing here for the gamestate
 
         let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
 
