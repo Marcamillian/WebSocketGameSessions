@@ -60,6 +60,7 @@ app.put('/gameinstance', (req, res)=>{
 app.get('/gameinstance/:gameRef', (req, res)=>{
     let gameState = stateManager.getGameState(req.params.gameRef)
     console.log(gameState)
+
     res.send({result: 'OK', gameState: gameState})
 })
 
@@ -74,7 +75,7 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
 
-    console.log(stateManager.getGameState(gameRef))
+    console.log("Broadcast state:", stateManager.getGameState(gameRef))
     
     res.send({result:'OK', 'gameState':stateManager.getGameState(gameRef)})
 
@@ -93,16 +94,25 @@ app.delete('/gameinstance/:gameRef/players', (req, res)=>{
     res.send({result:'OK', message:"Left the game"})
 })
 
+// == GAME STATE ALTERING PLAYER INPUTS ==
+
 // ready up in the lobby
 app.post('/gameinstance/:gameRef/players', (req, res)=>{
+    // get the game and player references
     let gameRef = req.params.gameRef;
     let playerID = req.session.userId
 
+    // ready the player
     let gameState = stateManager.readyPlayer(stateManager.getGameState(gameRef, playerID))
+    //check if the phase has changed
     gameState = stateManager.update(gameState)
 
+    // send back the updated game state
     wss.broadcast( gameState )
+    req.send({result:'OK', message:"You are ready"})
 })
+
+
 
 //  ======  CREATE THE HTTP SERVER  ==== 
 server = http.createServer(app)

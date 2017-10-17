@@ -1,3 +1,6 @@
+StateTemplate = require('./stateTemplate.js')
+PlayerTemplate = require('./playerTemplate.js')
+
 let gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
@@ -127,10 +130,7 @@ let gameStateManager = function(){
     let initGame = (gameKey)=>{
         if(gameStates[gameKey]){ throw new Error(`Game session ${gameKey} already exists`)} // check that we arn't overwriting something
 
-        gameStates[gameKey] = {
-            players: [],
-            score: 0
-        }
+        gameStates[gameKey] = StateTemplate()
     }
 
     let createSessionKey = (length)=>{
@@ -143,8 +143,19 @@ let gameStateManager = function(){
 
             let returnState = {};
 
-            let states = gameStates[sessionKey];
-            returnState['players'] = states.players.map( (playerInfo)=>{ return playerInfo.playerName } )
+            let targetState = gameStates[sessionKey];
+            returnState['players'] = targetState.players.map( (playerInfo)=>{ return {playerName: playerInfo.playerName,
+                                                                                      president: playerInfo.president,
+                                                                                      chancellor: playerInfo.chancellor,
+                                                                                      ready: playerInfo.ready,
+                                                                                      prevGov: playerInfo.prevGov,
+                                                                                      proposedChancellor: playerInfo.proposedChancellor,
+                                                                                      voteCast: playerInfo.voteCast }
+                                                                            })
+            returnState['gamePhase'] = targetState.gamePhase;
+            returnState['voteFailTrack'] = targetState.voteFailTrack;
+            returnState['policyTrackFascist'] = targetState.policyTrackFascist;
+            returnState['policyTrackLiberal'] = targetState.policyTrackLiberal;
 
             return returnState
         }else{
@@ -156,7 +167,12 @@ let gameStateManager = function(){
 
     let joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
-            return gameStates[sessionKey].players.push({'playerRef':playerRef, 'playerName': playerName, 'ready':false });
+
+            var newPlayer = PlayerTemplate();
+            newPlayer.playerName = playerName;
+            newPlayer.playerRef = playerRef;
+
+            return gameStates[sessionKey].players.push( newPlayer );
         }else{
             throw new Error( "session doesn't exist")
         }
@@ -165,7 +181,6 @@ let gameStateManager = function(){
     let leaveGame = (sessionKey, playerRef)=>{
         if(gameStates[sessionKey]){
             gameStates[sessionKey].players = gameStates[sessionKey].players.filter((player)=>{ return player.playerRef != playerRef })
-            console.log(gameStates[sessionKey].players)
         }else{
             throw new Error("Session doesn't exist")
         }

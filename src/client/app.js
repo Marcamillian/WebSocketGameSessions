@@ -83,8 +83,10 @@
                     console.log(`Joined game ${message.data.gameRef}`)
                 break
                 case "updateGameState":
-                    console.log(message.data)
-                    showPlayers(message.data.players)
+                    let gameState = message.data 
+                    console.log("WS message GameState:", gameState)
+                    gameStateDisplay(gameState.gamePhase)
+                    showPlayers(gameState.players)
                 break
                 default:
                     console.log(`Message Type ${message.type} : Unexpected type`)
@@ -111,22 +113,6 @@
         return gameRef
     }
 
-    const processJoinState = ( serverResponse )=>{
-        
-        // 1-  remove the elements from the list
-        while(playerDisplay.children.length > 0){
-            playerDisplay.children[0].remove()
-        }
-        // 2- add the new names to the list
-        serverResponse.gameState.players.forEach((playerName)=>{
-            let addEl = document.createElement('li')
-            addEl.innerText = playerName
-
-            playerDisplay.appendChild(addEl)
-        }) 
-
-    }
-
     const getGameState = (gameState)=>{
         fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
             .then(handleResponse)
@@ -139,14 +125,21 @@
     }
 
     const showPlayers = (playerArray)=>{
+        
         // 1-  remove the elements from the list
         while(playerDisplay.children.length > 0){
             playerDisplay.children[0].remove()
         }
+
         // 2- add the new names to the list
-        playerArray.forEach((playerName)=>{
-            let addEl = document.createElement('li')
-            addEl.innerText = playerName
+        playerArray.forEach((playerObject)=>{
+
+            let addEl = document.createElement('li');
+            addEl.innerText = playerObject["playerName"]
+            
+            if(playerObject['ready']) {
+                addEl.classList.add('highlight')
+            }
 
             playerDisplay.appendChild(addEl)
         }) 
@@ -224,8 +217,8 @@
 
         fetch(`/gameinstance/${gameRef}/players`, { method: 'POST', credentials:'same-origin', headers: myHeaders })
             .then(handleResponse)
-            .then(processJoinState)
-            .then(()=>{gameStateDisplay('lobby')})
+            .then(showMessage)
+            //.then(()=>{gameStateDisplay('lobby')})
             .catch( (err)=>{ showMessage(err.message) })
     }
 

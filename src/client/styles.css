@@ -24,3 +24,7 @@ body button{
 .in-game {
     display:block;
 }
+
+.highlight{
+    color:green
+}
