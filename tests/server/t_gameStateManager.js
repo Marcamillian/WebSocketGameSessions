@@ -67,14 +67,14 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
     state1.players.push(player1_2)
 
     // test the function using the mock as a second argument
-    t.equals(gsManager.update(state1).gamePhase, "lobby" , "Stays in lobby if not everyone ready")
+    t.equals(gsManager.update(undefined,state1).gamePhase, "lobby" , "Stays in lobby if not everyone ready")
 
 
     // udpate so that everyone ready
     player1_2.ready = true
 
     // test the function using the mock as a second argument
-    t.equals(gsManager.update(state1).gamePhase, "proposal" , "Leaves lobby if everyone ready")
+    t.equals(gsManager.update(undefined,state1).gamePhase, "proposal" , "Leaves lobby if everyone ready")
 
     t.end()
 })
@@ -90,11 +90,11 @@ test("Testing the stateMachine - proposal to vote transition", (t)=>{
     gameState1.players.push(player1)
     gameState1.players.push(player2)
 
-    t.equals(gsManager.update(gameState1).gamePhase, "proposal", "No chancellor proposed - stay in proposal phase")
+    t.equals(gsManager.update(undefined,gameState1).gamePhase, "proposal", "No chancellor proposed - stay in proposal phase")
 
     player2.proposedChancellor = true;
 
-    t.equals(gsManager.update(gameState1).gamePhase, "election", "Chancellor proposed - move to vote phase")
+    t.equals(gsManager.update(undefined,gameState1).gamePhase, "election", "Chancellor proposed - move to vote phase")
 
     t.end()
 })
@@ -117,7 +117,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         gameState1.players.push(player3)
         gameState1.players.push(player4)
 
-        ts.equals(gsManager.update(gameState1).gamePhase, "election", "No votes - stay in proposal phase")
+        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "election", "No votes - stay in proposal phase")
 
         ts.end()
     })
@@ -140,7 +140,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         player2.voteCast = true;
 
-        ts.equals(gsManager.update(gameState1).gamePhase, "election", "One vote - stay in proposal phase")
+        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "election", "One vote - stay in proposal phase")
         ts.end()
     })
 
@@ -165,7 +165,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
-        ts.equals(gsManager.update(gameState1).gamePhase, "legislative", "Success vote - move to legislative")
+        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "legislative", "Success vote - move to legislative")
         ts.end()
     })
 
@@ -190,7 +190,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
-        ts.equals(gsManager.update(gameState1).gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
+        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
         ts.end()
     })
 
@@ -212,7 +212,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = false})
 
-        ts.equals(gsManager.update(gameState1).gamePhase, "proposal", "Unsuccessful gov election - elect another")
+        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "proposal", "Unsuccessful gov election - elect another")
         ts.end()
     })
 
@@ -230,7 +230,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.gamePhase = 'legislative'
         gameState.policyDraw = ['fascist']
 
-        t.equals(gsManager.update(gameState).gamePhase, "proposal", "Policy Passes - next proposal")
+        t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
         ts.end()
     })
@@ -243,7 +243,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.gamePhase = 'legislative'
         gameState.policyDraw = ['liberal']
 
-        t.equals(gsManager.update(gameState).gamePhase, "proposal", "Policy Passes - next proposal")
+        t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
         ts.end()
     })
@@ -257,7 +257,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.policyDraw = ['fascist']
         gameState.policyTrackFascist = [true, true, true, false, false, false]
 
-        t.equals(gsManager.update(gameState).gamePhase, "power", "Policy Passes - power activated")
+        t.equals(gsManager.update(undefined,gameState).gamePhase, "power", "Policy Passes - power activated")
 
         ts.end()
     })
@@ -271,7 +271,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.policyDraw = ['fascist']
         gameState.policyTrackFascist = [true, true, true, true, true, true]
 
-        t.equals(gsManager.update(gameState).gamePhase, "endGame", "Fascists win")
+        t.equals(gsManager.update(undefined,gameState).gamePhase, "endGame", "Fascists win")
 
         ts.end()
     })
@@ -285,7 +285,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.policyDraw = ['liberal']
         gameState.policyTrackLiberal = [true, true, true, true, true]
 
-        ts.equals(gsManager.update(gameState).gamePhase, "endGame", "Liberals win")
+        ts.equals(gsManager.update(undefined,gameState).gamePhase, "endGame", "Liberals win")
 
         ts.end()
     })
@@ -310,7 +310,7 @@ test("Testing interaction functions: player lobby ready up", (t)=>{
         gameState.gamePhase = "lobby";
         gameState.players.push(player1, player2)
 
-        let result = gsManager.readyPlayer(gameState, "player1")
+        let result = gsManager.readyPlayer(undefined, "player1", gameState)
 
         let changedPlayer  = result.players.filter((player)=>{return player.playerRef == 'player1'})
         ts.equals(changedPlayer[0].ready, true, "Is the players ready state changed")
@@ -334,7 +334,7 @@ test("Testing interaction functions: player lobby ready up", (t)=>{
         //ts.throws(()=>{gsManager.readyPlayer(gameState, "player3")}, /Player not in game/i, "Player not in game to ready")
 
         //ts.throws(()=>{gsManager.readyPlayer(gameState, "player3")},/Player not in game to ready/i, "Player not in game to ready")
-        ts.throws(()=>{gsManager.readyPlayer(gameState,"player3")}, /PlayerRef not in game/i, "Ready playerRef that doesn't exist" )
+        ts.throws(()=>{gsManager.readyPlayer(undefined, "player3", gameState)}, /PlayerRef not in game/i, "Ready playerRef that doesn't exist" )
 
         ts.end()
     })
@@ -344,7 +344,7 @@ test("Testing interaction functions: player lobby ready up", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = "lobby";
-        ts.throws(()=>{ gsManager.readyPlayer(gameState, "player1"), /PlayerRef not in game/i, "Ready when no players in game" })
+        ts.throws(()=>{ gsManager.readyPlayer(undefined, "player1", gameState), /PlayerRef not in game/i, "Ready when no players in game" })
 
         ts.end()
     })
@@ -363,7 +363,7 @@ test("Testing interaction functions: player lobby ready up", (t)=>{
         gameState.gamePhase = "lobby";
         gameState.players.push(player1, player2);
 
-        ts.throws(()=>{ gsManager.readyPlayer(gameState, "player1") }, /More than one player with that reference/i, "Multiple players matching PlayerRef")
+        ts.throws(()=>{ gsManager.readyPlayer(undefined, "player1", gameState) }, /More than one player with that reference/i, "Multiple players matching PlayerRef")
 
         ts.end()
     })
@@ -378,7 +378,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        let result = base.gsManager.proposeChancellor(base.gs, "player1")
+        let result = base.gsManager.proposeChancellor(undefined, "player1", base.gs)
 
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == 'player1'})[0]
         ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
@@ -392,7 +392,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(base.gs, "player3")}, /No players with that playerRef/i, "Proposed chancellor not in game")
+        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player3", base.gs)}, /No players with that playerRef/i, "Proposed chancellor not in game")
         ts.end()
     })
 
@@ -404,7 +404,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.player2.playerRef = "player1"
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(base.gs, "player1"), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
+        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player1", base.gs), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
 
         ts.end()
     })
@@ -419,7 +419,7 @@ test("Testing interaction functions: Election vote", (t)=>{
         base.gs.gamePhase == 'election';
         base.gs.players.push(base.player1, base.player2);
 
-        let result = base.gsManager.castVote(base.gs, "player1", true)
+        let result = base.gsManager.castVote(undefined, "player1", true, base.gs)
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == "player1"})[0]
 
         ts.equal(targetPlayer.voteCast, true, "Vote for government")
@@ -433,7 +433,7 @@ test("Testing interaction functions: Election vote", (t)=>{
         base.gs.gamePhase == 'election';
         base.gs.players.push(base.player1, base.player2);
 
-        let result = base.gsManager.castVote(base.gs, "player1", false)
+        let result = base.gsManager.castVote(undefined, "player1", false, base.gs)
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == "player1"})[0]
 
         ts.equal(targetPlayer.voteCast, false, "Vote against government")
@@ -451,7 +451,7 @@ test("Testing interaction: Policy discard", (t)=>{
 
         gs.policyHand = ['fascist', 'liberal', 'fascist']
 
-        let result = gsManager.policyDiscard(gs, 'liberal')
+        let result = gsManager.policyDiscard(undefined, 'liberal', gs)
         let liberalDraw = result.policyHand.filter((card)=>{return card == "liberal"})
 
         ts.equal(result.policyHand.length, 2, "2 cards left in the policy draw")
@@ -467,7 +467,7 @@ test("Testing interaction: Policy discard", (t)=>{
 
         gs.policyHand = ['fascist','liberal','liberal']
 
-        let result = gsManager.policyDiscard(gs,'fascist')
+        let result = gsManager.policyDiscard(undefined,'fascist', gs)
         let fascistDraw = result.policyHand.filter((card)=>{ return card == "fascist"})
 
         ts.equal(result.policyHand.length, 2, "2 left in the policy draw")
@@ -483,7 +483,7 @@ test("Testing interaction: Policy discard", (t)=>{
 
         gs.policyHand = ['fascist', 'fascist','fascist']
 
-        ts.throws(()=>{gsManager.policyDiscard(gs,"liberal")}, /No policy of that type/i, "No liberal policy in hand")
+        ts.throws(()=>{gsManager.policyDiscard(undefined,"liberal", gs)}, /No policy of that type/i, "No liberal policy in hand")
 
         ts.end()
     })
@@ -494,7 +494,7 @@ test("Testing interaction: Policy discard", (t)=>{
 
         gs.policyHand = ['fascist', 'liberal'];
 
-        let result = gsManager.policyDiscard(gs, 'liberal')
+        let result = gsManager.policyDiscard(undefined, 'liberal', gs)
         let liberalDraw = result.policyHand.filter((card)=>{ return card == "liberal" })
 
         ts.equal(result.policyHand.length,1, "1 card left in policy draw")
@@ -508,7 +508,7 @@ test("Testing interaction: Policy discard", (t)=>{
         let gs = StateTemplate();
         let gsManager = GameStateManager();
 
-        ts.throws(()=>{gsManager.policyDiscard(gs, 'liberal')}, /No policy of that type/i, "No policy cards drawn")
+        ts.throws(()=>{gsManager.policyDiscard(undefined, 'liberal', gs)}, /No policy of that type/i, "No policy cards drawn")
 
         ts.end()
     })

@@ -69,13 +69,9 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
-
-    console.log(`getting gameRef for the player posted - ${stateManager.getGameForPlayer(req.session.userId)}`)
     
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
-
-    console.log("Broadcast state:", stateManager.getGameState(gameRef))
     
     res.send({result:'OK', 'gameState':stateManager.getGameState(gameRef)})
 
@@ -102,14 +98,15 @@ app.post('/gameinstance/:gameRef/players/ready', (req, res)=>{
     let gameRef = req.params.gameRef;
     let playerID = req.session.userId
 
-    // ready the player
-    let gameState = stateManager.readyPlayer(stateManager.getGameState(gameRef, playerID))
+    // ready the player -- the gameState playerObject doesn't have a playerRef -- the getGameState doesn't include playerRefs
+    let gameState = stateManager.readyPlayer(gameRef, playerID)
     //check if the phase has changed
-    gameState = stateManager.update(gameState)
+    gameState = stateManager.update(gameRef)
+    
 
     // send back the updated game state
-    wss.broadcast( gameState )
-    req.send({result:'OK', message:"You are ready"})
+    wss.broadcast( gameRef )
+    res.send({result:'OK', message:"You are ready"})
 })
 
 

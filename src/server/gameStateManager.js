@@ -4,23 +4,10 @@ PlayerTemplate = require('./playerTemplate.js')
 let gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
-    const stateTemplate = {
-        gamePhase: 'lobby', // where in the state machine the state is
-        players:[], // collection of player objects
-        policyDraw:[], // collection of card objects
-        policyDiscard:[], // collection of card objects
-        voteFailTrack:[false, false, false]  // 
-    }
-    const playerTemplate = {
-        playerRef: undefined, // string to link req.session
-        playerName: undefined, // string for display name
-        ready: false,           // ready to start the game
-        allignment: undefined, // string to show what side they are on
-        character: undefined, // if they are fascist/hitler/liberal
-        prevGov: false,       // if they were in the last successful gov 
-    }
+    let update = (gameRef, testState)=>{
 
-    let update = (gameState)=>{
+        var gameState = (testState) ? testState : gameStates[gameRef]
+
         // updating game
         switch(gameState.gamePhase){
             case "lobby":
@@ -172,7 +159,9 @@ let gameStateManager = function(){
             newPlayer.playerName = playerName;
             newPlayer.playerRef = playerRef;
 
-            return gameStates[sessionKey].players.push( newPlayer );
+            gameStates[sessionKey].players.push( newPlayer );
+
+            return true;
         }else{
             throw new Error( "session doesn't exist")
         }
@@ -186,7 +175,7 @@ let gameStateManager = function(){
         }
     }
 
-    let getPlayerRefs = ( gameRef, suppliedStates )=>{ // TODO: is failing here for the gamestate
+    let getPlayerRefs = ( gameRef, suppliedStates )=>{
 
         let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
 
@@ -210,7 +199,10 @@ let gameStateManager = function(){
 
     // === affect game state ===
 
-    let readyPlayer = (gameState, playerRef )=>{
+    let readyPlayer = (gameRef, playerRef, testState )=>{
+
+        // use the passed state or the internal state with the Ref
+        let gameState = (testState) ? testState : gameStates[gameRef]
 
         if(gameState){
             // look for the player that we are looking for
@@ -231,7 +223,10 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let proposeChancellor = (gameState, playerRef)=>{
+    let proposeChancellor = (gameRef, playerRef, testState)=>{
+
+        let gameState = (testState) ? testState : gameStates[gameRef]
+
         let matchedPlayers = gameState.players.filter((player)=>{return player.playerRef == playerRef})
         
         if(matchedPlayers.length == 1){
@@ -242,7 +237,9 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let castVote = (gameState, playerRef, vote)=>{
+    let castVote = (gameRef, playerRef, vote, testState)=>{
+
+        let gameState = (testState) ? testState : gameStates[gameRef]
 
         // throw if values not set
         if(vote == undefined) throw new Error("Vote not defined")
@@ -258,7 +255,9 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let policyDiscard = (gameState, policyType)=>{
+    let policyDiscard = (gameRef, policyType, testState)=>{
+
+        let gameState = (testState) ? testState : gameStates[gameRef]
 
         let policyHand = gameState.policyHand
         let policyIndex = policyHand.indexOf(policyType)
