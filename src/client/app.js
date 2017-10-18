@@ -54,6 +54,12 @@
             case "inGame":
                 displayBody.classList.add("in-game")
             break
+            case "proposal":
+                displayBody.classList.add("proposal")
+            break
+            default:
+                throw new Error(`gamePhase not recognised: ${gamePhase}`)
+            break
         }
     }
 

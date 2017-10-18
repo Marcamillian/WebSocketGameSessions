@@ -29,3 +29,7 @@ body button{
 .highlight{
     color:green
 }
+
+.proposal #player-list{
+    display:block;
+}
