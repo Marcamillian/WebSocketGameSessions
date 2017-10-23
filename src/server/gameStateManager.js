@@ -12,12 +12,17 @@ let gameStateManager = function(){
         switch(gameState.gamePhase){
             case "lobby":
 
+                // v2 - do we have between 5 & 10 players
+            
                 // array of ready values for the players
                 let playersReady = gameState.players.map((player)=>{
                     return player.ready
                 })
 
-                if(playersReady.includes(false)){ // if everyone is ready
+                if(playersReady.length > 10) throw new Error("Too many players")
+
+
+                if(playersReady.includes(false) || playersReady.length < 5){ // someone unready || not enough
                     // do nothing
 
                         

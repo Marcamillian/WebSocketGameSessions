@@ -54,27 +54,42 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
 
     let gsManager = GameStateManager();
 
-    // mock up a gamestate to test
-    state1 = StateTemplate()
-    player1_1 = PlayerTemplate()
-    player1_2 = PlayerTemplate()
+    t.test("5 players all ready", (ts)=>{
+        // a state with 5 ready players
+        let state = {players:[], gamePhase: 'lobby'}
+        for(var i=0; i<5; i++){ state.players.push({ready:true}) }
 
-    // set the conditions
-    player1_1.ready = true;
-    
-    // add the players to the state
-    state1.players.push(player1_1)
-    state1.players.push(player1_2)
+        ts.equals(gsManager.update(undefined, state).gamePhase, 'proposal', "gameState should move on")
+        ts.end()
+    })
 
-    // test the function using the mock as a second argument
-    t.equals(gsManager.update(undefined,state1).gamePhase, "lobby" , "Stays in lobby if not everyone ready")
+    t.test("enough players - not all ready", (ts)=>{
+        // a state with 5 players - not all ready
+        let state = {players:[], gamePhase: 'lobby'}
+        for(var i=0; i<5; i++){ state.players.push({ready:true}) }
+        state.players[0].ready = false
 
+        ts.equals(gsManager.update(undefined, state).gamePhase, 'lobby', "not everyone ready")
+        ts.end()
+    })
 
-    // udpate so that everyone ready
-    player1_2.ready = true
+    t.test("not enough players - all ready", (ts)=>{ // TODO this is failing
+        // a state with 5 players - not all ready
+        let state = {players:[], gamePhase: 'lobby'}
+        for(var i=0; i<3; i++){ state.players.push({ready:true}) }
 
-    // test the function using the mock as a second argument
-    t.equals(gsManager.update(undefined,state1).gamePhase, "proposal" , "Leaves lobby if everyone ready")
+        ts.equals(gsManager.update(undefined, state).gamePhase, 'lobby', "not enought to start")
+        ts.end()
+    })
+
+    t.test("too many players - all ready", (ts)=>{ // TODO this is failing
+        // a state with 5 players - not all ready
+        let state = {players:[], gamePhase: 'lobby'}
+        for(var i=0; i<13; i++){ state.players.push({ready:true}) }
+
+        ts.throws(()=>{gsManager.update(undefined, state)}, /Too many players/i, "Too many players for the game")
+        ts.end()
+    })
 
     t.end()
 })
