@@ -29,16 +29,22 @@ app.use(express.static('./src/client'));
 app.use(sessionParser);
 
 
-// ===  EXPRESS APP - ROUTING TRIGGERS for PLAYER input 
+// ===  EXPRESS APP - ROUTING TRIGGERS for PLAYER input
+
 
 // login to the game
 app.post('/login', (req, res)=>{
     // "Log in" user and set userId to session
     const id= uuid.v4();
 
-    console.log(`Updating session for user ${id}`);
-    req.session.userId = id;
-    res.send({result:"OK", message: 'Session updated '})
+    if (!req.session.userId){
+        req.session.userId = id; // if there is already a session under that user
+        res.send({result:"OK", message: 'Session updated '})
+    } else {
+        console.log("USER ALREADY HAS A SESSION RUNNING")
+        res.send({result:"OK", message: "You are already in a game"})
+    } 
+    
 })
 
 // remove your login session
