@@ -27,11 +27,9 @@ let gameStateManager = function(){
 
                         
                 }else{
+                    assignRoles(gameState.players)
                     gameState.gamePhase = 'proposal'    // go to the next step
 
-                    // generate the roles
-                        // assign them to players
-                        // send private information
                 }
 
             break;
@@ -281,7 +279,57 @@ let gameStateManager = function(){
     }
 
     let assignRoles = (playerList)=>{
-        return []
+
+        let result = []
+        let fascistCount = undefined
+        let positions = []
+
+        // choose how many fascists we need
+        if(playerList.length < 5) throw new Error("not enough players to assign roles")
+        else if( playerList.length < 7) fascistCount = 2;
+        else if( playerList.length < 9) fascistCount = 3;
+        else if( playerList.length <= 10) fascistCount = 4;
+        else {throw new Error("too many players to assign roles")}
+
+        // == pick the indexes of the fascists == 
+        for(var i=0; i<playerList.length;i++) positions.push(i) //all possible positions in an array
+        positions = shuffleArray(positions)// shuffle all of the numbers
+
+        //set everyone as a liberal
+        playerList.map((player)=>{
+            player.character = 'liberal';
+            player.allignment = 'liberal';
+        })
+
+        // make the first X in the randomised position array fascist        
+        for (var i=0; i< fascistCount; i++){
+            playerList[positions[i]].allignment = 'fascist';
+            playerList[positions[i]].character = 'fascist'
+        }
+        // make the first in the randomised array hitler
+        playerList[positions[0]].character = 'hitler'
+
+        return playerList
+    }
+
+    let shuffleArray = (array)=>{ // https://github.com/Daplie/knuth-shuffle
+        var currentIndex = array.length
+        var tempValue;
+        var randomIndex;
+
+        // While there are still elements to shuffle
+        while(0 != currentIndex){
+            // Pick a remaining element
+            randomIndex = Math.floor(Math.random()*currentIndex);
+            currentIndex -= 1;
+
+            // swap it with the current element
+            tempValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex]
+            array[randomIndex] = tempValue
+        }
+
+        return array
     }
 
     // function to search for playerRef
