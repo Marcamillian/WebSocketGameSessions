@@ -197,8 +197,10 @@ let gameStateManager = function(){
         // loop over the gamestates - return the state key if 
             // 
 
-
+        return
     }
+
+
 
     // === affect game state ===
 
@@ -331,6 +333,7 @@ let gameStateManager = function(){
 
         return array
     }
+
 
     // function to search for playerRef
 

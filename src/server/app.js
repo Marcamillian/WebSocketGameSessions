@@ -137,7 +137,7 @@ wss = new WebSocket.Server({
 wss.on('connection', (ws,req)=>{
 
     ws.userId = req.session.userId  // adding the userID to the websocket you can get to
-
+ 
     ws.on('message', (messageString)=>{
 
         // get a list of the connected clients - wss.clients
@@ -192,6 +192,14 @@ wss.on('connection', (ws,req)=>{
         }
 
     })
+
+
+    let gameRef;// = gameStateManager.getGameForPlayer(ws.userId)
+    // if already in a game
+    if(gameRef != undefined){
+        console.log(`BROADCAST TO GAME: ${gameRef}`)
+        //wss.broadcast(gameStateManager.getGameRef(ws.userId))
+    }
     
 });
 

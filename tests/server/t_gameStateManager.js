@@ -601,3 +601,37 @@ test("Testing function: Assigning roles", (t)=>{
 
 })
 
+test("Testing function: getGameForPlayer", (t)=>{
+    let gameStateManager = GameStateManager()
+
+    t.test("PlayerRef in a game",(ts)=>{
+
+        let gameStates =
+        {
+            "gameOne":{players:[ {playerRef: "player1"},
+                            {playerRef: "player2"}]},
+            "gameTwo":{players:[ {playerRef: "player3"},
+                            {playerRef: "player4"}]}   
+        }
+
+
+        ts.equal(gameStateManager.getGameForPlayer("player1"), "gameOne", "Player exists")
+        ts.end()
+    })
+
+    t.test("PlayerRef not in any game",(ts)=>{
+        let gameStates =
+        {
+            "gameOne":{players:[ {playerRef: "player1"},
+                            {playerRef: "player2"}]},
+            "gameTwo":{players:[ {playerRef: "player3"},
+                            {playerRef: "player4"}]}   
+        }
+
+        ts.equal(gameStateManager.getGameForPlayer("player5"), undefined, "Player doesn't exist")
+        ts.end()
+    })
+
+    t.end() 
+})
+
