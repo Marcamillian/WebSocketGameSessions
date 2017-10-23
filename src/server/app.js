@@ -194,11 +194,10 @@ wss.on('connection', (ws,req)=>{
     })
 
 
-    let gameRef;// = gameStateManager.getGameForPlayer(ws.userId)
+    let gameRef = stateManager.getGameForPlayer(ws.userId)
     // if already in a game
     if(gameRef != undefined){
-        console.log(`BROADCAST TO GAME: ${gameRef}`)
-        //wss.broadcast(gameStateManager.getGameRef(ws.userId))
+        wss.broadcast(gameRef)
     }
     
 });

@@ -189,15 +189,23 @@ let gameStateManager = function(){
         }
     }
  
-    let getGameForPlayer= (playerRef, suppliedStates)=>{
+    let getGameForPlayer= (userId, suppliedStates)=>{
 
         let states = (suppliedStates) ? suppliedStates : gameStates // alt test if you want to mock the gameStates
         let stateRefs = Object.keys(states) // get the games of the gameStates
 
-        // loop over the gamestates - return the state key if 
-            // 
+        // loop over the games
+        for(var i=0; i < stateRefs.length; i++){
+            let inGame = false;
+            states[stateRefs[i]].players.forEach((player)=>{
+                if(player.playerRef == userId) return inGame = true
+            })
 
-        return
+            if(inGame)return stateRefs[i]
+        }
+
+        // if not found return nothing
+        return undefined
     }
 
 

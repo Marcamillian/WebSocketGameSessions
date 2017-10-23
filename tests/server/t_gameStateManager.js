@@ -615,7 +615,7 @@ test("Testing function: getGameForPlayer", (t)=>{
         }
 
 
-        ts.equal(gameStateManager.getGameForPlayer("player1"), "gameOne", "Player exists")
+        ts.equal(gameStateManager.getGameForPlayer("player1", gameStates), "gameOne", "Player exists")
         ts.end()
     })
 
@@ -628,7 +628,7 @@ test("Testing function: getGameForPlayer", (t)=>{
                             {playerRef: "player4"}]}   
         }
 
-        ts.equal(gameStateManager.getGameForPlayer("player5"), undefined, "Player doesn't exist")
+        ts.equal(gameStateManager.getGameForPlayer("player5", gameStates), undefined, "Player doesn't exist")
         ts.end()
     })
 
