@@ -531,3 +531,73 @@ test("Testing interaction: Policy discard", (t)=>{
     t.end()
 })
 
+test("Testing function: Assigning roles", (t)=>{
+    let gameStateManager = GameStateManager();
+
+    t.test("Assigning roles: Not enough players", (ts)=>{
+        let players = []
+        for(var i=0; i < 4; i++){players.push({allignment: undefined,character: undefined, president: false})}
+
+        ts.throws(()=>{gameStateManager.assignRoles(players)}, /not enough players to assign roles/i, "Can't assign roles")
+        
+        ts.end()
+    })
+
+    t.test("Assigning roles: 5 player",(ts)=>{
+        let players = []
+        for(var i=0; i < 5; i++){players.push({allignment: undefined,character: undefined, president: false})}
+
+        let result = gameStateManager.assignRoles(players)
+
+        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let hitler = result.filter((player)=>{ return player.character == 'hitler'})
+
+        ts.equals(fascists.length,2, "Two fascists")
+        ts.equals(hitler.length, 1, "Only one hitler")
+
+        ts.end()
+    })
+
+    t.test("Assigning roles: 7 player", (ts)=>{
+        let players = []
+        for(var i=0; i < 7; i++){players.push({allignment: undefined,character: undefined, president: false})}
+
+        let result = gameStateManager.assignRoles(players)
+
+        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let hitler = result.filter((player)=>{ return player.character == 'hitler'})
+
+        ts.equals(fascists.length,3, "Three fascists")
+        ts.equals(hitler.length, 1, "Only one hitler")
+        ts.end()
+    })
+
+    t.test("Assigning roles: 10 players", (ts)=>{
+        let players = []
+        for(var i=0; i < 10; i++){players.push({allignment: undefined,character: undefined, president: false})}
+
+        let result = gameStateManager.assignRoles(players)
+
+        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let hitler = result.filter((player)=>{ return player.character == 'hitler'})
+
+        ts.equals(fascists.length,4, "Two fascists")
+        ts.equals(hitler.length, 1, "Only one hitler")
+        ts.end()
+    })
+
+    t.test("Assigning roles: Too many players",(ts)=>{
+
+        let players = []
+        for(var i=0; i < 12; i++){players.push({allignment: undefined,character: undefined, president: false})}
+
+        ts.throws(()=>{gameStateManager.assignRoles(players), /too many players to assign roles/i, "Too many players in game"})
+
+        ts.end()
+    })
+
+    t.end()
+
+
+})
+

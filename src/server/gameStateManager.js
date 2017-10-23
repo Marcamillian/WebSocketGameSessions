@@ -280,6 +280,10 @@ let gameStateManager = function(){
         return gameState
     }
 
+    let assignRoles = (playerList)=>{
+        return []
+    }
+
     // function to search for playerRef
 
     return Object.create({
@@ -296,7 +300,8 @@ let gameStateManager = function(){
         readyPlayer: readyPlayer,
         proposeChancellor: proposeChancellor,
         castVote: castVote,
-        policyDiscard: policyDiscard
+        policyDiscard: policyDiscard,
+        assignRoles: assignRoles
     })
 
 }
