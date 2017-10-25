@@ -211,7 +211,8 @@ wss.broadcast = (gameRef)=>{
         result: 'OK',
         type: 'updateGameState',
         gameRef: gameRef,
-        data: gameState
+        gameState: gameState,
+        //privateInfo: stateManager.getPrivateInfo(ws.userId)
     }
 
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them

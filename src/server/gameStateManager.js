@@ -208,6 +208,10 @@ let gameStateManager = function(){
         return undefined
     }
 
+    let getPrivatePlayerInfo = (userId)=>{
+        
+    }
+
 
 
     // === affect game state ===
@@ -354,6 +358,7 @@ let gameStateManager = function(){
         getGameState: getGameState,
         getPlayerRefs: getPlayerRefs,
         getGameForPlayer: getGameForPlayer,
+        getPrivatePlayerInfo: getPrivatePlayerInfo,
 
         update: update,
         readyPlayer: readyPlayer,

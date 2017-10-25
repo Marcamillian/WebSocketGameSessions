@@ -89,7 +89,8 @@
                 break
                 case "updateGameState":
                     let gameRef = message.gameRef;
-                    let gameState = message.data ;
+                    let gameState = message.gameState ;
+                    //let privateInfo = message.privateInfo
 
                     if(!currentGameRef) currentGameRef = gameRef
                     gameStateDisplay(gameState.gamePhase)
