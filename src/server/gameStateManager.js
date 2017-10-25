@@ -208,8 +208,8 @@ let gameStateManager = function(){
         return undefined
     }
 
-    let getPrivatePlayerInfo = (userId)=>{
-        
+    let getPrivatePlayerInfo = (gameRef, userId, suppliedState)=>{
+        return {character: '', allignment: '', teamMates:[]}
     }
 
 

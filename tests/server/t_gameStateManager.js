@@ -635,3 +635,58 @@ test("Testing function: getGameForPlayer", (t)=>{
     t.end() 
 })
 
+test("Testing function: getPrivatePlayerInfo",(t)=>{
+    let stateManager = GameStateManager();
+
+    t.test("Player info when in govornment proposal phase", (ts)=>{
+        let gameState =
+        {gamePhase: 'proposal',
+        players: [
+            {playerRef: 'player1',
+             allignment: 'liberal',
+             character: 'liberal'},
+            {playerRef:'player2',
+             allignment:'fascist',
+             character: 'hitler'},
+            {playerRef:'player3',
+             allignment:'fascist',
+             character: 'hitler'}
+        ]}
+
+        let libResult = stateManager.getPrivatePlayerInfo(undefined, 'player1', gameState)
+        let fasResult = stateManager.getPrivatePlayerInfo(undefined,'player2', gameState)
+
+        ts.equals(libResult.allignment, 'liberal', "Checking liberal allignment")
+        ts.equals(libResult.character, 'liberal', "Checking liberal character")
+        ts.equals(fasResult.allignment, 'fascist', "Checking fascist allignment")
+        ts.equals(fasResult.character, 'hitler', "Checking fascist character")
+        ts.equals(fasResult.teamMates.length,1, "Checking for teammates" )
+        ts.equals(fasResult.teamMates[0], 1, "Index of myself")
+        ts.equals(fasResult.teamMates[1], 2, "Index of teammate")
+
+
+        ts.end()
+    })
+
+    t.skip("Player ref not in the game", (ts)=>{
+        let gameState =
+        {gamePhase: 'proposal',
+        players: [
+            {playerRef: 'player1',
+             allignment: 'liberal',
+             character: 'liberal'},
+            {playerRef:'player2',
+             allignment:'fascist',
+             character: 'hitler'}
+        ]}
+
+        ts.throws(()=>{stateManager.getPrivatePlayerInfo(undefined,'player1',gameState)}, /playerRef not in game/i, "Error if payerRef not present")
+
+        ts.end()
+    })
+
+
+
+    t.end()
+})
+
