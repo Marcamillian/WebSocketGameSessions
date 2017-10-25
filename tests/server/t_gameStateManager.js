@@ -643,12 +643,15 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         {gamePhase: 'proposal',
         players: [
             {playerRef: 'player1',
+             playerName: 'one',
              allignment: 'liberal',
              character: 'liberal'},
             {playerRef:'player2',
+             playerName: 'two',
              allignment:'fascist',
              character: 'hitler'},
             {playerRef:'player3',
+             playerName: 'three',
              allignment:'fascist',
              character: 'hitler'}
         ]}
@@ -661,8 +664,8 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.equals(fasResult.allignment, 'fascist', "Checking fascist allignment")
         ts.equals(fasResult.character, 'hitler', "Checking fascist character")
         ts.equals(fasResult.teamMates.length,2, "Checking for teammates" )
-        ts.equals(fasResult.teamMates[0], 1, "Index of myself")
-        ts.equals(fasResult.teamMates[1], 2, "Index of teammate")
+        ts.equals(fasResult.teamMates[0], 'two', "Index of myself")
+        ts.equals(fasResult.teamMates[1], 'three', "Index of teammate")
 
 
         ts.end()

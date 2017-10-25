@@ -223,7 +223,7 @@ let gameStateManager = function(){
         // make a list of the teammate indexes -- if he is a fascist
         if(player[0].allignment == 'fascist'){
             gameState.players.forEach((player,index)=>{
-                if(player.allignment == 'fascist') teamMates.push(index)
+                if(player.allignment == 'fascist') teamMates.push(player.playerName)
             })
         }
 

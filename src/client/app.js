@@ -162,14 +162,37 @@
     }
 
     const showPrivateInfo = (privateInfo)=>{
+
+        clearElement(privateInfoDisplay)
+
         let allignmentEl = document.createElement('p')
-        allignmentEl.innerText = privateInfo.allignment;
+        allignmentEl.innerText = `Allignment: ${privateInfo.allignment}`;
 
         let characterEl = document.createElement('p')
-        characterEl.innerText = privateInfo.character;
+        characterEl.innerText = `Character: ${privateInfo.character}`;
+
+        let teamEl = document.createElement('ul')
+        let teamTitle = document.createElement('p')
+        teamTitle.innerText = "Team mates"
+
+        privateInfo.teamMates.forEach((teamMateName)=>{
+            let teamMateEl = document.createElement('li')
+            teamMateEl.innerText = teamMateName;
+            teamEl.appendChild(teamMateEl)
+        })
 
         privateInfoDisplay.appendChild(allignmentEl)
         privateInfoDisplay.appendChild(characterEl)
+        privateInfoDisplay.appendChild(teamTitle)
+        privateInfoDisplay.appendChild(teamEl)
+    }
+
+    const clearElement = (element)=>{
+        while(element.children.length > 0){
+            element.children[0].remove()
+        }
+
+        return element
     }
 
     // BUTTON CLICK FUNCTIONS
