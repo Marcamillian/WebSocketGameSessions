@@ -16,6 +16,7 @@
     let playerDisplay = document.querySelector('#player-list .content')
     let scoreDisplay = document.querySelector('#score-display .content')
     let lobbyReadyButton = document.querySelector('#lobby-ready')
+    let privateInfoDisplay = document.querySelector('#private-info')
     let ws;
 
     // game session variables
@@ -90,11 +91,15 @@
                 case "updateGameState":
                     let gameRef = message.gameRef;
                     let gameState = message.gameState ;
-                    //let privateInfo = message.privateInfo
+                    let privateInfo = message.privateInfo;
 
-                    if(!currentGameRef) currentGameRef = gameRef
-                    gameStateDisplay(gameState.gamePhase)
-                    showPlayers(gameState.players)
+                    if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
+
+                    gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
+                    showPlayers(gameState.players)  // show the players
+                    if(gameState.gamePhase == 'proposal'){
+                        showPrivateInfo(message.privateInfo)// show the privateInfo
+                    }
                 break
                 default:
                     console.log(`Message Type ${message.type} : Unexpected type`)
@@ -154,6 +159,17 @@
 
     const getGameRefInput = ()=>{
         return gameRefInput.value
+    }
+
+    const showPrivateInfo = (privateInfo)=>{
+        let allignmentEl = document.createElement('p')
+        allignmentEl.innerText = privateInfo.allignment;
+
+        let characterEl = document.createElement('p')
+        characterEl.innerText = privateInfo.character;
+
+        privateInfoDisplay.appendChild(allignmentEl)
+        privateInfoDisplay.appendChild(characterEl)
     }
 
     // BUTTON CLICK FUNCTIONS

@@ -209,7 +209,25 @@ let gameStateManager = function(){
     }
 
     let getPrivatePlayerInfo = (gameRef, userId, suppliedState)=>{
-        return {character: '', allignment: '', teamMates:[]}
+
+        let player;
+        let teamMates=[];
+        let gameState = (suppliedState) ? suppliedState : gameStates[gameRef]
+
+        // find the user
+        player = gameState.players.filter((player)=>{ return player.playerRef == userId})
+
+        if(player.length == 0) throw new Error("playerRef not in game")    // ensure the player is in there
+        else if (player.length > 1) throw new Error("repeated playerRef in game")   // make sure there arn't doubles
+
+        // make a list of the teammate indexes -- if he is a fascist
+        if(player[0].allignment == 'fascist'){
+            gameState.players.forEach((player,index)=>{
+                if(player.allignment == 'fascist') teamMates.push(index)
+            })
+        }
+
+        return {character: player[0].character, allignment: player[0].allignment, teamMates:teamMates}
     }
 
 

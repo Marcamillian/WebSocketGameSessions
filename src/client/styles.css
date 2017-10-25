@@ -30,6 +30,7 @@ body button{
     color:green
 }
 
-.proposal #player-list{
+.proposal #player-list,
+.proposal #private-info{
     display:block;
 }

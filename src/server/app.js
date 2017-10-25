@@ -207,15 +207,16 @@ wss.broadcast = (gameRef)=>{
     let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
     let gameState = stateManager.getGameState(gameRef)
 
-    let message = {
-        result: 'OK',
-        type: 'updateGameState',
-        gameRef: gameRef,
-        gameState: gameState,
-        //privateInfo: stateManager.getPrivateInfo(ws.userId)
-    }
-
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
+
+        let message = {
+            result: 'OK',
+            type: 'updateGameState',
+            gameRef: gameRef,
+            gameState: gameState,
+            privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+        }
+
         if(playersInGame.includes(ws.userId)){
             ws.send(JSON.stringify(message)) // send the gamestate to the players in the game
         }
