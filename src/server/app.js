@@ -41,7 +41,8 @@ app.post('/login', (req, res)=>{
         req.session.userId = id; // if there is already a session under that user
         res.send({result:"OK", message: 'Session updated '})
     } else {
-        console.log("USER ALREADY HAS A SESSION RUNNING")
+        // get the game that they are in
+        let gameRef = stateManager.getGameForPlayer(req.session.userID)
         res.send({result:"OK", message: "You are already in a game"})
     } 
     
@@ -209,6 +210,7 @@ wss.broadcast = (gameRef)=>{
     let message = {
         result: 'OK',
         type: 'updateGameState',
+        gameRef: gameRef,
         data: gameState
     }
 

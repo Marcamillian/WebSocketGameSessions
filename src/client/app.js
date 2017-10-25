@@ -36,7 +36,7 @@
             ? response.json()
             : Promise.reject(new Error('Unexpected response'))
     }
-    
+
     const gameStateDisplay = ( gamePhase ) =>{
 
         displayBody.classList.remove("connect", "join-game", "lobby", "in-game")
@@ -88,8 +88,10 @@
                     console.log(`Joined game ${message.data.gameRef}`)
                 break
                 case "updateGameState":
-                    let gameState = message.data 
-                    console.log("WS message GameState:", gameState)
+                    let gameRef = message.gameRef;
+                    let gameState = message.data ;
+
+                    if(!currentGameRef) currentGameRef = gameRef
                     gameStateDisplay(gameState.gamePhase)
                     showPlayers(gameState.players)
                 break
@@ -101,15 +103,6 @@
 
         }
 
-    }
-
-    // game functions
-    const processGameRef = (responseObject)=>{
-        if (responseObject.gameRef){
-            return responseObject.gameRef
-        }else{
-            throw new Error("No gamRef in response")
-        }
     }
 
     const setGameRef = ( gameRef )=>{
@@ -181,7 +174,6 @@
     }
  
     wsButton.onclick = ()=>{
-        
         fetch('/login', {method: 'POST', credentials: 'same-origin'})
         .then(handleResponse)
         .then(stringifyObject)
