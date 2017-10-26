@@ -99,7 +99,6 @@
                     showGameRef(gameRef)
                     showPlayerName(privateInfo.playerName)
 
-
                     gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
                     showPlayers(gameState.players)  // show the players
 
@@ -150,6 +149,8 @@
             if(playerObject['ready']) {
                 addEl.classList.add('highlight')
             }
+
+            if(playerObject['president']) addEl.classList.add("president")
 
             playerDisplay.appendChild(addEl)
         }) 

@@ -31,6 +31,9 @@ body button{
 .highlight{
     color:green
 }
+.president{
+    font-weight:bold;
+}
 
 .proposal #player-list,
 .proposal #private-info,

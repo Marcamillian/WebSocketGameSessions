@@ -341,6 +341,11 @@ let gameStateManager = function(){
         // make the first in the randomised array hitler
         playerList[positions[0]].character = 'hitler'
 
+        shuffleArray(playerList)
+        playerList[0].president = true;
+
+        console.log(`assigned things: ${JSON.stringify(playerList)}`)
+
         return playerList
     }
 
