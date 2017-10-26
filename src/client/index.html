@@ -5,20 +5,65 @@
     <head>
         <meta charset="utf-8">
         <title> Express Session Demo</title>
+        <link rel="stylesheet" type="text/css" href="styles.css"/>
     </head>
 
-    <body>
-        <h1> Choose an action</h1>
+    <body class="connect">
+
+        <!-- pre joining the game -->
+        <button id="wsButton" type="button" title="Open WebSocket connection">
+            Connect to server
+        </button>
+
+        <!-- for joining a game session -->
+        <form>
+            <input id="player_name" type="text" label="player_name">Player Name</input>
+            <input id="game_ref" type="text" label="game_ref">Game to Join</input>
+        </form>
+
         <button id="login" type="button" title="Simulate login">
             Simulate login
         </button>
         <button id="logout" type="button" title="Simulate logout">
             Simulate Logout
         </button>
-        <button id="wsButton" type="button" title="Open WebSocket connection">
-            Open WebSocket connection
+        
+        <button id="createGame" type="button" title="Start new game instance">
+            Create Game
         </button>
-        <pre id="messages" style="height: 400px; overflow:scroll"></pre>
+        <button id="leaveGame" type="button" title="Leave current game">
+            Leave Game
+        </button>
+        <button id="url-join" type="button"> URL Join </button>
+
+
+        <!-- ingame player display -->
+        <div id="player-list">
+            <h2 class="title"> Players</h2>
+            <ul class="content">
+                <li> Some Player</li>
+            </ul>
+        </div>
+
+        <div id="game-ref-display">
+        </div>
+        <div id="name-display">
+        </div>
+
+        <!-- private info-->
+        <div id="private-info">
+            <p> PrivateInfo</p>
+        </div>
+
+        <!-- ready button to whilst in lobby-->
+        <button id="lobby-ready"> ready up</button>
+
+        <div id="score-display">
+            <h2 class="title"> Scores </h2>
+            <p class="content">none</p>
+        </div>
+
+
         <script src="app.js"></script> 
     </body>
 </html>

@@ -1,0 +1,43 @@
+body div,
+body form,
+body button{
+    display:none;
+}
+
+.connect #wsButton{
+    display:block;
+}
+
+.join-game form,
+.join-game form input,
+.join-game #createGame,
+.join-game #url-join{
+    display:block;
+}
+
+.lobby #player-list,
+.lobby #leaveGame,
+.lobby #lobby-ready,
+.lobby #game-ref-display,
+.lobby #name-display{
+    display:block;
+}
+
+.in-game #messages,
+.in-game {
+    display:block;
+}
+
+.highlight{
+    color:green
+}
+.president{
+    font-weight:bold;
+}
+
+.proposal #player-list,
+.proposal #private-info,
+.proposal #game-ref-display,
+.proposal #name-display{
+    display:block;
+}
