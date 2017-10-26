@@ -116,6 +116,24 @@ app.post('/gameinstance/:gameRef/players/ready', (req, res)=>{
     res.send({result:'OK', message:"You are ready"})
 })
 
+app.put(`/gameInstance/:gameRef/players/:targetPlayer`,(req, res)=>{ // general purpose select player endpoint
+    let gameRef = req.params.gameRef;
+    let targetPlayer = req.params.targetPlayer;
+    let targetPlayerRef = stateManager.nameToRef(gameRef, targetPlayer)
+    let actingPlayerRef = req.session.userId;
+
+    try{
+        stateManager.selectPlayer({gameRef: gameRef,actingPlayer: actingPlayerRef, selectedPlayer: targetPlayerRef })
+        wss.broadcast( gameRef );
+        res.send({result:'OK', message:`${targetPlayer} suggested`})
+    }catch(e){
+        console.log(e)
+        res.send({result:'Error', message:e.message})
+    }
+    
+    
+})
+
 
 
 //  ======  CREATE THE HTTP SERVER  ==== 

@@ -34,10 +34,20 @@ body button{
 .president{
     font-weight:bold;
 }
+.proposed-chancellor{
+    color:red;
+}
 
 .proposal #player-list,
 .proposal #private-info,
 .proposal #game-ref-display,
 .proposal #name-display{
     display:block;
+}
+
+#player-list *{
+    display:inherit;
+}
+#player-list li button{
+    display:inline-block;
 }

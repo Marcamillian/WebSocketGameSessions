@@ -87,9 +87,6 @@
                 case "gameCreate":
                     console.log(`Created & joined game ${message.data.gameRef}`)
                 break
-                case "joinGame":
-                    console.log(`Joined game ${message.data.gameRef}`)
-                break
                 case "updateGameState":
                     let gameRef = message.gameRef;
                     let gameState = message.gameState ;
@@ -145,12 +142,19 @@
 
             let addEl = document.createElement('li');
             addEl.innerText = playerObject["playerName"]
+
+            let electButton = document.createElement('button')
+            electButton.addEventListener('click',()=>{playerSelect(playerObject["playerName"])})
+            electButton.innerText = "Select Player"
             
+            addEl.appendChild(electButton)
+
+            // add classes
             if(playerObject['ready']) {
                 addEl.classList.add('highlight')
             }
-
             if(playerObject['president']) addEl.classList.add("president")
+            if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
 
             playerDisplay.appendChild(addEl)
         }) 
@@ -282,6 +286,13 @@
 
     lobbyReadyButton.onclick = ()=>{
         fetch(`gameinstance/${currentGameRef}/players/ready`, {method:'POST', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=>{showMessage(err.message)})
+    }
+
+    const playerSelect = (playerName)=>{
+        fetch(`gameinstance/${currentGameRef}/players/${playerName}`, {method:'PUT', credentials:'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{showMessage(err.message)})

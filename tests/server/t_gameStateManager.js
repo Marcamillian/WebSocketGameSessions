@@ -693,3 +693,78 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
     t.end()
 })
 
+test("Testing function: nameToRef", (t)=>{
+    let stateManager = GameStateManager();
+
+    t.test("Player in the game", (ts)=>{
+        gameState = {
+            players:[{ playerRef:'player1', playerName:'one'},
+                    {playerRef:'player2', playerName:'two'}]
+        }
+
+        ts.equals(stateManager.nameToRef(undefined, 'one', gameState), "player1", "Player is present")
+        ts.end()
+    })
+
+    t.test("Player not in the game", (ts)=>{
+        gameState = {
+            players:[{ playerRef:'player1', playerName:'one'},
+                    {playerRef:'player2', playerName:'two'}]
+        }
+
+        ts.throws(()=>{stateManager.nameToRef(undefined, 'three', gameState)}, /player not in game/i, "Player isn't in game")
+        ts.end()
+    })
+
+    t.test("Multiple players with that name", (ts)=>{
+        gameState = {
+            players:[{ playerRef:'player1', playerName:'one'},
+                    {playerRef:'player2', playerName:'one'}]
+        }
+
+        ts.throws(()=>{stateManager.nameToRef(undefined, 'one', gameState)}, /Multiple with that name/i, "multiple players with that name")
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: getPlayer",(t)=>{
+    let stateManager = GameStateManager()
+
+    t.test("Get existing player", (ts)=>{
+        let gameState =
+        {
+            players:[{ playerRef:"player1", playerName:"one"},
+                    {   playerRef:"player2", playerName:"two"}]
+        }
+
+        ts.equals(stateManager.getPlayer({testState:gameState, playerRef:"player1"}).playerName, "one", "Checking getting a player")
+        ts.end()
+    })
+
+    t.test("Try for player not in the game", (ts)=>{
+        let gameState =
+        {
+            players:[{ playerRef:"player1", playerName:"one"},
+                    {   playerRef:"player2", playerName:"two"}]
+        }
+
+        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player3"})}, /not in game/i, "Searching for player not there")
+        ts.end()
+    })
+
+    t.test("Try for player in the game twice", (ts)=>{
+        let gameState =
+        {
+            players:[{ playerRef:"player1", playerName:"one"},
+                    {   playerRef:"player1", playerName:"two"}]
+        }
+
+        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player1"})}, /has multiple entries/i, "Searching for player represented twice")
+        ts.end()
+    })
+
+    t.end()
+})
+

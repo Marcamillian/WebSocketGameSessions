@@ -158,6 +158,10 @@ let gameStateManager = function(){
     let joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
 
+            // check the playerName isn't already in there
+            let playerNames = gameStates[sessionKey].players.map((player)=>{return player.playerName})  // get a list of the playerNames
+            if(playerNames.includes(playerName)) throw new Error("PlayerName already taken")// check if name is already in there
+
             var newPlayer = PlayerTemplate();
             newPlayer.playerName = playerName;
             newPlayer.playerRef = playerRef;
@@ -344,8 +348,6 @@ let gameStateManager = function(){
         shuffleArray(playerList)
         playerList[0].president = true;
 
-        console.log(`assigned things: ${JSON.stringify(playerList)}`)
-
         return playerList
     }
 
@@ -369,6 +371,42 @@ let gameStateManager = function(){
         return array
     }
 
+    let nameToRef = (gameRef, playerName, testState)=>{
+        let gameState = (testState) ? testState : gameStates[gameRef];
+
+        let targetPlayer = gameState.players.filter((player)=>{
+            return player.playerName == playerName
+        })
+
+        if(targetPlayer.length == 1) return targetPlayer[0].playerRef
+        else if(targetPlayer.length > 1) throw new Error("Multiple with that name")
+        else throw new Error("player not in game")
+    }
+
+    let selectPlayer = (args)=>{
+        // aruments = {gameRef || testState || selectedPlayer || actingPlayer }
+        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
+        let player = getPlayer({gameRef: args.gameRef, playerRef: args.actingPlayer})
+        let target = getPlayer({gameRef: args.gameRef, playerRef: args.selectedPlayer})
+
+        if(gameState.gamePhase == "proposal"){
+            if(player.president) { // if proposer and target are valid
+                if(!target.prevGov){ proposeChancellor(args.gameRef, args.selectedPlayer)
+                }else{ throw new Error("Selected player in previous govornment")}
+            }else{ throw new Error("Selecting player not president")}
+        }else {throw new Error("phase doesn't allow selecting")}
+
+    }
+
+    let getPlayer = (args)=>{ // args { gameRef ; testState ; targetPlayer}
+        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
+        let player = gameState.players.filter((player)=>{ return player.playerRef == args.playerRef })
+
+        if(player.length == 1) return player[0]
+        else if(player.length < 1) throw new Error(`PlayerRef ${args.targetPlayer} not in game`)
+        else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
+    }
+
 
     // function to search for playerRef
 
@@ -382,13 +420,16 @@ let gameStateManager = function(){
         getPlayerRefs: getPlayerRefs,
         getGameForPlayer: getGameForPlayer,
         getPrivatePlayerInfo: getPrivatePlayerInfo,
+        getPlayer:getPlayer,
 
         update: update,
         readyPlayer: readyPlayer,
         proposeChancellor: proposeChancellor,
         castVote: castVote,
         policyDiscard: policyDiscard,
-        assignRoles: assignRoles
+        assignRoles: assignRoles,
+        nameToRef: nameToRef,
+        selectPlayer: selectPlayer
     })
 
 }
