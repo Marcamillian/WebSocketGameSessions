@@ -17,6 +17,8 @@
     let scoreDisplay = document.querySelector('#score-display .content')
     let lobbyReadyButton = document.querySelector('#lobby-ready')
     let privateInfoDisplay = document.querySelector('#private-info')
+    let gameRefDisplay = document.querySelector('#game-ref-display')
+    let playerNameDisplay = document.querySelector('#name-display')
     let ws;
 
     // game session variables
@@ -94,9 +96,13 @@
                     let privateInfo = message.privateInfo;
 
                     if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
+                    showGameRef(gameRef)
+                    showPlayerName(privateInfo.playerName)
+
 
                     gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
                     showPlayers(gameState.players)  // show the players
+
                     if(gameState.gamePhase == 'proposal'){
                         showPrivateInfo(message.privateInfo)// show the privateInfo
                     }
@@ -193,6 +199,20 @@
         }
 
         return element
+    }
+
+    const showGameRef = (gameRef)=>{
+        clearElement(gameRefDisplay)
+        let el = document.createElement('p')
+        el.innerText = gameRef;
+        gameRefDisplay.appendChild(el)
+    }
+
+    const showPlayerName = (playerName)=>{
+        clearElement(playerNameDisplay)
+        let el = document.createElement('p')
+        el.innerText = playerName;
+        playerNameDisplay.appendChild(el)
     }
 
     // BUTTON CLICK FUNCTIONS

@@ -227,7 +227,7 @@ let gameStateManager = function(){
             })
         }
 
-        return {character: player[0].character, allignment: player[0].allignment, teamMates:teamMates}
+        return {playerName:player[0].playerName ,character: player[0].character, allignment: player[0].allignment, teamMates:teamMates}
     }
 
 
