@@ -95,13 +95,17 @@
                     let gameRef = message.gameRef;
                     let gameState = message.gameState ;
                     let privateInfo = message.privateInfo;
+                    let isPresident = gameState.players.filter((player)=>{return player.president})[0].playerName == privateInfo.playerName
 
                     if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
-                    showGameRef(gameRef)
-                    showPlayerName(privateInfo.playerName)
-
-                    gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
-                    showPlayers(gameState.players)  // show the players
+                        showGameRef(gameRef)
+                        showPlayerName(privateInfo.playerName)
+                        gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
+                        showPlayers(gameState.players, gameState.gamePhase, isPresident )  // show the players
+                        switch(gameState.gamePhase){
+                            case "election":
+                            break;
+                        }
 
                     if(gameState.gamePhase == 'proposal'){
                         showPrivateInfo(message.privateInfo)// show the privateInfo
@@ -134,7 +138,7 @@
         showScore(response.gameState)
     }
 
-    const showPlayers = (playerArray)=>{
+    const showPlayers = (playerArray, gamePhase, extraOptions)=>{
         
         // 1-  remove the elements from the list
         while(playerDisplay.children.length > 0){
@@ -147,16 +151,25 @@
             let addEl = document.createElement('li');
             addEl.innerText = playerObject["playerName"]
 
-            let electButton = document.createElement('button')
-            electButton.addEventListener('click',()=>{playerSelect(playerObject["playerName"])})
-            electButton.innerText = "Select Player"
+            switch(gamePhase){
+                case "lobby":
+                    if(playerObject['ready']) {
+                        addEl.classList.add('highlight')
+                    }
+                break;
+                case "proposal":
+                    if(extraOptions && !playerObject.president && !playerObject.prevGov){
+                        let electButton = document.createElement('button')
+                        electButton.addEventListener('click',()=>{playerSelect(playerObject["playerName"])})
+                        electButton.innerText = "Select Player"
+                        
+                        addEl.appendChild(electButton)
+                    }
+                break;
+            }
             
-            addEl.appendChild(electButton)
 
             // add classes
-            if(playerObject['ready']) {
-                addEl.classList.add('highlight')
-            }
             if(playerObject['president']) addEl.classList.add("president")
             if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
 
