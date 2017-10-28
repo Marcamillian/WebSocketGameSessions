@@ -44,6 +44,8 @@
 
         displayBody.classList.remove("connect", "join-game", "lobby", "in-game")
 
+        console.log(`GAME PHASE: ${gamePhase}`)
+
         switch( gamePhase ){
             case "connect":
                 displayBody.classList.add("connect")
@@ -59,6 +61,8 @@
             break
             case "proposal":
                 displayBody.classList.add("proposal")
+            break
+            case "election":
             break
             default:
                 throw new Error(`gamePhase not recognised: ${gamePhase}`)

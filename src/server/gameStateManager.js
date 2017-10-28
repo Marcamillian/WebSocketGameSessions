@@ -101,6 +101,7 @@ let gameStateManager = function(){
             case "endgame":
 
         }
+        console.log(`UPDATED GAME STATE: ${gameState.gamePhase}`)
 
         return gameState // pass back the updated state
     }

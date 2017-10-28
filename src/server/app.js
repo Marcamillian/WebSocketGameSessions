@@ -124,13 +124,13 @@ app.put(`/gameInstance/:gameRef/players/:targetPlayer`,(req, res)=>{ // general 
 
     try{
         stateManager.selectPlayer({gameRef: gameRef,actingPlayer: actingPlayerRef, selectedPlayer: targetPlayerRef })
+        stateManager.update(gameRef)
         wss.broadcast( gameRef );
         res.send({result:'OK', message:`${targetPlayer} suggested`})
     }catch(e){
         console.log(e)
         res.send({result:'Error', message:e.message})
     }
-    
     
 })
 
