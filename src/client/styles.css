@@ -1,13 +1,16 @@
+/* hide everything */
 body div,
 body form,
 body button{
     display:none;
 }
 
+/* connect phase */
 .connect #wsButton{
     display:block;
 }
 
+/* things to be shown in the join-game session*/
 .join-game form,
 .join-game form input,
 .join-game #createGame,
@@ -15,6 +18,7 @@ body button{
     display:block;
 }
 
+/*things to be seen lobby*/
 .lobby #player-list,
 .lobby #leaveGame,
 .lobby #lobby-ready,
@@ -23,31 +27,49 @@ body button{
     display:block;
 }
 
-.in-game #messages,
-.in-game {
+/*Elements that are always visible whilst in play*/
+.in-game #private-info,
+.in-game #player-list,
+.in-game #name-display,
+.in-game #game-ref-display{
     display:block;
 }
 
-.highlight{
+/* general styling of the elements*/
+.ready{
     color:green
 }
 .president{
+    color:red;
     font-weight:bold;
 }
 .proposed-chancellor{
     color:red;
 }
 
-.proposal #player-list,
-.proposal #private-info,
-.proposal #game-ref-display,
-.proposal #name-display{
-    display:block;
+/* things to be seen in the proposal phase*/
+
+.proposal #private-info,{
+    
 }
+
+/* things to be seen in the election phase*/
+
+.election #ingame-vote{
+    display:inline-block;
+}
+
+
+
+/* set up the sub-inheritance*/
 
 #player-list *{
     display:inherit;
 }
 #player-list li button{
     display:inline-block;
+}
+
+#ingame-vote *{
+    display:inherit
 }

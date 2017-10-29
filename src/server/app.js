@@ -116,6 +116,7 @@ app.post('/gameinstance/:gameRef/players/ready', (req, res)=>{
     res.send({result:'OK', message:"You are ready"})
 })
 
+// select a player
 app.put(`/gameInstance/:gameRef/players/:targetPlayer`,(req, res)=>{ // general purpose select player endpoint
     let gameRef = req.params.gameRef;
     let targetPlayer = req.params.targetPlayer;
@@ -132,6 +133,23 @@ app.put(`/gameInstance/:gameRef/players/:targetPlayer`,(req, res)=>{ // general 
         res.send({result:'Error', message:e.message})
     }
     
+})
+
+// vote on a govornment
+app.put(`/gameInstance/:gameRef/elect/:vote`,(req,res)=>{
+    let gameRef = req.params.gameRef;
+    let playerID = req.session.userId;
+    let vote = req.params.vote;
+
+    try{
+        stateManager.castVote(gameRef, playerID, vote) // cast the vote
+        stateManager.update(gameRef)    // update
+        wss.broadcast(gameRef)
+        res.send({result:'OK', message:'Vote cast'})
+    }catch(e){
+        console.log(e)
+        res.send({result:'Error', message: e.message})
+    }
 })
 
 

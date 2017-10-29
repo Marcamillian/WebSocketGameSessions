@@ -431,10 +431,11 @@ test("Testing interaction functions: Election vote", (t)=>{
     t.test("Positive vote for a proposed govornment", (ts)=>{
         let base = getTestBase();
 
-        base.gs.gamePhase == 'election';
+        base.gs.gamePhase = 'election';
         base.gs.players.push(base.player1, base.player2);
-
+        
         let result = base.gsManager.castVote(undefined, "player1", true, base.gs)
+        
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == "player1"})[0]
 
         ts.equal(targetPlayer.voteCast, true, "Vote for government")
@@ -445,7 +446,7 @@ test("Testing interaction functions: Election vote", (t)=>{
     t.test("Negative vote for a proposed govornment", (ts)=>{
         let base = getTestBase();
 
-        base.gs.gamePhase == 'election';
+        base.gs.gamePhase = 'election';
         base.gs.players.push(base.player1, base.player2);
 
         let result = base.gsManager.castVote(undefined, "player1", false, base.gs)

@@ -101,7 +101,6 @@ let gameStateManager = function(){
             case "endgame":
 
         }
-        console.log(`UPDATED GAME STATE: ${gameState.gamePhase}`)
 
         return gameState // pass back the updated state
     }
@@ -278,10 +277,11 @@ let gameStateManager = function(){
     }
 
     let castVote = (gameRef, playerRef, vote, testState)=>{
-
-        let gameState = (testState) ? testState : gameStates[gameRef]
+        
+        let gameState = (testState != undefined) ? testState : gameStates[gameRef]
 
         // throw if values not set
+        if(gameState.gamePhase !='election') throw new Error(`Can't vote in gamePhase: ${gameState.gamePhase}`)
         if(vote == undefined) throw new Error("Vote not defined")
         if(playerRef == undefined) throw new Error("PlayerRef not defined")
 

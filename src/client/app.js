@@ -19,6 +19,10 @@
     let privateInfoDisplay = document.querySelector('#private-info')
     let gameRefDisplay = document.querySelector('#game-ref-display')
     let playerNameDisplay = document.querySelector('#name-display')
+    let voteYesButton = document.querySelector('#ingame-vote #yes')
+    let voteNoButton = document.querySelector('#ingame-vote #no')
+
+    
     let ws;
 
     // game session variables
@@ -42,7 +46,7 @@
 
     const gameStateDisplay = ( gamePhase ) =>{
 
-        displayBody.classList.remove("connect", "join-game", "lobby", "in-game")
+        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative")
 
         console.log(`GAME PHASE: ${gamePhase}`)
 
@@ -56,13 +60,17 @@
             case "lobby":
                 displayBody.classList.add("lobby")
             break
-            case "inGame":
-                displayBody.classList.add("in-game")
-            break
             case "proposal":
                 displayBody.classList.add("proposal")
+                displayBody.classList.add("in-game")
             break
             case "election":
+                displayBody.classList.add("election")
+                displayBody.classList.add("in-game")
+            break
+            case "legislative":
+                displayBody.classList.add("legislative")
+                displayBody.classList.add("in-game")
             break
             default:
                 throw new Error(`gamePhase not recognised: ${gamePhase}`)
@@ -95,7 +103,8 @@
                     let gameRef = message.gameRef;
                     let gameState = message.gameState ;
                     let privateInfo = message.privateInfo;
-                    let isPresident = gameState.players.filter((player)=>{return player.president})[0].playerName == privateInfo.playerName
+                    let presList = gameState.players.filter((player)=>{return player.president})[0]
+                    let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
 
                     if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
                         showGameRef(gameRef)
@@ -154,7 +163,7 @@
             switch(gamePhase){
                 case "lobby":
                     if(playerObject['ready']) {
-                        addEl.classList.add('highlight')
+                        addEl.classList.add('ready')
                     }
                 break;
                 case "proposal":
@@ -237,6 +246,20 @@
         playerNameDisplay.appendChild(el)
     }
 
+    const playerSelect = (playerName)=>{
+        fetch(`gameinstance/${currentGameRef}/players/${playerName}`, {method:'PUT', credentials:'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=>{showMessage(err.message)})
+    }
+
+    const castVote = (vote)=>{
+        fetch(`gameinstance/${currentGameRef}/elect/${vote}`,{method:'PUT', credentials: 'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=>{showMessage(err.message)})
+    }
+
     // BUTTON CLICK FUNCTIONS
 
     login.onclick = ()=>{
@@ -308,13 +331,7 @@
             .catch((err)=>{showMessage(err.message)})
     }
 
-    const playerSelect = (playerName)=>{
-        fetch(`gameinstance/${currentGameRef}/players/${playerName}`, {method:'PUT', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{showMessage(err.message)})
-    }
-
-
+    voteYesButton.onclick = ()=>{castVote(true)}
+    voteNoButton.onclick = ()=>{castVote(false)}
 
 })();
