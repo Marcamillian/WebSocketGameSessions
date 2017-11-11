@@ -408,6 +408,48 @@ let gameStateManager = function(){
         else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
     }
 
+    let genPolicyDeck = ()=>{
+        var policyDeck = [] 
+
+        for (var i=0; i < 6; i++){policyDeck.push('liberal') }// 6 liberal
+        for( var i=0; i< 11; i++){ policyDeck.push('fascist') } //11 fascist
+
+        policyDeck = shuffleArray(policyDeck) // shuffle the cards
+
+        return policyDeck
+    }
+
+    let drawPolicyHand = (args)=>{ // args { gameRef ; testState}
+        // take the top 3 cards from the deck
+        var gameState = (args.testState) ? args.testState : gameStates[args.gameRef]
+        var policyHand = [];
+
+        if(gameState.policyHand.length != 0) throw new Error("policyHand not empty");
+
+        // can we draw 3 cards
+        if(gameState.policyDeck.length < 3){
+
+            gameState.policyDeck = shuffleArraysTogether([gameState.policyDiscard, gameState.policyDeck])
+            gameState.policyDiscard = []
+        }
+
+        // draw the three cards
+        for(var i=0; i<3 ; i++) {policyHand.push(gameState.policyDeck.shift());}
+
+        gameState.policyHand = policyHand
+
+        return gameState
+    }
+
+    let shuffleArraysTogether = (arrays)=>{
+        let result= [];
+        arrays.forEach((array)=>{
+            result = result.concat(array)
+        })
+
+        return shuffleArray(result)
+    }
+
 
     // function to search for playerRef
 
@@ -430,7 +472,10 @@ let gameStateManager = function(){
         policyDiscard: policyDiscard,
         assignRoles: assignRoles,
         nameToRef: nameToRef,
-        selectPlayer: selectPlayer
+        selectPlayer: selectPlayer,
+        genPolicyDeck: genPolicyDeck,
+        shuffleArraysTogether: shuffleArraysTogether,
+        drawPolicyHand: drawPolicyHand
     })
 
 }

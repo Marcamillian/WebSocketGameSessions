@@ -769,3 +769,102 @@ test("Test function: getPlayer",(t)=>{
     t.end()
 })
 
+test("Test function: Creating the policyDeck", (t)=>{
+    let stateManager = GameStateManager();
+
+    let result = stateManager.genPolicyDeck()
+    let libCount = result.reduce((count, policy)=>{ return (policy == 'liberal') ? count+1: count },0)
+    let fascCount = result.reduce( (count, policy)=>{ return (policy == 'fascist') ? count+1: count },0 )
+
+    // check that there are the right number of cards
+    t.equals(libCount, 6, "6 liberal cards")    
+    t.equals(fascCount, 11, "11 fascist cards")
+
+    // check that the positions are randomised
+    let result2 = stateManager.genPolicyDeck()
+
+    // need at least 1 difference
+    var different = result.map((policyCard, index)=>{
+        return ( policyCard != result2[index] ) ? true : false
+    })
+    
+    t.ok(different.includes(true), "There is a difference between the two decks")
+
+    //console.log(result, " : ", result2)
+
+    t.end()
+})
+
+test("Combine two arrays and shuffle", (t)=>{
+    let stateManager = GameStateManager();
+
+    t.test("two arrays", (ts)=>{
+
+        let arrays = [[1,2,3], [4,5,6]]
+        let result = stateManager.shuffleArraysTogether(arrays)
+        let allThere = [1,2,3,4,5,6].map((number)=>{ return result.includes(number)})
+
+        ts.equals(result.length, 6, "Right number of components")
+        ts.ok(!allThere.includes(false), "Check that all numbers are in the result arrray")
+
+        ts.end()
+    })
+
+    t.test("one array", (ts)=>{
+        
+                let arrays = [[1,2,3]]
+                let result = stateManager.shuffleArraysTogether(arrays)
+                let allThere = [1,2,3].map((number)=>{ return result.includes(number)})
+        
+                ts.equals(result.length, 3, "Right number of components")
+                ts.ok(!allThere.includes(false), "Check that all numbers are in the result arrray")
+        
+                ts.end()
+    })
+
+
+
+    t.end()
+})
+
+test("Test function: drawpolicyHand",(t)=>{
+    let stateManager = GameStateManager();
+
+    t.test("Normal card pull", (ts)=>{
+        let gameState = StateTemplate();
+        gameState.policyDeck = ['liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist' ]
+
+        let result = stateManager.drawPolicyHand({testState: gameState})
+
+        ts.test(result.policyHand.length, 3, "Drew right number of cards")
+        ts.test(result.policyDeck.length, 5, "Right number of cards left in deck")
+
+        ts.end()
+    })
+
+    t.test("Cards in draw from last time", (ts)=>{
+        let gameState = StateTemplate();
+        gameState.policyDeck = ['liberal', 'liberal', 'fascist', 'liberal']
+        gameState.policyHand = ['liberal'];
+
+        ts.throws(()=>{stateManager.drawPolicyHand({testState: gameState})}, /policyHand not empty/i, "Errors if there is something in policy hand");
+    
+        ts.end()
+    })
+
+    t.test("Less than 3 cards in deck", (ts)=>{
+        let gameState = StateTemplate();
+        gameState.policyDeck = ['liberal']
+        gameState.policyDiscard = ['fascist', 'fascist', 'liberal']
+
+        let result = stateManager.drawPolicyHand({testState: gameState})
+
+        ts.equals(result.policyHand.length, 3, "Drew three cards")
+        ts.equals(result.policyDiscard.length, 0, "Empty discard")
+        ts.equals(result.policyDeck.length, 1, "Right number of cards left in deck")
+
+        ts.end()
+    })
+
+    t.end()
+})
