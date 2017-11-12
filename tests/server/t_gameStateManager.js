@@ -705,6 +705,91 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.end()
     })
 
+    t.test("Player Info when in legislative phase- pres policy choice", (ts)=>{
+
+        gameState = {
+            gamePhase: 'legislative',
+            policyHand: ['liberal', 'fascist', 'fascist'],
+            players: [
+                {
+                    playerRef: 'player1',
+                    playerName: 'one',
+                    allignment: 'liberal',
+                    character: 'liberal',
+                    president: true
+                },
+                {
+                    playerRef:'player2',
+                    playerName:'two',
+                    allignment: 'liberal',
+                    character: 'liberal'
+                },
+                {
+                    playerRef:'player3',
+                    playerName: 'three',
+                    allignment: 'fascist',
+                    character: 'fascist',
+                    chancellor: true
+                }
+            ]
+        }
+
+        let result = stateManager.getPrivatePlayerInfo(undefined, 'player1', gameState)
+
+        ts.ok(result.policyHand, "President is given policies to chose from")
+        ts.equals(result.policyHand.join(), 'liberal,fascist,fascist', "President given the right policy hand")
+
+        let result2 = stateManager.getPrivatePlayerInfo(undefined, 'player2', gameState);
+        ts.equals(result2.policyHand, undefined, "no policies given to non-president")
+
+        let result3 = stateManager.getPrivatePlayerInfo(undefined, 'player3', gameState);
+        ts.equals(result3.policyHand, undefined, "no policies for chancellor with 3 in hand")
+
+        ts.end()
+    })
+
+    t.test("PlayerInfo when in legislative phase - chancellor choice", (ts)=>{
+        let gameState = {
+            gamePhase: 'legislative',
+            policyHand:['liberal', 'fascist'],
+            players:[
+                {
+                    playerRef: 'player1',
+                    playerName: 'one',
+                    allignment: 'liberal',
+                    character: 'liberal',
+                    chancellor: true
+                },
+                {
+                    playerRef:'player2',
+                    playerName: 'two',
+                    allignment: 'liberal',
+                    character:'liberal'
+                },
+                {
+                    playerRef: 'player3',
+                    playerName: 'three',
+                    allignment: 'fascist',
+                    character:'fascist',
+                    president: true
+                }
+            ]
+        }
+
+        let result = stateManager.getPrivatePlayerInfo(undefined, 'player1', gameState);
+
+        ts.ok(result.policyHand, "Chancellor has poicy hand")
+        ts.equals(result.policyHand.join(), "liberal,fascist", "Chancellor has the right policyHand")
+
+        let result2 = stateManager.getPrivatePlayerInfo(undefined, 'player2', gameState);
+        ts.equals(result2.policyHand, undefined, "non-government doesn't get a policy hand")
+        
+        let result3 = stateManager.getPrivatePlayerInfo(undefined, 'player3', gameState);
+        ts.equals(result3.policyHand, undefined, "President doesn't get policyHand with 2 in hand")
+
+        ts.end()
+    })
+
 
 
     t.end()
