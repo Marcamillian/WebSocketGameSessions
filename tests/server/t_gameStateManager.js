@@ -73,7 +73,7 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
         ts.end()
     })
 
-    t.test("not enough players - all ready", (ts)=>{ // TODO this is failing
+    t.test("not enough players - all ready", (ts)=>{ 
         // a state with 5 players - not all ready
         let state = {players:[], gamePhase: 'lobby'}
         for(var i=0; i<3; i++){ state.players.push({ready:true}) }
@@ -82,7 +82,7 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
         ts.end()
     })
 
-    t.test("too many players - all ready", (ts)=>{ // TODO this is failing
+    t.test("too many players - all ready", (ts)=>{
         // a state with 5 players - not all ready
         let state = {players:[], gamePhase: 'lobby'}
         for(var i=0; i<13; i++){ state.players.push({ready:true}) }
@@ -172,6 +172,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         player1.proposedChancellor = true;
         player2.character = 'hitler';
+        player3.president = true;
 
         gameState1.players.push(player1)
         gameState1.players.push(player2)
@@ -180,7 +181,12 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
-        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "legislative", "Success vote - move to legislative")
+        let result = gsManager.update(undefined,gameState1);
+
+        ts.equals(result.gamePhase, "legislative", "Success vote - move to legislative")
+
+
+
         ts.end()
     })
 
@@ -197,6 +203,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         player1.proposedChancellor = true;
         player1.character = 'hitler';
+        player2.president = true;
 
         gameState1.players.push(player1)
         gameState1.players.push(player2)
@@ -205,7 +212,10 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
-        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
+        let result = gsManager.update(undefined,gameState1)
+        //let hasPresident = gameState.players.
+
+        ts.equals(result.gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
         ts.end()
     })
 
@@ -222,6 +232,8 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         gameState1.players.push(player2)
         gameState1.players.push(player3)
         gameState1.players.push(player4)
+
+        player3.president = true;
 
         gameState1.gamePhase = 'election'
 
@@ -245,7 +257,11 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         gameState.gamePhase = 'legislative'
         gameState.policyDraw = ['fascist']
 
-        t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
+        let result = gsManager.update(undefined,gameState)
+
+        t.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
+        // TODO: check that the players were set to previous govornment
+        // TODO: check that president is updated
 
         ts.end()
     })
@@ -834,7 +850,7 @@ test("Test function: drawpolicyHand",(t)=>{
         let gameState = StateTemplate();
         gameState.policyDeck = ['liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist' ]
 
-        let result = stateManager.drawPolicyHand({testState: gameState})
+        let result = stateManager.drawPolicyHand({gameState: gameState})
 
         ts.test(result.policyHand.length, 3, "Drew right number of cards")
         ts.test(result.policyDeck.length, 5, "Right number of cards left in deck")
@@ -847,7 +863,7 @@ test("Test function: drawpolicyHand",(t)=>{
         gameState.policyDeck = ['liberal', 'liberal', 'fascist', 'liberal']
         gameState.policyHand = ['liberal'];
 
-        ts.throws(()=>{stateManager.drawPolicyHand({testState: gameState})}, /policyHand not empty/i, "Errors if there is something in policy hand");
+        ts.throws(()=>{stateManager.drawPolicyHand({gameState: gameState})}, /policyHand not empty/i, "Errors if there is something in policy hand");
     
         ts.end()
     })
@@ -857,7 +873,7 @@ test("Test function: drawpolicyHand",(t)=>{
         gameState.policyDeck = ['liberal']
         gameState.policyDiscard = ['fascist', 'fascist', 'liberal']
 
-        let result = stateManager.drawPolicyHand({testState: gameState})
+        let result = stateManager.drawPolicyHand({gameState: gameState})
 
         ts.equals(result.policyHand.length, 3, "Drew three cards")
         ts.equals(result.policyDiscard.length, 0, "Empty discard")
@@ -868,3 +884,5 @@ test("Test function: drawpolicyHand",(t)=>{
 
     t.end()
 })
+
+

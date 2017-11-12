@@ -53,26 +53,48 @@ let gameStateManager = function(){
                 })
 
                 if(voteResult.includes(undefined)){ // not all votes cast
-                    // stay in this state
-                }else{
-                    let positiveVotes = voteResult.reduce((sum, vote)=>{ return (vote) ? sum+1 : sum },0)
-                    let negativeVotes = voteResult.reduce((sum, vote)=>{ return (!vote) ? sum+1 : sum },0)
-                    //console.log(`JA: ${positiveVotes} | Nein: ${negativeVotes}`)
-
-                    if(positiveVotes > negativeVotes){ // vote passes
-                        // find hitler
-                        let chancellor = gameState.players.filter((player)=>{return player.proposedChancellor})[0]
-                        // TODO: also need check for facist policy track
-
-                        if(chancellor.character == "hitler"/* && policy track*/){ // if chancellor is hitler
-                            gameState.gamePhase = 'endGame'
-                        }else{
-                            gameState.gamePhase = 'legislative'
-                        }   
-                    }else{  // vote passes
-                        gameState.gamePhase = 'proposal'
-                    }
+                    return gameState// exit and don't continue
                 }
+
+                // if all the votes cast
+                let positiveVotes = voteResult.reduce((sum, vote)=>{ return (vote) ? sum+1 : sum },0)
+                let negativeVotes = voteResult.reduce((sum, vote)=>{ return (!vote) ? sum+1 : sum },0)
+                //console.log(`JA: ${positiveVotes} | Nein: ${negativeVotes}`)
+
+                if(positiveVotes > negativeVotes){ // vote passes
+                    
+                    // === check for hitler as chancellor === 
+                    let chancellor = gameState.players.filter((player)=>{return player.proposedChancellor})[0]
+                    let president = gameState.players.filter((player)=>{return player.president})[0]
+
+                    // TODO: also need check for facist policy track
+                    if(chancellor.character == "hitler"/* && policy track*/){ // if chancellor is hitler
+                        gameState.gamePhase = 'endGame' // fascists win
+                        return gameState
+                    }
+
+                    // === if not eneded - set up for legislative ===
+
+                    // set the proposed chancellor as chancellor - set prevGov
+                    chancellor.proposedChancellor = false;
+                    chancellor.chancellor = true;
+                    chancellor.prevGov = true;
+                    president.prevGov = true;
+                    // deal the policyhand
+                    gameState = drawPolicyHand({gameState:gameState}) // failing here - gameState not defined
+                    // set the gamephase to legislative
+                    gameState.gamePhase = 'legislative'
+                    return gameState
+                    
+                }else{  // vote fails
+
+                    // update the president
+                    // remove the proposed chancellor
+
+                    gameState.gamePhase = 'proposal'
+                    return gameState
+                }
+                
 
 
             break;
@@ -214,6 +236,7 @@ let gameStateManager = function(){
 
     let getPrivatePlayerInfo = (gameRef, userId, suppliedState)=>{
 
+        let privateInfo = {}
         let player;
         let teamMates=[];
         let gameState = (suppliedState) ? suppliedState : gameStates[gameRef]
@@ -230,6 +253,9 @@ let gameStateManager = function(){
                 if(player.allignment == 'fascist') teamMates.push(player.playerName)
             })
         }
+
+        if(gameState.gamePhase == )
+
 
         return {playerName:player[0].playerName ,character: player[0].character, allignment: player[0].allignment, teamMates:teamMates}
     }
@@ -419,9 +445,9 @@ let gameStateManager = function(){
         return policyDeck
     }
 
-    let drawPolicyHand = (args)=>{ // args { gameRef ; testState}
+    let drawPolicyHand = (args)=>{ // args { gameRef ; gameState}
         // take the top 3 cards from the deck
-        var gameState = (args.testState) ? args.testState : gameStates[args.gameRef]
+        var gameState = (args.gameState) ? args.gameState : gameStates[args.gameRef]
         var policyHand = [];
 
         if(gameState.policyHand.length != 0) throw new Error("policyHand not empty");
