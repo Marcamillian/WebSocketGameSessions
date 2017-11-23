@@ -25,3 +25,11 @@ Progress Points
 --- Features
 --- Testing
 --- 
+
+==== 
+
+TODO: Fedback on you having voted suceessfully (how many others have voted)
+
+TODO: Get Policies showing for pres/chanc
+Current state - Can go through to legislative - default policy buttons shown for all
+Desired State - 

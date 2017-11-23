@@ -14,13 +14,13 @@
     const playerNameInput = document.querySelector('#player_name')
     const gameRefInput = document.querySelector('#game_ref')
     let playerDisplay = document.querySelector('#player-list .content')
-    let scoreDisplay = document.querySelector('#score-display .content')
     let lobbyReadyButton = document.querySelector('#lobby-ready')
     let privateInfoDisplay = document.querySelector('#private-info')
     let gameRefDisplay = document.querySelector('#game-ref-display')
     let playerNameDisplay = document.querySelector('#name-display')
     let voteYesButton = document.querySelector('#ingame-vote #yes')
     let voteNoButton = document.querySelector('#ingame-vote #no')
+    let policyPickDisplay = document.querySelector('#ingame-policy-pick')
 
     
     let ws;
@@ -88,45 +88,52 @@
         ws.onerror = ()=> showMessage('WebSocket error')
         ws.onopen = ()=> showMessage(' Websocket connection established')
         ws.onclose = ()=> showMessage('WebSocket connection closed')
-        ws.onmessage = ( messageString )=>{
-            let message = JSON.parse(messageString.data)
-            
-            if(message.result != 'OK'){
-                console.error(`${message.type} : ERROR - ${message.data.errorMessage}`)
-            }
+        ws.onmessage = handleWsMessage;
 
-            switch(message.type){
-                case "gameCreate":
-                    console.log(`Created & joined game ${message.data.gameRef}`)
-                break
-                case "updateGameState":
-                    let gameRef = message.gameRef;
-                    let gameState = message.gameState ;
-                    let privateInfo = message.privateInfo;
-                    let presList = gameState.players.filter((player)=>{return player.president})[0]
-                    let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
+    }
 
-                    if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
-                        showGameRef(gameRef)
-                        showPlayerName(privateInfo.playerName)
-                        gameStateDisplay(gameState.gamePhase)       // change the displayMode based on the gamePhase
-                        showPlayers(gameState.players, gameState.gamePhase, isPresident )  // show the players
-                        switch(gameState.gamePhase){
-                            case "election":
-                            break;
-                        }
-
-                    if(gameState.gamePhase == 'proposal'){
-                        showPrivateInfo(message.privateInfo)// show the privateInfo
-                    }
-                break
-                default:
-                    console.log(`Message Type ${message.type} : Unexpected type`)
-                break
-            }
-            
-
+    const handleWsMessage = ( messageString )=>{
+        let message = JSON.parse(messageString.data)
+        
+        if(message.result != 'OK'){
+            console.error(`${message.type} : ERROR - ${message.data.errorMessage}`)
         }
+
+        switch(message.type){
+            case "gameCreate":
+                console.log(`Created & joined game ${message.data.gameRef}`)
+            break
+            case "updateGameState":
+                let gameRef = message.gameRef;
+                let gameState = message.gameState ;
+                let privateInfo = message.privateInfo;
+                let presList = gameState.players.filter((player)=>{return player.president})[0]
+                let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
+
+                if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
+                showGameRef(gameRef)                    //  put the gameRef in the display element
+                showPlayerName(privateInfo.playerName)  // put the playerName in the display element
+                gameStateDisplay(gameState.gamePhase)       // update the class to hide/display elements
+                showPlayers(gameState.players, gameState.gamePhase, isPresident )  // put the list of players in the display element
+                
+                switch(gameState.gamePhase){
+                    case "proposal":
+                        showPrivateInfo(message.privateInfo)// show the privateInfo
+                    break;
+                    case "election":
+                    break;
+                    case "legislative":
+                        // TODO: if there is a policyhand - show it on the display
+                        
+                    break;
+                }
+
+            break
+            default:
+                console.log(`Message Type ${message.type} : Unexpected type`)
+            break
+        }
+        
 
     }
 
@@ -141,10 +148,6 @@
             .then(handleResponse)
             .then(updateGameState)
             .catch((err)=> showMessage(err.message))
-    }
-
-    const updateGameState = (response)=>{
-        showScore(response.gameState)
     }
 
     const showPlayers = (playerArray, gamePhase, extraOptions)=>{
@@ -186,10 +189,6 @@
         }) 
     }
 
-    const showScore = (gameState)=>{
-        scoreDisplay.textContent = gameState.score
-    }
-
     const getPlayerNameInput =()=>{
         return playerNameInput.value
     }
@@ -217,6 +216,8 @@
             teamMateEl.innerText = teamMateName;
             teamEl.appendChild(teamMateEl)
         })
+
+        // TODO: if there is a policyHand attached - show the policyHand in the voting things
 
         privateInfoDisplay.appendChild(allignmentEl)
         privateInfoDisplay.appendChild(characterEl)
@@ -331,7 +332,7 @@
             .catch((err)=>{showMessage(err.message)})
     }
 
-    voteYesButton.onclick = ()=>{castVote(true)}
+    voteYesButton.onclick = ()=>{castVote(true); }
     voteNoButton.onclick = ()=>{castVote(false)}
 
 })();

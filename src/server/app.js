@@ -152,8 +152,22 @@ app.put(`/gameInstance/:gameRef/elect/:vote`,(req,res)=>{
     }
 })
 
+// choose policy
+app.put(`/gameInstance/:gameRef/policyDiscard/:policy`,(req,res)=>{
+    let gameRef = req.params.gameRef;
+    let playerID = req.session.userId;
+    let policyDiscard = req.params.policyDiscard
 
-
+    try{
+        stateManager.policyDiscard(policyDiscard); // get rid of the policy
+        stateManager.update(gameRef)
+        wss.broardcast(gameRef)
+        res.send({result: 'OK', message: 'POlicy Discarded'})
+    }catch(e){
+        console.log(e);
+        res.send({result: 'Error', message:e.message})
+    }
+})
 
 
 //  ======  CREATE THE HTTP SERVER  ==== 

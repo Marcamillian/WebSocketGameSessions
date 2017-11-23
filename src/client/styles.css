@@ -35,27 +35,15 @@ body button{
     display:block;
 }
 
-/* general styling of the elements*/
-.ready{
-    color:green
-}
-.president{
-    color:red;
-    font-weight:bold;
-}
-.proposed-chancellor{
-    color:red;
-}
-
-/* things to be seen in the proposal phase*/
-
-.proposal #private-info,{
-    
-}
 
 /* things to be seen in the election phase*/
 
 .election #ingame-vote{
+    display:inline-block;
+}
+
+/* Things to be seen in the legislative phase*/
+.legislative #ingame-policy-pick{
     display:inline-block;
 }
 
@@ -72,4 +60,20 @@ body button{
 
 #ingame-vote *{
     display:inherit
+}
+
+#ingame-policy-pick *{
+    display:inherit
+}
+
+/* general styling of the elements*/
+.ready{
+    color:green
+}
+.president{
+    color:red;
+    font-weight:bold;
+}
+.proposed-chancellor{
+    color:red;
 }
