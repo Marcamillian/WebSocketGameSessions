@@ -115,18 +115,7 @@
                 showPlayerName(privateInfo.playerName)  // put the playerName in the display element
                 gameStateDisplay(gameState.gamePhase)       // update the class to hide/display elements
                 showPlayers(gameState.players, gameState.gamePhase, isPresident )  // put the list of players in the display element
-                
-                switch(gameState.gamePhase){
-                    case "proposal":
-                        showPrivateInfo(message.privateInfo)// show the privateInfo
-                    break;
-                    case "election":
-                    break;
-                    case "legislative":
-                        // TODO: if there is a policyhand - show it on the display
-                        
-                    break;
-                }
+                showPrivateInfo(message.privateInfo)// show the privateInfo
 
             break
             default:
@@ -199,30 +188,53 @@
 
     const showPrivateInfo = (privateInfo)=>{
 
-        clearElement(privateInfoDisplay)
+        let teamTitle, teamEl,
+         allignmentEl, characterEl,
+         policyPickTitle, policyButtons;
 
-        let allignmentEl = document.createElement('p')
+        clearElement(privateInfoDisplay)
+        clearElement(policyPickDisplay)
+
+        allignmentEl = document.createElement('p')
         allignmentEl.innerText = `Allignment: ${privateInfo.allignment}`;
 
-        let characterEl = document.createElement('p')
+        characterEl = document.createElement('p')
         characterEl.innerText = `Character: ${privateInfo.character}`;
 
-        let teamEl = document.createElement('ul')
-        let teamTitle = document.createElement('p')
-        teamTitle.innerText = "Team mates"
+        if(privateInfo.teamMates){
+            teamEl = document.createElement('ul')
+            teamTitle = document.createElement('p')
+            teamTitle.innerText = "Team mates"
 
-        privateInfo.teamMates.forEach((teamMateName)=>{
-            let teamMateEl = document.createElement('li')
-            teamMateEl.innerText = teamMateName;
-            teamEl.appendChild(teamMateEl)
-        })
+            privateInfo.teamMates.forEach((teamMateName)=>{
+                teamMateEl = document.createElement('li')
+                teamMateEl.innerText = teamMateName;
+                teamEl.appendChild(teamMateEl)
+            })
+        }
+
+        // -- policy display handling
+        if(privateInfo.policyHand){
+            console.log(privateInfo.policyHand)
+
+            policyPickTitle = document.createElement('p')
+            policyPickTitle.innerHTML = `<b> Discard a policy </b>`
+
+            policyButtons = document.createElement('div');
+            privateInfo.policyHand.forEach((policy)=>{
+                let policyButton = document.createElement('button')
+                console.log("what is this: ",policy)
+                policyButton.innerText = `${policy}`;
+                policyButtons.appendChild(policyButton)
+            })
+        }
 
         // TODO: if there is a policyHand attached - show the policyHand in the voting things
 
         privateInfoDisplay.appendChild(allignmentEl)
         privateInfoDisplay.appendChild(characterEl)
-        privateInfoDisplay.appendChild(teamTitle)
-        privateInfoDisplay.appendChild(teamEl)
+        if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
+        if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
     }
 
     const clearElement = (element)=>{

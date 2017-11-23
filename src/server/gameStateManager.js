@@ -143,6 +143,8 @@ let gameStateManager = function(){
         if(gameStates[gameKey]){ throw new Error(`Game session ${gameKey} already exists`)} // check that we arn't overwriting something
 
         gameStates[gameKey] = StateTemplate()
+        gameStates[gameKey].policyDeck = genPolicyDeck(gameStates[gameKey])
+        console.log('have a policydeck?',gameStates[gameKey])
     }
 
     let createSessionKey = (length)=>{
@@ -260,6 +262,7 @@ let gameStateManager = function(){
         }
 
         if(gameState.gamePhase == 'legislative'){   // if in the legislative phase
+
             if(player[0].president && gameState.policyHand.length == 3){  // if the president && 3 cards in hand
                 privateInfo["policyHand"] = gameState.policyHand; 
             }else if(player[0].chancellor && gameState.policyHand.length ==2){  // else if the chancellor and 2 cards in hand
@@ -460,6 +463,8 @@ let gameStateManager = function(){
         // take the top 3 cards from the deck
         var gameState = (args.gameState) ? args.gameState : gameStates[args.gameRef]
         var policyHand = [];
+
+        console.log('drawing hands: ',gameState.policyDeck)
 
         if(gameState.policyHand.length != 0) throw new Error("policyHand not empty");
 
