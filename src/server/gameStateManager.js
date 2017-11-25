@@ -100,7 +100,7 @@ let gameStateManager = function(){
             break;
             case "legislative":
 
-                if(gameState.policyDraw.length == 1 ){
+                if(gameState.policyHand.length == 1 ){ // *TODO: This is throwing -- used to be policyDraw - updated to policyHand but need to fix failing tests
                         let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
                         let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
                         if(fPolicy >= 6 || lPolicy >= 5){
@@ -144,7 +144,6 @@ let gameStateManager = function(){
 
         gameStates[gameKey] = StateTemplate()
         gameStates[gameKey].policyDeck = genPolicyDeck(gameStates[gameKey])
-        console.log('have a policydeck?',gameStates[gameKey])
     }
 
     let createSessionKey = (length)=>{
@@ -336,7 +335,7 @@ let gameStateManager = function(){
     }
 
     let policyDiscard = (gameRef, policyType, testState)=>{
-
+        
         let gameState = (testState) ? testState : gameStates[gameRef]
 
         let policyHand = gameState.policyHand
@@ -350,7 +349,10 @@ let gameStateManager = function(){
             gameState.policyHand = head.concat(tail)
             gameState.policyDiscardPile.push(card)
 
-        }else throw new Error("No policy of that type")
+        }else {
+            
+            throw new Error("No policy of that type")
+        }
 
         return gameState
     }
@@ -464,8 +466,6 @@ let gameStateManager = function(){
         var gameState = (args.gameState) ? args.gameState : gameStates[args.gameRef]
         var policyHand = [];
 
-        console.log('drawing hands: ',gameState.policyDeck)
-
         if(gameState.policyHand.length != 0) throw new Error("policyHand not empty");
 
         // can we draw 3 cards
@@ -479,7 +479,6 @@ let gameStateManager = function(){
         for(var i=0; i<3 ; i++) {policyHand.push(gameState.policyDeck.shift());}
 
         gameState.policyHand = policyHand
-
         return gameState
     }
 

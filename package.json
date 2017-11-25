@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server/app.js",
     "test": "tap tests/server/*.js",
+    "debug": "node debug src/server/app.js",
     "test-client": "tap tests/client/*.js",
     "test-server": "tap tests/server/*.js"
   },

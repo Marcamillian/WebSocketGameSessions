@@ -255,7 +255,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyDraw = ['fascist']
+        gameState.policyHand = ['fascist']
 
         let result = gsManager.update(undefined,gameState)
 
@@ -272,7 +272,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyDraw = ['liberal']
+        gameState.policyHand = ['liberal']
 
         t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
@@ -285,7 +285,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyDraw = ['fascist']
+        gameState.policyHand = ['fascist']
         gameState.policyTrackFascist = [true, true, true, false, false, false]
 
         t.equals(gsManager.update(undefined,gameState).gamePhase, "power", "Policy Passes - power activated")
@@ -299,7 +299,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyDraw = ['fascist']
+        gameState.policyHand = ['fascist']
         gameState.policyTrackFascist = [true, true, true, true, true, true]
 
         t.equals(gsManager.update(undefined,gameState).gamePhase, "endGame", "Fascists win")
@@ -313,7 +313,7 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyDraw = ['liberal']
+        gameState.policyHand = ['liberal']
         gameState.policyTrackLiberal = [true, true, true, true, true]
 
         ts.equals(gsManager.update(undefined,gameState).gamePhase, "endGame", "Liberals win")

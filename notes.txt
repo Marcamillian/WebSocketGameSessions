@@ -30,6 +30,8 @@ Progress Points
 
 TODO: Fedback on you having voted suceessfully (how many others have voted)
 
-TODO: Get Policies showing for pres/chanc
+[DONE] Get Policies showing for pres/chanc
 Current state - Can go through to legislative - default policy buttons shown for all
 Desired State - 
+
+TODO: Trigger Endpoint for discarding a policy

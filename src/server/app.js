@@ -153,15 +153,15 @@ app.put(`/gameInstance/:gameRef/elect/:vote`,(req,res)=>{
 })
 
 // choose policy
-app.put(`/gameInstance/:gameRef/policyDiscard/:policy`,(req,res)=>{
+app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
     let gameRef = req.params.gameRef;
     let playerID = req.session.userId;
     let policyDiscard = req.params.policyDiscard
-
+    console.log(`policy put: ${policyDiscard}`)
     try{
-        stateManager.policyDiscard(policyDiscard); // get rid of the policy
+        stateManager.policyDiscard(gameRef,policyDiscard); // get rid of the policy
         stateManager.update(gameRef)
-        wss.broardcast(gameRef)
+        wss.broadcast(gameRef)
         res.send({result: 'OK', message: 'POlicy Discarded'})
     }catch(e){
         console.log(e);

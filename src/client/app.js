@@ -223,8 +223,9 @@
             policyButtons = document.createElement('div');
             privateInfo.policyHand.forEach((policy)=>{
                 let policyButton = document.createElement('button')
-                console.log("what is this: ",policy)
                 policyButton.innerText = `${policy}`;
+                policyButton.addEventListener('click', ()=>{discardPolicy(policy)})
+
                 policyButtons.appendChild(policyButton)
             })
         }
@@ -271,6 +272,14 @@
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{showMessage(err.message)})
+    }
+
+    const discardPolicy = (policyAllignment)=>{
+        
+        fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyAllignment}`, {method:'PUT', credentials: 'same-origin'})
+            .then(handleResponse)
+            .then(showMessage)
+            .catch((err)=>{ showMessage(err.message) })
     }
 
     // BUTTON CLICK FUNCTIONS
@@ -346,5 +355,7 @@
 
     voteYesButton.onclick = ()=>{castVote(true); }
     voteNoButton.onclick = ()=>{castVote(false)}
+
+
 
 })();
