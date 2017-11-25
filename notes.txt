@@ -34,4 +34,12 @@ TODO: Fedback on you having voted suceessfully (how many others have voted)
 Current state - Can go through to legislative - default policy buttons shown for all
 Desired State - 
 
-TODO: Trigger Endpoint for discarding a policy
+[DONE] Trigger Endpoint for discarding a policy
+
+TODO: Client visibility for chancellor
+
+[DONE]: Remove the chancellor
+[DONE]: Move on the president
+[DONE]: Set previous govornment
+
+[DONE]: Deal with prevGov assign - assign && remove at vote pass

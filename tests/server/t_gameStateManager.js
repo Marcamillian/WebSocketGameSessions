@@ -173,6 +173,8 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         player1.proposedChancellor = true;
         player2.character = 'hitler';
         player3.president = true;
+        player2.prevGov = true;
+        player4.prevGov = true;
 
         gameState1.players.push(player1)
         gameState1.players.push(player2)
@@ -184,8 +186,10 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         let result = gsManager.update(undefined,gameState1);
 
         ts.equals(result.gamePhase, "legislative", "Success vote - move to legislative")
-
-
+        ts.equals(player3.prevGov, true, "president is part of a successful gov")
+        ts.equals(player1.prevGov, true, "chancellor is part of a successful gov")
+        ts.equals(player2.prevGov, false, "No longer previous government")
+        ts.equals(player4.prevGov, false, "no longer a member of the previous government")
 
         ts.end()
     })
@@ -323,7 +327,6 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
     t.end()
 })
-
 
 
 test("Testing interaction functions: player lobby ready up", (t)=>{ 
@@ -963,6 +966,59 @@ test("Test function: drawpolicyHand",(t)=>{
         ts.equals(result.policyHand.length, 3, "Drew three cards")
         ts.equals(result.policyDiscard.length, 0, "Empty discard")
         ts.equals(result.policyDeck.length, 1, "Right number of cards left in deck")
+
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: rotateGovernment",(t)=>{
+    let stateManager = GameStateManager();
+
+    test('successful govornment pass policy', (ts)=>{
+        
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+
+
+        let gameState = {
+            gamePhase: 'legislative',
+            players: [player1, player2, player3, player4]
+        }
+
+        let result = stateManager.rotateGovernment({gameState:gameState})
+        let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
+        
+        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player2.president, true, "Next player assigned president")
+        ts.equals(player2.chancellor, false, "Prev chancellor removed");
+        ts.equals(chancellorCount, 0, "No chancellors in the result")
+        
+        ts.end()
+    })
+
+    test('failed govornment lose vote', (ts)=>{
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+
+        let gameState = {
+            gamePhase: 'election',
+            players: [player1, player2, player3, player4]
+        }
+
+        let result = stateManager.rotateGovernment({gameState:gameState})
+        let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
+        let proposedChancellorCount = result.players.reduce((count, player)=>{ return (player.proposedChancellor) ? 1 : count},0)
+
+        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player2.president, true, "Next player assigned president")
+        ts.equals(proposedChancellorCount, 0, "No proposed chancellors");
+        ts.equals(chancellorCount, 0, "No chancellors in the result")
 
         ts.end()
     })

@@ -1,10 +1,10 @@
 StateTemplate = require('./stateTemplate.js')
 PlayerTemplate = require('./playerTemplate.js')
 
-let gameStateManager = function(){
+const gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
-    let update = (gameRef, testState)=>{
+    const update = (gameRef, testState)=>{
 
         var gameState = (testState) ? testState : gameStates[gameRef]
 
@@ -78,8 +78,12 @@ let gameStateManager = function(){
                     // set the proposed chancellor as chancellor - set prevGov
                     chancellor.proposedChancellor = false;
                     chancellor.chancellor = true;
-                    chancellor.prevGov = true;
-                    president.prevGov = true;
+
+                    // deal with previous govornment
+                    gameState.players.forEach((player)=>{player.prevGov = false}) // clear prevGov
+                    chancellor.prevGov = true;  // set chancellor as a prevGov
+                    president.prevGov = true;   // set president as prevGov
+
                     // deal the policyhand
                     gameState = drawPolicyHand({gameState:gameState}) // failing here - gameState not defined
                     // set the gamephase to legislative
@@ -88,10 +92,9 @@ let gameStateManager = function(){
                     
                 }else{  // vote fails
 
-                    // update the president
-                    // remove the proposed chancellor
-
-                    gameState.gamePhase = 'proposal'
+                    gameState = rotateGovernment({gameState:gameState}); // TODO: this is breaking
+                    gameState.gamePhase = 'proposal';
+                    
                     return gameState
                 }
                 
@@ -105,13 +108,14 @@ let gameStateManager = function(){
                         let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
                         if(fPolicy >= 6 || lPolicy >= 5){
                             gameState.gamePhase = "endGame"
-                         }else{
+                        }else{
                             if(fPolicy > 2){
                                 gameState.gamePhase = "power"
                             }else{
                                 gameState.gamePhase = "proposal"
                             }
-                         }
+                        }
+                        debugger;
                 }else{
                     // carry on
                 }
@@ -127,7 +131,7 @@ let gameStateManager = function(){
         return gameState // pass back the updated state
     }
     
-    let createNewGame = ()=>{
+    const createNewGame = ()=>{
         let sessionRef = createSessionKey(4)
 
         try{
@@ -139,18 +143,18 @@ let gameStateManager = function(){
         return sessionRef // returns the reference to the session you have made
     }
 
-    let initGame = (gameKey)=>{
+    const initGame = (gameKey)=>{
         if(gameStates[gameKey]){ throw new Error(`Game session ${gameKey} already exists`)} // check that we arn't overwriting something
 
         gameStates[gameKey] = StateTemplate()
         gameStates[gameKey].policyDeck = genPolicyDeck(gameStates[gameKey])
     }
 
-    let createSessionKey = (length)=>{
+    const createSessionKey = (length)=>{
         return Math.random().toString(36).substring(2,2+length)
     }
 
-    let getGameState = (sessionKey)=>{
+    const getGameState = (sessionKey)=>{
 
         if(gameStates[sessionKey]){
 
@@ -178,7 +182,7 @@ let gameStateManager = function(){
 
     }
 
-    let joinGame = (sessionKey, playerRef, playerName)=>{
+    const joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
 
             // check the playerName isn't already in there
@@ -197,7 +201,7 @@ let gameStateManager = function(){
         }
     }
 
-    let leaveGame = (sessionKey, playerRef)=>{
+    const leaveGame = (sessionKey, playerRef)=>{
         if(gameStates[sessionKey]){
             gameStates[sessionKey].players = gameStates[sessionKey].players.filter((player)=>{ return player.playerRef != playerRef })
         }else{
@@ -205,7 +209,7 @@ let gameStateManager = function(){
         }
     }
 
-    let getPlayerRefs = ( gameRef, suppliedStates )=>{
+    const getPlayerRefs = ( gameRef, suppliedStates )=>{
 
         let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
 
@@ -216,7 +220,7 @@ let gameStateManager = function(){
         }
     }
  
-    let getGameForPlayer= (userId, suppliedStates)=>{
+    const getGameForPlayer= (userId, suppliedStates)=>{
 
         let states = (suppliedStates) ? suppliedStates : gameStates // alt test if you want to mock the gameStates
         let stateRefs = Object.keys(states) // get the games of the gameStates
@@ -235,7 +239,7 @@ let gameStateManager = function(){
         return undefined
     }
 
-    let getPrivatePlayerInfo = (gameRef, userId, suppliedState)=>{
+    const getPrivatePlayerInfo = (gameRef, userId, suppliedState)=>{
 
         let privateInfo = {}
         let player;
@@ -273,11 +277,20 @@ let gameStateManager = function(){
         return privateInfo
     }
 
+    const getPlayer = (args)=>{ // args { gameRef ; testState ; targetPlayer}
+        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
+        let player = gameState.players.filter((player)=>{ return player.playerRef == args.playerRef })
+
+        if(player.length == 1) return player[0]
+        else if(player.length < 1) throw new Error(`PlayerRef ${args.targetPlayer} not in game`)
+        else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
+    }
+
 
 
     // === affect game state ===
 
-    let readyPlayer = (gameRef, playerRef, testState )=>{
+    const readyPlayer = (gameRef, playerRef, testState )=>{
 
         // use the passed state or the internal state with the Ref
         let gameState = (testState) ? testState : gameStates[gameRef]
@@ -301,7 +314,7 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let proposeChancellor = (gameRef, playerRef, testState)=>{
+    const proposeChancellor = (gameRef, playerRef, testState)=>{
 
         let gameState = (testState) ? testState : gameStates[gameRef]
 
@@ -315,7 +328,7 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let castVote = (gameRef, playerRef, vote, testState)=>{
+    const castVote = (gameRef, playerRef, vote, testState)=>{
         
         let gameState = (testState != undefined) ? testState : gameStates[gameRef]
 
@@ -334,7 +347,7 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let policyDiscard = (gameRef, policyType, testState)=>{
+    const policyDiscard = (gameRef, policyType, testState)=>{
         
         let gameState = (testState) ? testState : gameStates[gameRef]
 
@@ -357,7 +370,7 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let assignRoles = (playerList)=>{
+    const assignRoles = (playerList)=>{
 
         let result = []
         let fascistCount = undefined
@@ -394,27 +407,7 @@ let gameStateManager = function(){
         return playerList
     }
 
-    let shuffleArray = (array)=>{ // https://github.com/Daplie/knuth-shuffle
-        var currentIndex = array.length
-        var tempValue;
-        var randomIndex;
-
-        // While there are still elements to shuffle
-        while(0 != currentIndex){
-            // Pick a remaining element
-            randomIndex = Math.floor(Math.random()*currentIndex);
-            currentIndex -= 1;
-
-            // swap it with the current element
-            tempValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex]
-            array[randomIndex] = tempValue
-        }
-
-        return array
-    }
-
-    let nameToRef = (gameRef, playerName, testState)=>{
+    const nameToRef = (gameRef, playerName, testState)=>{
         let gameState = (testState) ? testState : gameStates[gameRef];
 
         let targetPlayer = gameState.players.filter((player)=>{
@@ -426,7 +419,7 @@ let gameStateManager = function(){
         else throw new Error("player not in game")
     }
 
-    let selectPlayer = (args)=>{
+    const selectPlayer = (args)=>{
         // aruments = {gameRef || testState || selectedPlayer || actingPlayer }
         let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
         let player = getPlayer({gameRef: args.gameRef, playerRef: args.actingPlayer})
@@ -441,16 +434,7 @@ let gameStateManager = function(){
 
     }
 
-    let getPlayer = (args)=>{ // args { gameRef ; testState ; targetPlayer}
-        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
-        let player = gameState.players.filter((player)=>{ return player.playerRef == args.playerRef })
-
-        if(player.length == 1) return player[0]
-        else if(player.length < 1) throw new Error(`PlayerRef ${args.targetPlayer} not in game`)
-        else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
-    }
-
-    let genPolicyDeck = ()=>{
+    const genPolicyDeck = ()=>{
         var policyDeck = [] 
 
         for (var i=0; i < 6; i++){policyDeck.push('liberal') }// 6 liberal
@@ -461,7 +445,7 @@ let gameStateManager = function(){
         return policyDeck
     }
 
-    let drawPolicyHand = (args)=>{ // args { gameRef ; gameState}
+    const drawPolicyHand = (args)=>{ // args { gameRef ; gameState}
         // take the top 3 cards from the deck
         var gameState = (args.gameState) ? args.gameState : gameStates[args.gameRef]
         var policyHand = [];
@@ -482,7 +466,40 @@ let gameStateManager = function(){
         return gameState
     }
 
-    let shuffleArraysTogether = (arrays)=>{
+    const rotateGovernment = (args)=>{ // args {gameRef: testState: }
+        const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
+        
+        const playerRoles = gameState.players.map((player)=>{
+            if(player.president) return 'president'
+            else if(player.chancellor) return 'chancellor'
+            else if(player.proposedChancellor) return 'proposedChancellor'
+            else return 'nonGov'
+        })
+
+        // get the index of the next president
+        const presIndex = playerRoles.indexOf('president')
+        const nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
+        const chancellorIndex = playerRoles.indexOf('chancellor')
+        const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
+
+        gameState.players[presIndex].president = false; // unassign old president
+        gameState.players[nextPresIndex].president = true // assign new president
+
+        if(chancellorIndex !=-1){ // if there is a chancellor
+            gameState.players[chancellorIndex].chancellor = false; // reset the chancellor 
+        }
+
+        if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
+            gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
+        }
+
+        return gameState;
+    }
+
+    
+    
+    // utility functions
+    const shuffleArraysTogether = (arrays)=>{
         let result= [];
         arrays.forEach((array)=>{
             result = result.concat(array)
@@ -491,6 +508,25 @@ let gameStateManager = function(){
         return shuffleArray(result)
     }
 
+    const shuffleArray = (array)=>{ // https://github.com/Daplie/knuth-shuffle
+        var currentIndex = array.length
+        var tempValue;
+        var randomIndex;
+
+        // While there are still elements to shuffle
+        while(0 != currentIndex){
+            // Pick a remaining element
+            randomIndex = Math.floor(Math.random()*currentIndex);
+            currentIndex -= 1;
+
+            // swap it with the current element
+            tempValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex]
+            array[randomIndex] = tempValue
+        }
+
+        return array
+    }
 
     // function to search for playerRef
 
@@ -516,7 +552,8 @@ let gameStateManager = function(){
         selectPlayer: selectPlayer,
         genPolicyDeck: genPolicyDeck,
         shuffleArraysTogether: shuffleArraysTogether,
-        drawPolicyHand: drawPolicyHand
+        drawPolicyHand: drawPolicyHand,
+        rotateGovernment: rotateGovernment
     })
 
 }
