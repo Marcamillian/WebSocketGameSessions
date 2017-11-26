@@ -1026,4 +1026,67 @@ test("Test function: rotateGovernment",(t)=>{
     t.end()
 })
 
+test("Test function: enactPolicy",(t)=>{
+    const stateManager = GameStateManager();
+
+    test('liberal policy passed', (ts)=>{
+        const gameState = {
+            policyHand:['liberal'],
+            policyTrackLiberal:[false, false, false, false,false,],
+            policyTrackFascist:[false, false, false, false, false, false]
+        }
+
+        const result = stateManager.enactPolicy({gameState: gameState});
+
+        ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy");
+        ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has no policies")
+        ts.equals(result.policyHand.length, 0, "Policy hand is empty")
+
+        ts.end()
+    })
+
+    test('fascist policy passed', (ts)=>{
+        const gameState = {
+            policyHand:['fascist'],
+            policyTrackLiberal:[false, false, false, false,false,],
+            policyTrackFascist:[false, false, false, false, false, false]
+        }
+
+        const result = stateManager.enactPolicy({gameState: gameState});
+
+        ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy");
+        ts.equals(result.policyTrackLiberal.indexOf(true), -1, "Fascist track has no policies")
+        ts.equals(result.policyHand.length, 0, "Policy hand is empty")
+
+        ts.end()
+    })
+
+    test('no policies in hand',(ts)=>{
+
+        const gameState = {
+            policyHand:[],
+            policyTrackLiberal:[false, false, false, false,false,],
+            policyTrackFascist:[false, false, false, false, false, false]
+        }
+
+        ts.throws(()=>{stateManager.enactPolicy({gameState: gameState})},/no policies to enact/i, "Error when no poliies are in hand" )
+
+        ts.end()
+    })
+
+    test('too many policies in hand', (ts)=>{
+
+        const gameState = {
+            policyHand:['liberal', 'fascist'],
+            policyTrackLiberal:[false, false, false, false,false,],
+            policyTrackFascist:[false, false, false, false, false, false]
+        }
+
+        ts.throws(()=>{stateManager.enactPolicy({gameState: gameState})},/more than one policy to enact/i, "Error when multiple policies in hand" )
+
+        ts.end()
+    })
+
+    t.end()
+})
 

@@ -103,19 +103,26 @@ const gameStateManager = function(){
             break;
             case "legislative":
 
-                if(gameState.policyHand.length == 1 ){ // *TODO: This is throwing -- used to be policyDraw - updated to policyHand but need to fix failing tests
-                        let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
-                        let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
-                        if(fPolicy >= 6 || lPolicy >= 5){
-                            gameState.gamePhase = "endGame"
+                if(gameState.policyHand.length == 1 ){
+
+                    // enact the policy
+                    gameState = enactPolicy({gameState:gameState})
+
+                    // count the policy tracks
+                    let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
+                    let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
+
+                    // change the state dependant on the policies that are out
+                    if(fPolicy >= 6 || lPolicy >= 5){
+                        gameState.gamePhase = "endGame"
+                    }else{
+                        if(fPolicy > 2){
+                            gameState.gamePhase = "power"
                         }else{
-                            if(fPolicy > 2){
-                                gameState.gamePhase = "power"
-                            }else{
-                                gameState.gamePhase = "proposal"
-                            }
+                            gameState.gamePhase = "proposal"
                         }
-                        debugger;
+                    }
+                
                 }else{
                     // carry on
                 }
@@ -466,7 +473,7 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const rotateGovernment = (args)=>{ // args {gameRef: testState: }
+    const rotateGovernment = (args)=>{ // args {gameRef: gameState: }
         const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
         
         const playerRoles = gameState.players.map((player)=>{
@@ -492,6 +499,31 @@ const gameStateManager = function(){
         if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
             gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
         }
+
+        return gameState;
+    }
+
+    const enactPolicy = (args)=>{ // args gameRef: gameState:
+        const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
+        let trackIndex;
+
+        // check that we have the right numebr of policies
+        if(gameState.policyHand.length < 1) throw new Error("no policies to enact")
+        else if(gameState.policyHand.length > 1 ) throw new Error("more than one policy to enact")
+
+        // add to the right track
+        if(gameState.policyHand[0] == 'liberal'){
+            trackIndex = gameState.policyTrackLiberal.indexOf('false')
+            gameState.policyTrackLiberal[trackIndex+1] = true;
+        }else if(gameState.policyHand[0] == 'fascist'){
+            trackIndex = gameState.policyTrackFascist.indexOf('false')
+            gameState.policyTrackFascist[trackIndex+1]= true;
+        }else{
+            throw new Error(`Unknown policy type: ${gameState.policyHand[0]}`)
+        }
+
+        //clear the policy hand
+        gameState.policyHand.pop() // remove the item
 
         return gameState;
     }
@@ -553,7 +585,8 @@ const gameStateManager = function(){
         genPolicyDeck: genPolicyDeck,
         shuffleArraysTogether: shuffleArraysTogether,
         drawPolicyHand: drawPolicyHand,
-        rotateGovernment: rotateGovernment
+        rotateGovernment: rotateGovernment,
+        enactPolicy: enactPolicy
     })
 
 }
