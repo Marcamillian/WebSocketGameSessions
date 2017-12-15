@@ -73,7 +73,6 @@ app.get('/gameinstance/:gameRef', (req, res)=>{
 
 // joiningGame via URL
 app.post('/gameinstance/:gameRef/players', (req, res)=>{
-    
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
     

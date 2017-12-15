@@ -92,7 +92,7 @@ const gameStateManager = function(){
                     
                 }else{  // vote fails
 
-                    gameState = rotateGovernment({gameState:gameState}); // TODO: this is breaking
+                    gameState = rotateGovernment({gameState:gameState});
                     gameState.gamePhase = 'proposal';
                     
                     return gameState
@@ -116,6 +116,10 @@ const gameStateManager = function(){
                     if(fPolicy >= 6 || lPolicy >= 5){
                         gameState.gamePhase = "endGame"
                     }else{
+
+                        // rotate the government positions
+                        rotateGovernment({gameState: gameState})
+
                         if(fPolicy > 2){
                             gameState.gamePhase = "power"
                         }else{
