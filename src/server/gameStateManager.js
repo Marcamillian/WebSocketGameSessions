@@ -531,9 +531,13 @@ const gameStateManager = function(){
     }
 
     const clearVotes = (args)=>{ // gameref : gameState
-        const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState
+        const gameState = (args.gameRef) ? gameStates[args.gameRef] : args.gameState
 
+        gameState.players.forEach((player)=>{
+            player.voteCast = undefined
+        })
 
+        return gameState
     }
 
     
@@ -594,7 +598,8 @@ const gameStateManager = function(){
         shuffleArraysTogether: shuffleArraysTogether,
         drawPolicyHand: drawPolicyHand,
         rotateGovernment: rotateGovernment,
-        enactPolicy: enactPolicy
+        enactPolicy: enactPolicy,
+        clearVotes:clearVotes
     })
 
 }

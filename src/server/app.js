@@ -168,7 +168,8 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
         if(startPhase != endPhase){
             console.log("New government")
             debugger;
-            stateManager.rotateGovernment({gameRef: gameRef})
+            gameState = stateManager.rotateGovernment({gameRef: gameRef}) // set next president
+            gameState = stateManager.clearVotes({gameRef: gameRef}) // clear the votes for players
         }
 
         wss.broadcast(gameRef)
