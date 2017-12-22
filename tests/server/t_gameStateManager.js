@@ -260,6 +260,23 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         gameState.gamePhase = 'legislative'
         gameState.policyHand = ['fascist']
+        gameState.players = [
+            {   playerRef:1,
+                playerName: 'one',
+                president: true,
+                chancellor: false,
+            },
+            {   playerRef:2,
+                playerName: 'two',
+                president: false,
+                chancellor: true,
+            },
+            {   playerRef:3,
+                playerName: 'three',
+                president: false,
+                chancellor: false
+            }
+        ]
 
         let result = gsManager.update(undefined,gameState)
 

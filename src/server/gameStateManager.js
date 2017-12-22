@@ -489,9 +489,12 @@ const gameStateManager = function(){
 
         // get the index of the next president
         const presIndex = playerRoles.indexOf('president')
+        
         const nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
         const chancellorIndex = playerRoles.indexOf('chancellor')
         const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
+
+        console.log(`president things `)
 
         gameState.players[presIndex].president = false; // unassign old president
         gameState.players[nextPresIndex].president = true // assign new president
@@ -530,6 +533,12 @@ const gameStateManager = function(){
         gameState.policyHand.pop() // remove the item
 
         return gameState;
+    }
+
+    const clearVotes = (args)=>{ // gameref : gameState
+        const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState
+
+
     }
 
     
