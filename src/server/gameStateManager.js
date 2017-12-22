@@ -117,9 +117,6 @@ const gameStateManager = function(){
                         gameState.gamePhase = "endGame"
                     }else{
 
-                        // rotate the government positions
-                        rotateGovernment({gameState: gameState})
-
                         if(fPolicy > 2){
                             gameState.gamePhase = "power"
                         }else{
@@ -478,7 +475,7 @@ const gameStateManager = function(){
     }
 
     const rotateGovernment = (args)=>{ // args {gameRef: gameState: }
-        const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
+        const gameState = (args.gameRef) ? gameStates[args.gameRef] : args.gameState;
         
         const playerRoles = gameState.players.map((player)=>{
             if(player.president) return 'president'
@@ -493,9 +490,7 @@ const gameStateManager = function(){
         const nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
         const chancellorIndex = playerRoles.indexOf('chancellor')
         const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
-
-        console.log(`president things `)
-
+        
         gameState.players[presIndex].president = false; // unassign old president
         gameState.players[nextPresIndex].president = true // assign new president
 
@@ -506,7 +501,7 @@ const gameStateManager = function(){
         if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
             gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
         }
-
+        
         return gameState;
     }
 

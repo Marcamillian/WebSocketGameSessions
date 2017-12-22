@@ -106,9 +106,8 @@ app.post('/gameinstance/:gameRef/players/ready', (req, res)=>{
 
     // ready the player -- the gameState playerObject doesn't have a playerRef -- the getGameState doesn't include playerRefs
     let gameState = stateManager.readyPlayer(gameRef, playerID)
-    //check if the phase has changed
     gameState = stateManager.update(gameRef)
-    
+    endPhase = gameState.gamePhase;
 
     // send back the updated game state
     wss.broadcast( gameRef )
@@ -156,10 +155,22 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
     let gameRef = req.params.gameRef;
     let playerID = req.session.userId;
     let policyDiscard = req.params.policyDiscard
-    console.log(`policy put: ${policyDiscard}`)
+    let startPhase = stateManager.getGameState(gameRef).gamePhase
+    let endPhase;
+
     try{
         stateManager.policyDiscard(gameRef,policyDiscard); // get rid of the policy
-        stateManager.update(gameRef)
+        let gameState = stateManager.update(gameRef)
+        endPhase = gameState.gamePhase
+
+        console.log(`Game Phase : ${startPhase} --> ${endPhase}`)
+        
+        if(startPhase != endPhase){
+            console.log("New government")
+            debugger;
+            stateManager.rotateGovernment({gameRef: gameRef})
+        }
+
         wss.broadcast(gameRef)
         res.send({result: 'OK', message: 'POlicy Discarded'})
     }catch(e){
