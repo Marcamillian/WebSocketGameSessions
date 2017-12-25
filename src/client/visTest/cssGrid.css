@@ -1,5 +1,15 @@
 body{
     display:grid;
-    grid-template-columns: 41% 50px auto 50px 40px;
-    grid-template-rows: 25% 100px auto
+    grid-template-columns: 1fr 1fr ;
+    grid-template-rows: auto;
+    grid-template-areas: "left-content right-content";
+    grid-column-gap: 10px;
+}
+
+.item-a{
+    grid-area: left-content;
+}
+
+.item-b{
+    grid-area: right-content
 }
