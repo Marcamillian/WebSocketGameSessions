@@ -1,0 +1,47 @@
+
+html{
+    height: calc(100% - 30px);
+    width: calc(100% - 32px);
+}
+body{
+    height:100%;
+    width:100%;
+    padding: 15px 16px 15px 16px;
+    margin:0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: [header-start] 10% [header-mid] 10% [header-end] 2% [main-start] 45% [main-end] 2% [buttons-start] 19% [buttons-end] 2% [envelope-start] 10% [envelope-end];   
+    align-items: stretch;
+    justify-items: stretch;
+}
+
+p,div{
+    padding:0px;
+    margin:0px;
+}
+
+.gref-block{
+    display:block;
+    grid-column: 5 / 7;
+    grid-row: header-start / header-end;
+    background-color: red
+}
+
+.player-list{
+    grid-column: 1 / 7;
+    grid-row: main-start / main-end;
+    background-color: blue;
+}
+
+.player-cards{
+    grid-column: 3/5;
+    grid-row: buttons-start / buttons-end;
+    background-color: green;
+}
+
+.envelope{
+    grid-column: 2/6;
+    grid-row: envelope-start / envelope-end;
+    background-color: brown;
+}
+
