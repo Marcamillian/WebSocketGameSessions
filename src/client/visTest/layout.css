@@ -1,6 +1,6 @@
 
 html{
-    height: calc(100% - 30px);
+    height: calc(100% - 15px);
     width: calc(100% - 32px);
 }
 
@@ -10,7 +10,7 @@ body{
 
     /*max-width: 1000px;*/
 
-    padding: 15px 16px 15px 16px;
+    padding: 15px 16px 0px 16px;
     margin:0px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -69,10 +69,20 @@ p,div{
 
 /** INTERACTION BLOCK / PLAYER CARDS **/
 
-.player-cards{
-    grid-column: 3/5;
+.card-area{
+    grid-column: 1/7;
     grid-row: buttons-start / buttons-end;
-    background-color: green;
+
+    display:flex;
+    justify-content:space-around;
+    align-items: center;
+}
+.card-area button, .card-area .vote-card{
+    width: 30%;
+    font-size:1.5em;
+}
+.card-area button{
+    height:50%
 }
 
 /** ENVELOPE **/
@@ -80,7 +90,8 @@ p,div{
 .envelope{
     grid-column: 2/6;
     grid-row: envelope-start / envelope-end;
-    background-color: brown;
+    font-size:1.5em;
+    position:relative;
 }
 
 
