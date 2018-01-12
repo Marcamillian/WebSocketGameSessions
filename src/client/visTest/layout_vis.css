@@ -8,5 +8,21 @@ button{
 }
 
 .player-card{
+    display:flex;
+
+    font-size: 2em;
+    text-align: center;
+
     background-color: #EBEAE8;
+}
+.player-card p{
+    display:inline-block;
+    width:80%;
+    margin-top:auto;
+    margin-bottom:auto;
+}
+.player-card img{
+    display: inline-block;
+    height:80%;
+    margin-top:1%;
 }

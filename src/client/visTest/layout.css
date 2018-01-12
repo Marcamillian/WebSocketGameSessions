@@ -27,12 +27,13 @@ p,div{
     
 }
 
+/** GAME REF BLOCK **/
+
 .gref-block{ /* positional information */
     display:flex;
     flex-direction: column;
     grid-column: 5 / 7;
     grid-row: header-start / header-mid;
-    background-color: red;
     text-align: center;
 }
 .gref-block button{
@@ -47,17 +48,34 @@ p,div{
     font-size: 0.75em;
 }
 
+/** PLAYER LIST **/
+
 .player-list{
     grid-column: 1 / 7;
     grid-row: main-start / main-end;
-    background-color: blue;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
 }
+
+.player-list div{
+    width: 100%;
+    height: 21%;
+}
+
+
+
+/** INTERACTION BLOCK / PLAYER CARDS **/
 
 .player-cards{
     grid-column: 3/5;
     grid-row: buttons-start / buttons-end;
     background-color: green;
 }
+
+/** ENVELOPE **/
 
 .envelope{
     grid-column: 2/6;
