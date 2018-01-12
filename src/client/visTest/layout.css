@@ -3,9 +3,13 @@ html{
     height: calc(100% - 30px);
     width: calc(100% - 32px);
 }
+
 body{
     height:100%;
     width:100%;
+
+    /*max-width: 1000px;*/
+
     padding: 15px 16px 15px 16px;
     margin:0px;
     display: grid;
@@ -13,18 +17,34 @@ body{
     grid-template-rows: [header-start] 10% [header-mid] 10% [header-end] 2% [main-start] 45% [main-end] 2% [buttons-start] 19% [buttons-end] 2% [envelope-start] 10% [envelope-end];   
     align-items: stretch;
     justify-items: stretch;
+
+    font-family:'Roboto';
 }
 
 p,div{
     padding:0px;
     margin:0px;
+    
 }
 
-.gref-block{
-    display:block;
+.gref-block{ /* positional information */
+    display:flex;
+    flex-direction: column;
     grid-column: 5 / 7;
-    grid-row: header-start / header-end;
-    background-color: red
+    grid-row: header-start / header-mid;
+    background-color: red;
+    text-align: center;
+}
+.gref-block button{
+    width:auto;
+    margin: 2px auto 2px auto;
+    font-size: 0.75em;
+}
+.gref-block .code{
+    font-size: 2em;
+}
+.gref-block p{
+    font-size: 0.75em;
 }
 
 .player-list{
@@ -44,4 +64,5 @@ p,div{
     grid-row: envelope-start / envelope-end;
     background-color: brown;
 }
+
 

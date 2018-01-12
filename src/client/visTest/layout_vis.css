@@ -1,0 +1,12 @@
+button{
+    background-color: #E0CEAB;
+    box-shadow: 0px 0px 0px 6px #00000075;
+    -moz-box-shadow: 0px 0px 0px 6px #00000075;
+    -webkit-box-shadow: 4px 4px 6px 0px #00000075;
+    border:none;
+    padding: 2px 2em 2px 2em;
+}
+
+.player-card{
+    background-color: #EBEAE8;
+}
