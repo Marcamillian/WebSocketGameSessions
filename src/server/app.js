@@ -199,9 +199,11 @@ wss = new WebSocket.Server({
 })
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
-
+    
+    //  ??? create a userID - is this still relevant in an all websocket implementation??
     ws.userId = req.session.userId  // adding the userID to the websocket you can get to
- 
+    ws.currentGame = undefined;
+
     ws.on('message', (messageString)=>{
 
         // get a list of the connected clients - wss.clients
@@ -257,7 +259,225 @@ wss.on('connection', (ws,req)=>{
 
     })
 
+    // == WS ENDPOINTS FOR DATA COMING IN
+    /*  XXX join game
+    ws.on('joinGame', ( { gameRef=undefined } = {} )=>{
+        try{
+            let response = {
+                "result":"OK",
+                "type":"joinGame",
+                "data":gameRef
+            }
+            stateManager.getGameState(gameRef)
+            ws.send(JSON.stringify(response))
+        }catch(e){
+            console.log(e)
+            let response = {
+                "result": "failed",
+                "type": "joinGame",
+                "data":{
+                    "errorMessage": `Couldn't find gameRef ${gameRef}`,
+                    "internalError": e.message
+                }
+            }
+            ws.send(JSON.stringify(response))
+        }
+    })*/
 
+    // login to the game
+
+    // remove your login session
+
+    ws.on("createGame", ()=>{
+        try{
+            let response = {
+                "result": "OK",
+                "type": "gameCreate",
+                "data":{
+                    "gameRef": stateManager.createNewGame()
+                }
+            }
+            console.log(`New game created : ${response.data.gameRef}`)
+            ws.emit("gameCreated", JSON.stringify(response))
+        }catch(e){
+            let response = {
+                "result": "failed",
+                "type": "gameCreate",
+                "data":{
+                    "errorMessage": `Couldn't create game`,
+                    "internalMessage": e.message
+                }
+            }
+            ws.emit("gameCreated", JSON.stringify(response))
+        }
+    })
+
+    ws.on("getGameState", ( {gameRef="XXXX"} = {})=>{
+        try{
+            let gameState = stateManager.getGameState(gameRef)
+            ws.emit("sendGameState", {result: "OK", gameState:gameState })
+        }catch(e){
+            let errorMessage = `Error: ${e.message}`
+            console.log(errorMessage)
+            ws.emit("sendGameState",{
+                result: "failed",
+                type: "getGameState",
+                errorMessage: errorMessage
+            })
+        }
+        
+
+    })
+
+    ws.on("joinGame", ( {playerName = "someName", gameRef="XXXX"} = {} )=>{
+        try{
+            stateManager.joinGame(gameRef, ws.userId, playerName)   // add the player to the game
+            ws.currentGame = gameRef; // make sure the websocket knows which game its in
+            ws.emit("gameJoined",{
+                "result": "OK",
+                "type": "joinGame",
+                "data" : {gameState: stateManager.getGameState(gameRef)}
+            })  // send the message back to the client that joined
+            wss.broadcast(gameRef)  // update everyone in the game
+        }catch(e){
+            let errorMessage = `Error - joinGame: ${e.message}`
+            console.log(errorMessage)
+            ws.emit("gameJoined",{
+                result: "failed",
+                type:"joinGame",
+                data: {errorMessage: errorMessage}
+            })
+        }
+    })
+
+    ws.on("leaveGame", ( )=>{
+        try{
+            let gameRef = ws.currentGame;
+            let userId = ws.userId;
+
+            stateManager.leaveGame(gameRef, userId)
+            ws.currentGame = undefined;
+
+            ws.emit("gameLeft", {result: "OK", type:"leaveGame", data:{message:`Left game ${gameRef}`}})
+            wss.broadcast(gameRef)
+        }catch(e){
+            let errorMessage = `Error - leaveGame: ${e.message}`
+            console.log(errorMessage)
+            ws.emit("gameLeft",{
+                result: "failed",
+                type:"leaveGame",
+                data: {errorMessage: errorMessage}
+            })
+        }
+    })
+
+    // == GAME STATE ALTERING PLAYER INPUTS
+
+    // ready up in lobby
+    ws.on("readyUp", ()=>{
+        try{
+            let gameRef = ws.currentGame;
+            let userId = ws.userId;
+            let gameState = stateManager.readyPlayer(gameRef, userID)
+
+            gameState = stateManager.update(gameRef)
+
+            wss.broadcast( gameRef )
+            ws.emit("playerReady", {result:'OK', type: "readyUp", message: "You are ready"})
+        }catch(e){
+            let errorMessage = `Error - readyUp : ${e.message}`
+            console.log(errorMessage)
+
+            ws.emit("playerReady",{
+                result:"failed",
+                type:"readyUp",
+                message: errorMessage })
+        }
+    })
+
+    // select a player
+    ws.on("selectPlayer", ({ targetPlayerName="someName" } = {})=>{
+        
+        try{
+            let gameRef = ws.currentGame;
+            let actingPlayer = ws.userId;
+            let targetPlayerRef = stateManager.nameToRef(gameRef, targetPlayerName)
+
+            stateManager.selectPlayer({
+                gameRef: gameRef,
+                actingPlayer: actingPlayer,
+                selectedPlayer: targetPlayerRef
+            })
+            stateManager.update(gameRef)
+            wss.broadcast(gameRef)
+            ws.emit("playerSelected",{result: 'OK', type:"selectPlayer", data:{message: `${targetPlayer} selected`}})
+        }catch(e){
+            let errorMessage = `Error - selectPlayer : ${e.message}`
+            console.log(errorMessage)
+            ws.emit("playerSelected",{
+                result:"failed",
+                type:"selectPlayer",
+                data: {errorMessage: errorMessage}
+            })
+        }
+    })
+
+    // vote on a government - vote:Boolean
+    ws.on("castVote", ( {vote = undefined} = {})=>{
+        try{
+            let gameRef = ws.currentGame;
+            let userId = ws.userId;
+
+            stateManager.castVote(gameRef, userId, vote)
+            stateManager.update(gameRef)
+            wss.broadcast(gameRef)
+            ws.emit("voteRegistered",{ result:'OK', type:"castVote",data:{message:`Vote cast: ${vote}`}})
+        }catch(e){
+            let errorMessage = `Error - vote : ${e.message}`
+            console.log(errorMessage)
+            ws.emit("voteRegistered",{
+                result:"failed",
+                type:"castVote",
+                data:{errorMessage: errorMessage}
+            })
+        }
+    })
+
+    // choose policy
+    ws.on("discardPolicy", ( {policyDiscard="fascist/liberal"} = {} )=>{
+        
+        try{
+            let gameRef = ws.currentGame;
+            let playerID = ws.userId;
+            let startPhase = stateManager.getGameState(gameRef).gamePhase;
+            let endPhase
+
+            stateManager.policyDiscard(gameRef, policyDiscard);
+            let gameState = stateManager.update(gameRef)
+            endPhase = gameState.gamePhase;
+
+            if(startPhase != gamePhase){
+                console.log("New government")
+                gameState = stateManager.rotateGovernment( {gameRef:gameRef} );
+                gameState = stateManager.clearVotes({gameRef: gameRef})
+            }
+
+            wss.broadcast(gameRef);
+            ws.emit("policyDiscarded", { result:'OK', type:"discardPolicy", data:{message:`Policy discarded: ${policyDiscard}`}} )
+        }catch(e){
+            let errorMessage = `Error - discardPolicy: ${e.message}`;
+            console.log(errorMessage)
+            ws.emit("policyDiscarded",{
+                result: "failed",
+                type: "discardPolicy",
+                data: {errorMessage: errorMessage}
+            })
+        }
+
+    })
+
+
+    // THIS IS ON CONNECTION - ??? Dont know about this 
     let gameRef = stateManager.getGameForPlayer(ws.userId)
     // if already in a game
     if(gameRef != undefined){
@@ -281,7 +501,7 @@ wss.broadcast = (gameRef)=>{
         }
 
         if(playersInGame.includes(ws.userId)){
-            ws.send(JSON.stringify(message)) // send the gamestate to the players in the game
+            ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
         }
     })
 }

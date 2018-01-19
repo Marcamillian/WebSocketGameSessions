@@ -1,0 +1,79 @@
+/* hide everything */
+body div,
+body form,
+body button{
+    display:none;
+}
+
+/* connect phase */
+.connect #wsButton{
+    display:block;
+}
+
+/* things to be shown in the join-game session*/
+.join-game form,
+.join-game form input,
+.join-game #createGame,
+.join-game #url-join{
+    display:block;
+}
+
+/*things to be seen lobby*/
+.lobby #player-list,
+.lobby #leaveGame,
+.lobby #lobby-ready,
+.lobby #game-ref-display,
+.lobby #name-display{
+    display:block;
+}
+
+/*Elements that are always visible whilst in play*/
+.in-game #private-info,
+.in-game #player-list,
+.in-game #name-display,
+.in-game #game-ref-display{
+    display:block;
+}
+
+
+/* things to be seen in the election phase*/
+
+.election #ingame-vote{
+    display:inline-block;
+}
+
+/* Things to be seen in the legislative phase*/
+.legislative #ingame-policy-pick{
+    display:inline-block;
+}
+
+
+
+/* set up the sub-inheritance*/
+
+#player-list *{
+    display:inherit;
+}
+#player-list li button{
+    display:inline-block;
+}
+
+#ingame-vote *{
+    display:inherit
+}
+
+#ingame-policy-pick *{
+    display:inherit
+}
+
+/* general styling of the elements*/
+.ready{
+    color:green
+}
+.president{
+    color:red;
+    font-weight:bold;
+}
+.proposed-chancellor{
+    color:red;
+}
