@@ -36,7 +36,7 @@ app.use(sessionParser);
 app.post('/login', (req, res)=>{
     // "Log in" user and set userId to session
     const id= uuid.v4();
-
+    
     if (!req.session.userId){
         req.session.userId = id; // if there is already a session under that user
         res.send({result:"OK", message: 'Session updated '})
@@ -76,6 +76,8 @@ app.post('/gameinstance/:gameRef/players', (req, res)=>{
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
     
+    debugger;
+
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
     
@@ -167,7 +169,6 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
         
         if(startPhase != endPhase){
             console.log("New government")
-            debugger;
             gameState = stateManager.rotateGovernment({gameRef: gameRef}) // set next president
             gameState = stateManager.clearVotes({gameRef: gameRef}) // clear the votes for players
         }
@@ -199,9 +200,10 @@ wss = new WebSocket.Server({
 })
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
-    
-    //  ??? create a userID - is this still relevant in an all websocket implementation??
-    ws.userId = req.session.userId  // adding the userID to the websocket you can get to
+    let userId = uuid.v4()
+
+    ws.userId = userId;
+    req.session.userId = userId;
     ws.currentGame = undefined;
 
     ws.on('message', (messageString)=>{
@@ -491,7 +493,6 @@ wss.broadcast = (gameRef)=>{
     let gameState = stateManager.getGameState(gameRef)
 
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
-
         let message = {
             result: 'OK',
             type: 'updateGameState',
