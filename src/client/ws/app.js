@@ -196,14 +196,14 @@
     const showPrivateInfo = (privateInfo)=>{
 
         let teamTitle, teamEl,
-         allignmentEl, characterEl,
+         alignmentEl, characterEl,
          policyPickTitle, policyButtons;
 
         clearElement(privateInfoDisplay)
         clearElement(policyPickDisplay)
 
-        allignmentEl = document.createElement('p')
-        allignmentEl.innerText = `Allignment: ${privateInfo.allignment}`;
+        alignmentEl = document.createElement('p')
+        alignmentEl.innerText = `alignment: ${privateInfo.alignment}`;
 
         characterEl = document.createElement('p')
         characterEl.innerText = `Character: ${privateInfo.character}`;
@@ -239,7 +239,7 @@
 
         // TODO: if there is a policyHand attached - show the policyHand in the voting things
 
-        privateInfoDisplay.appendChild(allignmentEl)
+        privateInfoDisplay.appendChild(alignmentEl)
         privateInfoDisplay.appendChild(characterEl)
         if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
         if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
@@ -286,10 +286,10 @@
         */
     }
 
-    const discardPolicy = (policyAllignment)=>{ // TODO: convert to websocket
+    const discardPolicy = (policyalignment)=>{ // TODO: convert to websocket
         
         /*
-        fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyAllignment}`, {method:'PUT', credentials: 'same-origin'})
+        fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyalignment}`, {method:'PUT', credentials: 'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{ showMessage(err.message) })

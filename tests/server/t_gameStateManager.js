@@ -556,7 +556,7 @@ test("Testing function: Assigning roles", (t)=>{
 
     t.test("Assigning roles: Not enough players", (ts)=>{
         let players = []
-        for(var i=0; i < 4; i++){players.push({allignment: undefined,character: undefined, president: false})}
+        for(var i=0; i < 4; i++){players.push({alignment: undefined,character: undefined, president: false})}
 
         ts.throws(()=>{gameStateManager.assignRoles(players)}, /not enough players to assign roles/i, "Can't assign roles")
         
@@ -565,11 +565,11 @@ test("Testing function: Assigning roles", (t)=>{
 
     t.test("Assigning roles: 5 player",(ts)=>{
         let players = []
-        for(var i=0; i < 5; i++){players.push({allignment: undefined,character: undefined, president: false})}
+        for(var i=0; i < 5; i++){players.push({alignment: undefined,character: undefined, president: false})}
 
         let result = gameStateManager.assignRoles(players)
 
-        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let fascists = result.filter((player)=>{ return player.alignment == 'fascist' })
         let hitler = result.filter((player)=>{ return player.character == 'hitler'})
 
         ts.equals(fascists.length,2, "Two fascists")
@@ -580,11 +580,11 @@ test("Testing function: Assigning roles", (t)=>{
 
     t.test("Assigning roles: 7 player", (ts)=>{
         let players = []
-        for(var i=0; i < 7; i++){players.push({allignment: undefined,character: undefined, president: false})}
+        for(var i=0; i < 7; i++){players.push({alignment: undefined,character: undefined, president: false})}
 
         let result = gameStateManager.assignRoles(players)
 
-        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let fascists = result.filter((player)=>{ return player.alignment == 'fascist' })
         let hitler = result.filter((player)=>{ return player.character == 'hitler'})
 
         ts.equals(fascists.length,3, "Three fascists")
@@ -594,11 +594,11 @@ test("Testing function: Assigning roles", (t)=>{
 
     t.test("Assigning roles: 10 players", (ts)=>{
         let players = []
-        for(var i=0; i < 10; i++){players.push({allignment: undefined,character: undefined, president: false})}
+        for(var i=0; i < 10; i++){players.push({alignment: undefined,character: undefined, president: false})}
 
         let result = gameStateManager.assignRoles(players)
 
-        let fascists = result.filter((player)=>{ return player.allignment == 'fascist' })
+        let fascists = result.filter((player)=>{ return player.alignment == 'fascist' })
         let hitler = result.filter((player)=>{ return player.character == 'hitler'})
 
         ts.equals(fascists.length,4, "Two fascists")
@@ -609,7 +609,7 @@ test("Testing function: Assigning roles", (t)=>{
     t.test("Assigning roles: Too many players",(ts)=>{
 
         let players = []
-        for(var i=0; i < 12; i++){players.push({allignment: undefined,character: undefined, president: false})}
+        for(var i=0; i < 12; i++){players.push({alignment: undefined,character: undefined, president: false})}
 
         ts.throws(()=>{gameStateManager.assignRoles(players), /too many players to assign roles/i, "Too many players in game"})
 
@@ -664,24 +664,24 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         players: [
             {playerRef: 'player1',
              playerName: 'one',
-             allignment: 'liberal',
+             alignment: 'liberal',
              character: 'liberal'},
             {playerRef:'player2',
              playerName: 'two',
-             allignment:'fascist',
+             alignment:'fascist',
              character: 'hitler'},
             {playerRef:'player3',
              playerName: 'three',
-             allignment:'fascist',
+             alignment:'fascist',
              character: 'hitler'}
         ]}
 
         let libResult = stateManager.getPrivatePlayerInfo(undefined, 'player1', gameState)
         let fasResult = stateManager.getPrivatePlayerInfo(undefined,'player2', gameState)
 
-        ts.equals(libResult.allignment, 'liberal', "Checking liberal allignment")
+        ts.equals(libResult.alignment, 'liberal', "Checking liberal alignment")
         ts.equals(libResult.character, 'liberal', "Checking liberal character")
-        ts.equals(fasResult.allignment, 'fascist', "Checking fascist allignment")
+        ts.equals(fasResult.alignment, 'fascist', "Checking fascist alignment")
         ts.equals(fasResult.character, 'hitler', "Checking fascist character")
         ts.equals(fasResult.teamMates.length,2, "Checking for teammates" )
         ts.equals(fasResult.teamMates[0], 'two', "Index of myself")
@@ -696,10 +696,10 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         {gamePhase: 'proposal',
         players: [
             {playerRef: 'player1',
-             allignment: 'liberal',
+             alignment: 'liberal',
              character: 'liberal'},
             {playerRef:'player2',
-             allignment:'fascist',
+             alignment:'fascist',
              character: 'hitler'}
         ]}
 
@@ -717,20 +717,20 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
                 {
                     playerRef: 'player1',
                     playerName: 'one',
-                    allignment: 'liberal',
+                    alignment: 'liberal',
                     character: 'liberal',
                     president: true
                 },
                 {
                     playerRef:'player2',
                     playerName:'two',
-                    allignment: 'liberal',
+                    alignment: 'liberal',
                     character: 'liberal'
                 },
                 {
                     playerRef:'player3',
                     playerName: 'three',
-                    allignment: 'fascist',
+                    alignment: 'fascist',
                     character: 'fascist',
                     chancellor: true
                 }
@@ -759,20 +759,20 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
                 {
                     playerRef: 'player1',
                     playerName: 'one',
-                    allignment: 'liberal',
+                    alignment: 'liberal',
                     character: 'liberal',
                     chancellor: true
                 },
                 {
                     playerRef:'player2',
                     playerName: 'two',
-                    allignment: 'liberal',
+                    alignment: 'liberal',
                     character:'liberal'
                 },
                 {
                     playerRef: 'player3',
                     playerName: 'three',
-                    allignment: 'fascist',
+                    alignment: 'fascist',
                     character:'fascist',
                     president: true
                 }
