@@ -495,9 +495,11 @@ wss.broadcast = (gameRef)=>{
         let message = {
             result: 'OK',
             type: 'updateGameState',
-            gameRef: gameRef,
-            gameState: gameState,
-            privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+            data:{
+                gameRef: gameRef,
+                gameState: gameState,
+                privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+            }
         }
 
         if(playersInGame.includes(ws.userId)){
