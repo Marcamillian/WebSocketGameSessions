@@ -34,14 +34,12 @@ app.use(sessionParser);
 
 // login to the game
 app.post('/login', (req, res)=>{
-    // "Log in" user and set userId to session
     const id= uuid.v4();
-    
     if (!req.session.userId){
-        req.session.userId = id; // if there is already a session under that user
+        req.session.userId = id; // if there is already a session under that user // !!! REMOVING THIS AS ITS NOW IN THE WEBSOCKET SETUP
         res.send({result:"OK", message: 'Session updated '})
     } else {
-        // get the game that they are in
+        // get the game that they are in - this makes sure that the actually have a session
         let gameRef = stateManager.getGameForPlayer(req.session.userID)
         res.send({result:"OK", message: "You are already in a game"})
     } 
@@ -73,10 +71,9 @@ app.get('/gameinstance/:gameRef', (req, res)=>{
 
 // joiningGame via URL
 app.post('/gameinstance/:gameRef/players', (req, res)=>{
+
     let playerName = req.headers["player-name"];
     let gameRef = req.params.gameRef
-    
-    debugger;
 
     stateManager.joinGame(gameRef, req.session.userId, playerName)
     req.session.currentGame = gameRef
@@ -200,14 +197,42 @@ wss = new WebSocket.Server({
 })
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws,req)=>{
-    let userId = uuid.v4()
 
-    ws.userId = userId;
-    req.session.userId = userId;
-    ws.currentGame = undefined;
+    let userId = req.session.userId
+
+    // Check to see if the request session exists
+
+    // two reasons that there might be an ID - 1. hit the login http endpoint 2. Has previously been in a game and joining again
+
+    if(userId && ws.currentGame){ // already in a game
+        let gameRef = stateManager.getGameForPlayer(userId)
+        wss.broadcast(gameRef)
+        ws.userId = userId
+        ws.currentGame = gameRef
+    }else if(!ws.currentGame){ // Already hit the http endpoint but not in game
+        ws.userId = userId;
+        ws.currentGame = undefined;
+    }else{ // Never connected before
+        userId = uuid.v4()
+        req.session.userId = userId;
+        ws.userId = userId;
+        ws.currentGame = undefined;
+    }
+
+    /*
+    let gameRef = stateManager.getGameForPlayer(ws.userId)
+    // if already in a game
+    if(gameRef != undefined){
+        wss.broadcast(gameRef)
+    }
+    */ 
+    // if you have an existing session
+
+    // if you don't have an existing session
+    
 
     ws.on('message', (messageString)=>{
-
+        debugger
         // get a list of the connected clients - wss.clients
 
         let message = JSON.parse(messageString)
@@ -261,35 +286,6 @@ wss.on('connection', (ws,req)=>{
 
     })
 
-    // == WS ENDPOINTS FOR DATA COMING IN
-    /*  XXX join game
-    ws.on('joinGame', ( { gameRef=undefined } = {} )=>{
-        try{
-            let response = {
-                "result":"OK",
-                "type":"joinGame",
-                "data":gameRef
-            }
-            stateManager.getGameState(gameRef)
-            ws.send(JSON.stringify(response))
-        }catch(e){
-            console.log(e)
-            let response = {
-                "result": "failed",
-                "type": "joinGame",
-                "data":{
-                    "errorMessage": `Couldn't find gameRef ${gameRef}`,
-                    "internalError": e.message
-                }
-            }
-            ws.send(JSON.stringify(response))
-        }
-    })*/
-
-    // login to the game
-
-    // remove your login session
-
     ws.on("createGame", ()=>{
         try{
             let response = {
@@ -332,6 +328,7 @@ wss.on('connection', (ws,req)=>{
     })
 
     ws.on("joinGame", ( {playerName = "someName", gameRef="XXXX"} = {} )=>{
+        debugger;
         try{
             stateManager.joinGame(gameRef, ws.userId, playerName)   // add the player to the game
             ws.currentGame = gameRef; // make sure the websocket knows which game its in
@@ -478,14 +475,6 @@ wss.on('connection', (ws,req)=>{
 
     })
 
-
-    // THIS IS ON CONNECTION - ??? Dont know about this 
-    let gameRef = stateManager.getGameForPlayer(ws.userId)
-    // if already in a game
-    if(gameRef != undefined){
-        wss.broadcast(gameRef)
-    }
-    
 });
 
 wss.broadcast = (gameRef)=>{
@@ -493,17 +482,18 @@ wss.broadcast = (gameRef)=>{
     let gameState = stateManager.getGameState(gameRef)
 
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
-        let message = {
-            result: 'OK',
-            type: 'updateGameState',
-            data:{
-                gameRef: gameRef,
-                gameState: gameState,
-                privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
-            }
-        }
-
+        
         if(playersInGame.includes(ws.userId)){
+            let message = {
+                result: 'OK',
+                type: 'updateGameState',
+                data:{
+                    gameRef: gameRef,
+                    gameState: gameState,
+                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+                }
+            }
+
             ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
         }
     })

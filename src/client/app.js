@@ -90,6 +90,10 @@
         ws.onclose = ()=> showMessage('WebSocket connection closed')
         ws.onmessage = handleWsMessage;
 
+        ws.on("updateGameState", ()=>{
+            console.log("New gameState to render")
+        })
+
     }
 
     const handleWsMessage = ( messageString )=>{
