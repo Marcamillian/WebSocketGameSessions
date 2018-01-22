@@ -90,10 +90,6 @@
         ws.onclose = ()=> showMessage('WebSocket connection closed')
         ws.onmessage = handleWsMessage;
 
-        ws.on("updateGameState", ()=>{
-            console.log("New gameState to render")
-        })
-
     }
 
     const handleWsMessage = ( messageString )=>{
@@ -108,9 +104,9 @@
                 console.log(`Created & joined game ${message.data.gameRef}`)
             break
             case "updateGameState":
-                let gameRef = message.gameRef;
-                let gameState = message.gameState ;
-                let privateInfo = message.privateInfo;
+                let gameRef = message.data.gameRef;
+                let gameState = message.data.gameState ;
+                let privateInfo = message.data.privateInfo;
                 let presList = gameState.players.filter((player)=>{return player.president})[0]
                 let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
 
@@ -119,7 +115,7 @@
                 showPlayerName(privateInfo.playerName)  // put the playerName in the display element
                 gameStateDisplay(gameState.gamePhase)       // update the class to hide/display elements
                 showPlayers(gameState.players, gameState.gamePhase, isPresident )  // put the list of players in the display element
-                showPrivateInfo(message.privateInfo)// show the privateInfo
+                showPrivateInfo(privateInfo)// show the privateInfo
 
             break
             default:

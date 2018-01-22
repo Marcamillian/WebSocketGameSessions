@@ -495,6 +495,7 @@ wss.broadcast = (gameRef)=>{
             }
 
             ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
+            ws.send(JSON.stringify(message));
         }
     })
 }
