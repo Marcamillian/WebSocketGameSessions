@@ -84,11 +84,18 @@
             ws.close()
         }
 
-        ws = new WebSocket(`ws://${location.host}`)
+        ws = io()
         ws.onerror = ()=> showMessage('WebSocket error')
         ws.onopen = ()=> showMessage(' Websocket connection established')
         ws.onclose = ()=> showMessage('WebSocket connection closed')
+
+        ws.on()
+
+
         ws.onmessage = handleWsMessage;
+        
+        return ws
+        // ??? have to change onmessage to look for the response?
 
     }
 
@@ -104,9 +111,9 @@
                 console.log(`Created & joined game ${message.data.gameRef}`)
             break
             case "updateGameState":
-                let gameRef = message.data.gameRef;
-                let gameState = message.data.gameState ;
-                let privateInfo = message.data.privateInfo;
+                let gameRef = message.gameRef;
+                let gameState = message.gameState ;
+                let privateInfo = message.privateInfo;
                 let presList = gameState.players.filter((player)=>{return player.president})[0]
                 let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
 
@@ -115,7 +122,7 @@
                 showPlayerName(privateInfo.playerName)  // put the playerName in the display element
                 gameStateDisplay(gameState.gamePhase)       // update the class to hide/display elements
                 showPlayers(gameState.players, gameState.gamePhase, isPresident )  // put the list of players in the display element
-                showPrivateInfo(privateInfo)// show the privateInfo
+                showPrivateInfo(message.privateInfo)// show the privateInfo
 
             break
             default:
@@ -260,47 +267,63 @@
         playerNameDisplay.appendChild(el)
     }
 
-    const playerSelect = (playerName)=>{
+    const playerSelect = (playerName)=>{ // TODO: convert to websocket
+
+        /*
         fetch(`gameinstance/${currentGameRef}/players/${playerName}`, {method:'PUT', credentials:'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{showMessage(err.message)})
+        */
     }
 
-    const castVote = (vote)=>{
+    const castVote = (vote)=>{  // TODO: convert to websocket
+        /*
         fetch(`gameinstance/${currentGameRef}/elect/${vote}`,{method:'PUT', credentials: 'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{showMessage(err.message)})
+        */
     }
 
-    const discardPolicy = (policyalignment)=>{
+    const discardPolicy = (policyalignment)=>{ // TODO: convert to websocket
         
+        /*
         fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyalignment}`, {method:'PUT', credentials: 'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{ showMessage(err.message) })
+        */
     }
 
     // BUTTON CLICK FUNCTIONS
 
-    login.onclick = ()=>{
+    login.onclick = ()=>{  // TODO: convert to websocket
+
+        /*
         fetch('/login', {method: 'POST', credentials: 'same-origin'})
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
             .catch((err)=> showMessage(err.message) )
+        */
     };
 
-    logout.onclick = () =>{
+    logout.onclick = () =>{ // TODO: convert to websocket
+        /*
         fetch('/logout', {method: 'DELETE', credentials: 'same-origin'})
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
             .catch((err)=> showMessage(err.message) )
+        */
     }
  
-    wsButton.onclick = ()=>{
+    wsButton.onclick = ()=>{ // TODO: convert to websocket
+
+        setupWsSession();
+
+        /*
         fetch('/login', {method: 'POST', credentials: 'same-origin'})
         .then(handleResponse)
         .then(stringifyObject)
@@ -308,31 +331,34 @@
         .then(setupWsSession)
         .then(()=>{ gameStateDisplay('joinGame') })
         .catch((err)=> showMessage(err.message) )
+        */
     }
 
-    createGame.onclick = ()=>{
+    createGame.onclick = ()=>{  // TODO: convert to websocket - don't know what this is
         
+        /*
         let response = {
             'type':'createGame',
             'data': {}
         }
 
         ws.send(JSON.stringify(response))
-
+        */
     }
 
-    leaveGame.onclick = ()=>{
-
+    leaveGame.onclick = ()=>{   // TODO: convert to websocket
+        /*
         fetch(`/gameinstance/${currentGameRef}/players`, {method: 'DELETE', credentials:'same-origin'})
             .then(handleResponse)
             .then(stringifyObject)
             .then(showMessage)
             .then(()=>{ gameStateDisplay('joinGame') })
             .catch( (err)=>{ showMessage(err.message) } )
-            
-    }
+        */
+    }   
 
-    urlJoinGame.onclick = ()=>{
+    urlJoinGame.onclick = ()=>{ // TODO: convert to websocket
+        /*
         let gameRef = getGameRefInput()
         let myHeaders = new Headers({
             "Player-Name": getPlayerNameInput()
@@ -344,13 +370,16 @@
             .then(showMessage)
             //.then(()=>{gameStateDisplay('lobby')})
             .catch( (err)=>{ showMessage(err.message) })
+        */
     }
 
-    lobbyReadyButton.onclick = ()=>{
+    lobbyReadyButton.onclick = ()=>{    // TODO: convert to websocket
+        /*
         fetch(`gameinstance/${currentGameRef}/players/ready`, {method:'POST', credentials:'same-origin'})
             .then(handleResponse)
             .then(showMessage)
             .catch((err)=>{showMessage(err.message)})
+        */
     }
 
     voteYesButton.onclick = ()=>{castVote(true); }

@@ -5,6 +5,7 @@ const express = require('express');
 const http = require('http');
 const uuid = require('uuid')
 const WebSocket = require('ws');
+const io = require('socket.io')
 const util = require('util')
  
 const GameStateManager = require('./GameStateManager')
@@ -15,7 +16,6 @@ var sessionParser;   // for handelling sessions
 var server;           // http server
 var wss;              // websocket server
 var stateManager = GameStateManager()   
-
 
 // we need the same instance of the session parser in express and websocket servers
 sessionParser = session({
@@ -183,6 +183,7 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
 server = http.createServer(app)
 
 // CREATE THE WEBSOCKET SERVER
+/*
 wss = new WebSocket.Server({
     verifyClient: (info, done)=>{
         console.log('Parsing session from request....')
@@ -194,11 +195,14 @@ wss = new WebSocket.Server({
         })
     },
     server
-})
-// CONFIGURE WEBSOCKET SERVER
-wss.on('connection', (ws,req)=>{
+})*/
+wss = io(server);
 
-    let userId = req.session.userId
+// CONFIGURE WEBSOCKET SERVER
+wss.on('connection', (ws)=>{
+
+
+    let userId = ws.id;
 
     // Check to see if the request session exists
 
