@@ -201,94 +201,17 @@ wss = io(server);
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws)=>{
 
-
     let userId = ws.id;
-
-    // Check to see if the request session exists
-
-    // two reasons that there might be an ID - 1. hit the login http endpoint 2. Has previously been in a game and joining again
+    console.log(`connection from user: ${userId}`)
 
     if(userId && ws.currentGame){ // already in a game
         let gameRef = stateManager.getGameForPlayer(userId)
         wss.broadcast(gameRef)
         ws.userId = userId
         ws.currentGame = gameRef
-    }else if(!ws.currentGame){ // Already hit the http endpoint but not in game
-        ws.userId = userId;
-        ws.currentGame = undefined;
     }else{ // Never connected before
-        userId = uuid.v4()
-        req.session.userId = userId;
-        ws.userId = userId;
-        ws.currentGame = undefined;
+        
     }
-
-    /*
-    let gameRef = stateManager.getGameForPlayer(ws.userId)
-    // if already in a game
-    if(gameRef != undefined){
-        wss.broadcast(gameRef)
-    }
-    */ 
-    // if you have an existing session
-
-    // if you don't have an existing session
-    
-
-    ws.on('message', (messageString)=>{
-        debugger
-        // get a list of the connected clients - wss.clients
-
-        let message = JSON.parse(messageString)
-
-        switch(message.type){
-            case 'joinGame':
-                try{
-                    let response = {
-                        "result": "OK",
-                        "type": "joinGame",
-                        "data":{
-                            "gameRef": message.data.gameRef
-                        }
-                    }
-                    
-                    stateManager.getGameState(message.data.gameRef)
-                    ws.send(JSON.stringify(response))
-                }catch(e){
-                    console.error(e)
-                    
-                    let response = {
-                        "result": "Failed",
-                        "type": "joinGame",
-                        "data": {
-                            "errorMessage": `Couldn't find gameRef ${message.gameRef}`
-                        }
-                    }
-
-                    ws.send(JSON.stringify(response))
-                }
-            
-            break
-            case 'createGame':
-
-                let response = {
-                    "result":"OK",
-                    "type":"gameCreate",
-                    "data": {
-                        "gameRef": stateManager.createNewGame()
-                    }
-                }
-
-                console.log(`New game created ${response.data.gameRef}`)
-                ws.send(JSON.stringify(response)) // create a new game and return the reference
-            break;
-            default:
-                console.log("some message sent without a type", message)
-            break;
-
-        }
-
-    })
 
     ws.on("createGame", ()=>{
         try{
@@ -479,6 +402,9 @@ wss.on('connection', (ws)=>{
 
     })
 
+    // tell the websocket that it is connected
+
+    ws.emit("connectSuccess")
 });
 
 wss.broadcast = (gameRef)=>{
@@ -499,7 +425,7 @@ wss.broadcast = (gameRef)=>{
             }
 
             ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
-            ws.send(JSON.stringify(message));
+            //ws.send(JSON.stringify(message));
         }
     })
 }

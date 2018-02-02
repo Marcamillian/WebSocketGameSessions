@@ -79,26 +79,27 @@
     }
 
     const setupWsSession = ()=>{
-        if(ws){
-            ws.onerror = ws.onopen = ws.onclose = null;
-            ws.close()
-        }
 
-        ws = io()
-        ws.onerror = ()=> showMessage('WebSocket error')
-        ws.onopen = ()=> showMessage(' Websocket connection established')
-        ws.onclose = ()=> showMessage('WebSocket connection closed')
+        return new Promise(function(resolve, reject = showMessage){
+            
+            if(ws) resolve(ws)
+            
+            try{
+                const someSocket = io()
 
-        ws.on()
+                someSocket.on("connectSuccess", ()=>{
+                    gameStateDisplay('joinGame')
+                })
 
-
-        ws.onmessage = handleWsMessage;
-        
-        return ws
-        // ??? have to change onmessage to look for the response?
+                resolve(someSocket)
+            }catch(e){
+                reject(e)
+            }
+        })
 
     }
 
+    /*
     const handleWsMessage = ( messageString )=>{
         let message = JSON.parse(messageString.data)
         
@@ -131,7 +132,7 @@
         }
         
 
-    }
+    }*/
 
     const setGameRef = ( gameRef )=>{
         currentGameRef = gameRef
@@ -298,30 +299,18 @@
 
     // BUTTON CLICK FUNCTIONS
 
-    login.onclick = ()=>{  // TODO: convert to websocket
-
-        /*
-        fetch('/login', {method: 'POST', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(stringifyObject)
-            .then(showMessage)
-            .catch((err)=> showMessage(err.message) )
-        */
-    };
-
     logout.onclick = () =>{ // TODO: convert to websocket
-        /*
-        fetch('/logout', {method: 'DELETE', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(stringifyObject)
-            .then(showMessage)
-            .catch((err)=> showMessage(err.message) )
-        */
+        
     }
  
     wsButton.onclick = ()=>{ // TODO: convert to websocket
 
-        setupWsSession();
+        setupWsSession().then((socket)=>{
+            ws = socket;
+            gameStateDisplay("joinGame");
+        }).catch((err)=>{
+            console.log(err)
+        })
 
         /*
         fetch('/login', {method: 'POST', credentials: 'same-origin'})
