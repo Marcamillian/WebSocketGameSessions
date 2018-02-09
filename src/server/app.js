@@ -223,7 +223,7 @@ wss.on('connection', (ws)=>{
                 }
             }
             console.log(`New game created : ${response.data.gameRef}`)
-            ws.emit("gameCreated", JSON.stringify(response))
+            ws.emit("gameCreated", response)
         }catch(e){
             let response = {
                 "result": "failed",
@@ -233,11 +233,11 @@ wss.on('connection', (ws)=>{
                     "internalMessage": e.message
                 }
             }
-            ws.emit("gameCreated", JSON.stringify(response))
+            ws.emit("gameCreated", response)
         }
     })
 
-    ws.on("getGameState", ( {gameRef="XXXX"} = {})=>{
+    /*ws.on("getGameState", ( {gameRef="XXXX"} = {})=>{
         try{
             let gameState = stateManager.getGameState(gameRef)
             ws.emit("sendGameState", {result: "OK", gameState:gameState })
@@ -252,22 +252,26 @@ wss.on('connection', (ws)=>{
         }
         
 
-    })
+    })*/
 
     ws.on("joinGame", ( {playerName = "someName", gameRef="XXXX"} = {} )=>{
-        debugger;
         try{
             stateManager.joinGame(gameRef, ws.userId, playerName)   // add the player to the game
             ws.currentGame = gameRef; // make sure the websocket knows which game its in
+            let data = {
+                gameState: stateManager.getGameState(gameRef),
+                gameRef: gameRef
+            }
             ws.emit("gameJoined",{
                 "result": "OK",
                 "type": "joinGame",
-                "data" : {gameState: stateManager.getGameState(gameRef)}
-            })  // send the message back to the client that joined
+                "data" : data 
+            })
             wss.broadcast(gameRef)  // update everyone in the game
         }catch(e){
             let errorMessage = `Error - joinGame: ${e.message}`
             console.log(errorMessage)
+            
             ws.emit("gameJoined",{
                 result: "failed",
                 type:"joinGame",
@@ -411,6 +415,25 @@ wss.broadcast = (gameRef)=>{
     let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
     let gameState = stateManager.getGameState(gameRef)
 
+
+    Object.keys(wss.sockets.connected).forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
+        let ws = wss.sockets.connected[socketKey]
+        if(playersInGame.includes(ws.userId)){
+            let response = {
+                result: 'OK',
+                type: 'updateGameState',
+                data:{
+                    gameRef: gameRef,
+                    gameState: gameState,
+                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+                }
+            }
+
+            ws.emit("updateGameState",response) // send the gamestate to the players in the game
+        }
+    })
+
+    /*
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
         
         if(playersInGame.includes(ws.userId)){
@@ -427,7 +450,7 @@ wss.broadcast = (gameRef)=>{
             ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
             //ws.send(JSON.stringify(message));
         }
-    })
+    })*/
 }
 
 // START THE SERVER
