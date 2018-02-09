@@ -147,6 +147,11 @@
             console.log(data.message)
         })
 
+        ws.on("policyDiscarded", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
         return ws
     }
 
@@ -288,25 +293,12 @@
         ws.emit("selectPlayer",{targetPlayerName:playerName})
     }
 
-    const castVote = (vote)=>{  // TODO: convert to websocket
-        
+    const castVote = (vote)=>{         
         ws.emit("castVote",{vote:vote})
-        /*
-        fetch(`gameinstance/${currentGameRef}/elect/${vote}`,{method:'PUT', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{showMessage(err.message)})
-        */
     }
 
-    const discardPolicy = (policyalignment)=>{ // TODO: convert to websocket
-        
-        /*
-        fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyalignment}`, {method:'PUT', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{ showMessage(err.message) })
-        */
+    const discardPolicy = (policyAlignment)=>{
+        ws.emit("discardPolicy", {policyDiscard: policyAlignment})
     }
 
     // BUTTON CLICK FUNCTIONS

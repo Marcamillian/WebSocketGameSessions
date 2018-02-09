@@ -391,7 +391,7 @@ wss.on('connection', (ws)=>{
             let gameState = stateManager.update(gameRef)
             endPhase = gameState.gamePhase;
 
-            if(startPhase != gamePhase){
+            if(startPhase != endPhase){
                 console.log("New government")
                 gameState = stateManager.rotateGovernment( {gameRef:gameRef} );
                 gameState = stateManager.clearVotes({gameRef: gameRef})
