@@ -207,7 +207,7 @@ wss.on('connection', (ws)=>{
     if(userId && ws.currentGame){ // already in a game
         let gameRef = stateManager.getGameForPlayer(userId)
         wss.broadcast(gameRef)
-        ws.userId = userId
+        ws.id = userId
         ws.currentGame = gameRef
     }else{ // Never connected before
         
@@ -256,7 +256,7 @@ wss.on('connection', (ws)=>{
 
     ws.on("joinGame", ( {playerName = "someName", gameRef="XXXX"} = {} )=>{
         try{
-            stateManager.joinGame(gameRef, ws.userId, playerName)   // add the player to the game
+            stateManager.joinGame(gameRef, ws.id, playerName)   // add the player to the game
             ws.currentGame = gameRef; // make sure the websocket knows which game its in
             let data = {
                 gameState: stateManager.getGameState(gameRef),
@@ -283,7 +283,7 @@ wss.on('connection', (ws)=>{
     ws.on("leaveGame", ( )=>{
         try{
             let gameRef = ws.currentGame;
-            let userId = ws.userId;
+            let userId = ws.id;
 
             stateManager.leaveGame(gameRef, userId)
             ws.currentGame = undefined;
@@ -307,13 +307,17 @@ wss.on('connection', (ws)=>{
     ws.on("readyUp", ()=>{
         try{
             let gameRef = ws.currentGame;
-            let userId = ws.userId;
-            let gameState = stateManager.readyPlayer(gameRef, userID)
+            let userId = ws.id;
+            let gameState = stateManager.readyPlayer(gameRef, userId)
 
             gameState = stateManager.update(gameRef)
 
             wss.broadcast( gameRef )
-            ws.emit("playerReady", {result:'OK', type: "readyUp", message: "You are ready"})
+            ws.emit("playerReady", {
+                result:'OK',
+                type: "readyUp",
+                data:{message: "You are ready"}
+            })
         }catch(e){
             let errorMessage = `Error - readyUp : ${e.message}`
             console.log(errorMessage)
@@ -321,7 +325,8 @@ wss.on('connection', (ws)=>{
             ws.emit("playerReady",{
                 result:"failed",
                 type:"readyUp",
-                message: errorMessage })
+                data:{ message: errorMessage }
+            })
         }
     })
 
@@ -330,7 +335,7 @@ wss.on('connection', (ws)=>{
         
         try{
             let gameRef = ws.currentGame;
-            let actingPlayer = ws.userId;
+            let actingPlayer = ws.id;
             let targetPlayerRef = stateManager.nameToRef(gameRef, targetPlayerName)
 
             stateManager.selectPlayer({
@@ -356,7 +361,7 @@ wss.on('connection', (ws)=>{
     ws.on("castVote", ( {vote = undefined} = {})=>{
         try{
             let gameRef = ws.currentGame;
-            let userId = ws.userId;
+            let userId = ws.id;
 
             stateManager.castVote(gameRef, userId, vote)
             stateManager.update(gameRef)
@@ -378,7 +383,7 @@ wss.on('connection', (ws)=>{
         
         try{
             let gameRef = ws.currentGame;
-            let playerID = ws.userId;
+            let playerID = ws.id;
             let startPhase = stateManager.getGameState(gameRef).gamePhase;
             let endPhase
 
@@ -418,32 +423,33 @@ wss.broadcast = (gameRef)=>{
 
     Object.keys(wss.sockets.connected).forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
         let ws = wss.sockets.connected[socketKey]
-        if(playersInGame.includes(ws.userId)){
+        if(playersInGame.includes(ws.id)){
             let response = {
                 result: 'OK',
                 type: 'updateGameState',
                 data:{
                     gameRef: gameRef,
                     gameState: gameState,
-                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.id)
                 }
             }
 
             ws.emit("updateGameState",response) // send the gamestate to the players in the game
+            //ws.send(JSON.stringify(message));
         }
     })
 
     /*
     wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
         
-        if(playersInGame.includes(ws.userId)){
+        if(playersInGame.includes(ws.id)){
             let message = {
                 result: 'OK',
                 type: 'updateGameState',
                 data:{
                     gameRef: gameRef,
                     gameState: gameState,
-                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.id)
                 }
             }
 
