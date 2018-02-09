@@ -142,6 +142,11 @@
             console.log(data.message)
         })
 
+        ws.on("voteRegistered", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
         return ws
     }
 
@@ -284,6 +289,8 @@
     }
 
     const castVote = (vote)=>{  // TODO: convert to websocket
+        
+        ws.emit("castVote",{vote:vote})
         /*
         fetch(`gameinstance/${currentGameRef}/elect/${vote}`,{method:'PUT', credentials: 'same-origin'})
             .then(handleResponse)

@@ -345,7 +345,7 @@ wss.on('connection', (ws)=>{
             })
             stateManager.update(gameRef)
             wss.broadcast(gameRef)
-            ws.emit("playerSelected",{result: 'OK', type:"selectPlayer", data:{message: `${targetPlayer} selected`}})
+            ws.emit("playerSelected",{result: 'OK', type:"selectPlayer", data:{message: `${targetPlayerName} selected`}})
         }catch(e){
             let errorMessage = `Error - selectPlayer : ${e.message}`
             console.log(errorMessage)
