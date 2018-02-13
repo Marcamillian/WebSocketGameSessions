@@ -25,6 +25,8 @@ sessionParser = session({
 })
 
 // CONFIGURE EXPRESS APP - serve files from the right folder
+
+app.set('port', (process.env.PORT || 8080))
 app.use(express.static('./src/client'));
 app.use(sessionParser);
 
@@ -460,4 +462,4 @@ wss.broadcast = (gameRef)=>{
 }
 
 // START THE SERVER
-server.listen(8080, ()=> console.log('Listening on http://localhost:8080'))
+server.listen(app.get('port'), ()=> console.log(`Listening on port ${app.get('port')}`))
