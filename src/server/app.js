@@ -8,7 +8,7 @@ const WebSocket = require('ws');
 const io = require('socket.io')
 const util = require('util')
  
-const GameStateManager = require('GameStateManager.js')
+const GameStateManager = require('src/server/GameStateManager.js')
 
 // game objects
 var app = express();  // express app - for handelling routes
