@@ -79,55 +79,80 @@
     }
 
     const setupWsSession = ()=>{
-        if(ws){
-            ws.onerror = ws.onopen = ws.onclose = null;
-            ws.close()
-        }
 
-        ws = new WebSocket(`ws://${location.host}`)
-        ws.onerror = ()=> showMessage('WebSocket error')
-        ws.onopen = ()=> showMessage(' Websocket connection established')
-        ws.onclose = ()=> showMessage('WebSocket connection closed')
-        ws.onmessage = handleWsMessage;
-
-        ws.on("updateGameState", ()=>{
-            console.log("New gameState to render")
+        return new Promise(function(resolve, reject = showMessage){
+            
+            if(ws) resolve(ws)
+            
+            try{
+                resolve(io())
+            }catch(e){
+                reject(e)
+            }
         })
 
     }
 
-    const handleWsMessage = ( messageString )=>{
-        let message = JSON.parse(messageString.data)
+    const addWsEventListeners = (ws)=>{
         
-        if(message.result != 'OK'){
-            console.error(`${message.type} : ERROR - ${message.data.errorMessage}`)
-        }
+        ws.on("updateGameState", ({ result, type, data })=>{
+            const gameRef = data.gameRef;
+            const gameState = data.gameState;
+            const privateInfo = data.privateInfo;
+            let presList = gameState.players.filter((player)=>{return player.president})[0]
+            let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false;
 
-        switch(message.type){
-            case "gameCreate":
-                console.log(`Created & joined game ${message.data.gameRef}`)
-            break
-            case "updateGameState":
-                let gameRef = message.gameRef;
-                let gameState = message.gameState ;
-                let privateInfo = message.privateInfo;
-                let presList = gameState.players.filter((player)=>{return player.president})[0]
-                let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false
-
-                if(!currentGameRef) currentGameRef = gameRef // set the gameRef if not already
-                showGameRef(gameRef)                    //  put the gameRef in the display element
-                showPlayerName(privateInfo.playerName)  // put the playerName in the display element
-                gameStateDisplay(gameState.gamePhase)       // update the class to hide/display elements
-                showPlayers(gameState.players, gameState.gamePhase, isPresident )  // put the list of players in the display element
-                showPrivateInfo(message.privateInfo)// show the privateInfo
-
-            break
-            default:
-                console.log(`Message Type ${message.type} : Unexpected type`)
-            break
-        }
+            if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
+            showGameRef(gameRef);
+            showPlayerName(privateInfo.playerName);
+            gameStateDisplay(gameState.gamePhase)
+            showPlayers(gameState.players, gameState.gamePhase, isPresident)
+            showPrivateInfo(privateInfo)
+        })
         
+        ws.on("connectSuccess",()=>{
+            gameStateDisplay('joinGame')
+        })
 
+        ws.on("gameCreated", ({ result, type, data })=>{
+            console.log(`Game created: ${data.gameRef}`)
+        })
+
+        ws.on("gameJoined", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            const gameRef = data.gameRef;
+            const gameState = data.gameState;
+            const errorMessage = data.errorMessage;
+            gameStateDisplay("lobby")
+            console.log(`Joined game ${data.gameRef}`)
+        })
+
+        ws.on("gameLeft", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
+        ws.on("playerReady", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
+        ws.on("playerSelected", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
+        ws.on("voteRegistered", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
+        ws.on("policyDiscarded", ({result, type, data})=>{
+            if(result !='OK'){ console.log(data.errorMessage); return }
+            console.log(data.message)
+        })
+
+        return ws
     }
 
     const setGameRef = ( gameRef )=>{
@@ -135,13 +160,13 @@
         console.log(`new game ref set to ${currentGameRef}`)
         return gameRef
     }
-
+/*
     const getGameState = (gameState)=>{
         fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
             .then(handleResponse)
             .then(updateGameState)
             .catch((err)=> showMessage(err.message))
-    }
+    }*/
 
     const showPlayers = (playerArray, gamePhase, extraOptions)=>{
         
@@ -265,96 +290,47 @@
     }
 
     const playerSelect = (playerName)=>{
-        fetch(`gameinstance/${currentGameRef}/players/${playerName}`, {method:'PUT', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{showMessage(err.message)})
+        ws.emit("selectPlayer",{targetPlayerName:playerName})
     }
 
-    const castVote = (vote)=>{
-        fetch(`gameinstance/${currentGameRef}/elect/${vote}`,{method:'PUT', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{showMessage(err.message)})
+    const castVote = (vote)=>{         
+        ws.emit("castVote",{vote:vote})
     }
 
-    const discardPolicy = (policyalignment)=>{
-        
-        fetch(`/gameInstance/${currentGameRef}/policyDiscard/${policyalignment}`, {method:'PUT', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{ showMessage(err.message) })
+    const discardPolicy = (policyAlignment)=>{
+        ws.emit("discardPolicy", {policyDiscard: policyAlignment})
     }
 
     // BUTTON CLICK FUNCTIONS
-
-    login.onclick = ()=>{
-        fetch('/login', {method: 'POST', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(stringifyObject)
-            .then(showMessage)
-            .catch((err)=> showMessage(err.message) )
-    };
-
-    logout.onclick = () =>{
-        fetch('/logout', {method: 'DELETE', credentials: 'same-origin'})
-            .then(handleResponse)
-            .then(stringifyObject)
-            .then(showMessage)
-            .catch((err)=> showMessage(err.message) )
-    }
  
     wsButton.onclick = ()=>{
-        fetch('/login', {method: 'POST', credentials: 'same-origin'})
-        .then(handleResponse)
-        .then(stringifyObject)
-        .then(showMessage)
-        .then(setupWsSession)
-        .then(()=>{ gameStateDisplay('joinGame') })
-        .catch((err)=> showMessage(err.message) )
+
+        setupWsSession()
+        .then(addWsEventListeners)
+        .then((socket)=>{
+            ws = socket;
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
+
     }
 
-    createGame.onclick = ()=>{
-        
-        let response = {
-            'type':'createGame',
-            'data': {}
-        }
-
-        ws.send(JSON.stringify(response))
-
+    createGame.onclick = ()=>{ 
+        ws.emit('createGame')
     }
 
     leaveGame.onclick = ()=>{
-
-        fetch(`/gameinstance/${currentGameRef}/players`, {method: 'DELETE', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(stringifyObject)
-            .then(showMessage)
-            .then(()=>{ gameStateDisplay('joinGame') })
-            .catch( (err)=>{ showMessage(err.message) } )
-            
-    }
+        ws.emit("leaveGame")
+    }   
 
     urlJoinGame.onclick = ()=>{
-        let gameRef = getGameRefInput()
-        let myHeaders = new Headers({
-            "Player-Name": getPlayerNameInput()
-        })
-        currentGameRef = gameRef
-
-        fetch(`/gameinstance/${gameRef}/players`, { method: 'POST', credentials:'same-origin', headers: myHeaders })
-            .then(handleResponse)
-            .then(showMessage)
-            //.then(()=>{gameStateDisplay('lobby')})
-            .catch( (err)=>{ showMessage(err.message) })
+        ws.emit("joinGame", {playerName: getPlayerNameInput(), gameRef: getGameRefInput()})
     }
 
-    lobbyReadyButton.onclick = ()=>{
-        fetch(`gameinstance/${currentGameRef}/players/ready`, {method:'POST', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(showMessage)
-            .catch((err)=>{showMessage(err.message)})
+    lobbyReadyButton.onclick = ()=>{ 
+        ws.emit("readyUp")
+        
     }
 
     voteYesButton.onclick = ()=>{castVote(true); }
