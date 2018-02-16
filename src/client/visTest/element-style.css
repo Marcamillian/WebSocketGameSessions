@@ -101,6 +101,11 @@ button{
 .flip-card.flipped{
     transform: rotateX( 180deg )
 }
-
+.flip-card.edge-flip.top{
+    transform-origin: center top;
+}
+.flip-card.edge-flip.top.flipped{
+    transform: translateY(-100%) rotateX(-180deg)
+}
 
 
