@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Homemade+Apple|Roboto" rel="stylesheet">
+        <link rel="stylesheet" href="element-style.css" type="text/css"/>
+    </head>
+
+    <body>
+        <style>
+            body{
+                font-family:"Roboto";
+            }
+            section{
+                margin:40px;
+            }
+            section .envelope{
+                height:20vh;
+                width:80vw;
+                position: relative;
+            }
+        </style>
+
+        <section>
+            <p>button element styling</p> 
+            <button> Connect </button>
+        </section>
+
+        <section>
+            <p> player display element styling</p>
+            <div class="player-card" style="height:60px">
+                <p> playerName </p>
+                <img src="assets/checkmark.svg">
+            </div>
+        </section>
+
+        <section>
+            <p> envelope display styling</p>
+            <div class="envelope" onclick="toggleClass(this, 'open')">
+                <div class="front"></div>
+                <div class="flap">
+                    <p> playerName</p>
+                </div>
+                <div class="env-contents"> </div>
+            </div>
+        </section>
+
+    </body>
+
+    <script>
+        var toggleClass=(element, tag)=>{element.classList.toggle(tag)}
+    </script>
+</html>
