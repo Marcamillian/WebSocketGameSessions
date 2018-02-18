@@ -104,8 +104,9 @@ button{
 }
 .flip-card .back{
     background-color:blue;
-    transform: rotateX( 180deg )
 }
+.flip-card.vertical .back{ transform:rotateX(180deg)}
+.flip-card.horizontal .back{ transform:rotateY(180deg)}
 .flip-card.flipped.vertical{
     transform: rotateX( 180deg )
 }
