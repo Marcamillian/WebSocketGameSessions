@@ -35,14 +35,18 @@
         <section>
             <p> envelope display styling</p>
             <div class="envelope">
+                
                 <div class="sleeve"></div>
 
-                    <div class="flap flip-card edge-flip top" onclick="toggleClass(this, 'flipped')">
-                        <div class="front"> <p> playerName</p> </div>
-                        <div class="back"></div>
-                    </div>
-
-                <div class="env-contents"> </div>
+                <div class="flap flip-card vertical edge-flip top" onclick="toggleClass(this, 'flipped')">
+                    <div class="front"> <p> playerName</p> </div>
+                    <div class="back"> </div>
+                </div>
+                
+                <div class="env-contents flip-card horizontal" onclick="toggleClass(this, 'flipped')">
+                    <div class="front"> Fascist </div>
+                    <div class="back"> Hitler </div>
+                </div>
             </div>
         </section>
 
