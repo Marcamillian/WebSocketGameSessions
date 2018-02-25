@@ -53,6 +53,27 @@
     </body>
 
     <script>
-        var toggleClass=(element, tag)=>{element.classList.toggle(tag)}
+
+        const envelope = document.querySelector('.envelope')
+        const flap = document.querySelector('.envelope .flap')
+
+        var toggleClass=(element, tag)=>{
+            element.classList.toggle(tag)
+        }
+        
+        var toggleEnvelopeOpen = ()=>{
+            toggleClass(flap, "flipped")
+            toggleClass(envelope, "open")
+            // open the flap - add .flipped
+            // wait X seconds
+            // move the contents up
+
+            // !!reverse
+            // move contents down
+            // wait X seconds
+            // close the flap - remove .flipped
+
+        }
+
     </script>
 </html>
