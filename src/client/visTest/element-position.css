@@ -27,6 +27,46 @@ p,div{
     
 }
 
+/** Element visibility per round **/
+
+    /* hide all by default*/
+    div.gref-block,
+    div.player-list,
+    div.card-area,
+    div.envelope,
+    div.connect-items,
+    div.join-controls,
+    button#ready-button{
+        visibility:hidden;
+    }
+
+    .connect .connect-button{
+        visibility:visible;
+    }
+
+    .join-game .join-controls{
+        visibility: visible;
+    }
+
+    .lobby div.player-list,
+    .lobby div.gref-block,
+    .lobby button#ready-button{
+        visibility: visible;
+    }
+
+    .in-game{
+
+    }
+
+    .election{
+
+    }
+
+    .legislative{
+        
+    }
+
+
 /** GAME REF BLOCK **/
 
 .gref-block{ /* positional information */
@@ -66,7 +106,6 @@ p,div{
 }
 
 
-
 /** INTERACTION BLOCK / PLAYER CARDS **/
 
 .card-area{
@@ -94,4 +133,52 @@ p,div{
     position:relative;
 }
 
+/** CONNECT BUTTON **/
+.connect-items{
+    grid-column:2/6;
+    grid-row:4/5;
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size:2em;
+}
+.connect-items button{
+    font-size:inherit;
+}
+
+/** JOIN-DETAILS **/
+.join-controls{
+    grid-column:2/6;
+    grid-row: main-start/buttons-end;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    align-items:center;
+}
+.join-controls input{
+    text-align: center;
+    height:10%;
+    font-size: 1.5em;
+}
+.join-controls #createGame{
+    height:10%;
+    width:70%;
+    font-size:1.5em;
+}
+.join-controls #url-join{
+    height:20%;
+    font-size:2em;
+}
+
+/** LOBBY ITEMS **/
+
+#ready-button{
+    grid-column:2/6;
+    grid-row: buttons-start/buttons-end;
+
+    font-size:2em;
+}
 

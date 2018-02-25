@@ -9,7 +9,7 @@ button{
 
 /* PLAYER CARD - player display*/
     .player-card{
-        display:flex;
+        display:inherit;
 
         font-size: 2em;
         text-align: center;

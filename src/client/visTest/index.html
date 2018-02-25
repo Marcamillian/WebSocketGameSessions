@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</meta>
+
 <head>
     <link rel="stylesheet" type="text/css" href="element-style.css">
     <link rel="stylesheet" type="text/css" href="element-position.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto|Homemade+Apple" rel="stylesheet">
 </head>
 
-<body>
+<body class="lobby">
 
     <div class="gref-block">
         <p> Game Reference</p>
@@ -54,14 +58,32 @@
     </div>
 
     <div class="envelope">
-        <div class="front"> </div>
-        <div class="flap">
-            <p> playerName </p>
+        <div class="sleeve"> </div>
+        <div class="flap flip-card vertical edge-flip top">
+            <div class="front"> <p> playerName</p> </div>
+            <div class="back"> </div>
         </div>
         <div class="env-contents">
-            <img src="./../assets/card_allignment_liberal.svg"/>
+            <div class="player-card flip-card horizontal" onclick="toggleClass(this, 'flipped')">
+                <div class="front"> Fascist </div>
+                <div class="back"> Hitler </div>
+            </div>
         </div>
         
     </div>
 
+    <div class="connect-items">
+        <button id="wsButton"> Connect </button>
+    </div>
+
+    <div class="join-controls">
+        <input id="player_name"placeholder="Player Name"></input>
+        <input id="game_ref" placeholder="Game Reference"></input>
+        <button id="createGame"> Create Game </button>
+        <button id="url-join"> Join Game </button>
+    </div>
+
+    <button id="ready-button"> Ready Up</button>
+
+    <script src="UIInteractions.js"></script>
 </body>
