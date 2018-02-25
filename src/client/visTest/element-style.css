@@ -65,6 +65,9 @@ button{
     .envelope .flap div{
         background-color: #C9B06F;
     }
+    .envelope.open .flap{
+        z-index: 1;
+    }
     .envelope .sleeve{
         position:absolute;
         width:100%;
@@ -72,20 +75,32 @@ button{
         background-color: #C9B06F;
         z-index:2;
     }
+    .envelope.open .sleeve{
+        z-index:3
+    }
     .envelope .env-contents{
-        width:70%;
+        width:90%;
         height:100%;
         margin-left:auto;
         margin-right:auto;
         position:relative;
         transition: top 1s;
+        top:0px;
+        z-index:1;
     }
-    .envelope .env-contents *{
+    .envelope .env-contents .player-card{
+        height:100%;
+        width:100%;
+    }
+    .envelope .env-contents .player-card *{
         box-shadow: 0px 0px 0px 6px #00000075;
         -moz-box-shadow: 0px 0px 0px 6px #00000075;
         -webkit-box-shadow: 4px 4px 6px 0px #00000075;
     }
     .envelope.open .env-contents{
+        z-index:2;
+    }
+    .envelope.open.show-card .env-contents{
         top:-100px;
     }
 
@@ -96,7 +111,6 @@ button{
     .flip-card{
         transform-style: preserve-3d;
         transition: transform 1s;
-        /* might need to do something about transform origin*/
     }
     .flip-card div{
         backface-visibility: hidden;

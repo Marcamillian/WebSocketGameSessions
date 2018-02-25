@@ -38,14 +38,16 @@
                 
                 <div class="sleeve"></div>
 
-                <div class="flap flip-card vertical edge-flip top" onclick="toggleClass(this, 'flipped')">
+                <div class="flap flip-card vertical edge-flip top" onclick="toggleEnvelopeOpen()">
                     <div class="front"> <p> playerName</p> </div>
                     <div class="back"> </div>
                 </div>
                 
-                <div class="env-contents flip-card horizontal" onclick="toggleClass(this, 'flipped')">
-                    <div class="front"> Fascist </div>
-                    <div class="back"> Hitler </div>
+                <div class="env-contents">
+                    <div class="player-card flip-card horizontal" onclick="toggleClass(this, 'flipped')">
+                        <div class="front"> Fascist </div>
+                        <div class="back"> Hitler </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -62,8 +64,17 @@
         }
         
         var toggleEnvelopeOpen = ()=>{
-            toggleClass(flap, "flipped")
-            toggleClass(envelope, "open")
+
+            if(!envelope.classList.contains("open")){
+                toggleClass(flap, "flipped")
+                window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+                window.setTimeout(()=>{toggleClass(envelope, "show-card")}, 1000)
+            }else{
+                toggleClass(envelope,"show-card")
+                window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+                window.setTimeout(()=>{toggleClass(flap, "flipped")}, 1000)
+            }
+           
             // open the flap - add .flipped
             // wait X seconds
             // move the contents up
