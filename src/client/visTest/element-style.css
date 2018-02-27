@@ -24,14 +24,15 @@ button{
     .player-card img{
         display: inline-block;
         width:10%;
-        background-size:cover;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
     }
 
 /* PLAYER CARD DEPENDING ON GAMESTATE*/
-    .join-game .player-card .player-action{
+    .lobby .player-card .player-action{
         background-image:url('./../assets/Checkmark_Wait.svg')
     }
-    .join-game .player-card.ready .player-action{
+    .lobby .player-card.ready .player-action{
         background-image:url('./../assets/Checkmark_Yes.svg')
     }
 
@@ -45,10 +46,10 @@ button{
         background-image:url('./../assets/Chancellor.svg')
     }
     
-    .legislative .player-card .player-action{
+    .election .player-card .player-action{
         background-image:url('./../assets/VotePending.svg')
     }
-    .legislative .player-card.vote-cast .player-action{
+    .election .player-card.vote-cast .player-action{
         background-image:url('./../assets/VoteCast.svg')
     }
 
