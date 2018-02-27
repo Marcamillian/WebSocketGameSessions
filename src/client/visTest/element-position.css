@@ -54,8 +54,11 @@ p,div{
         visibility: visible;
     }
 
-    .in-game{
-
+    .in-game .gref-block,
+    .in-game .player-list,
+    .in-game .card-area,
+    .in-game .envelope{
+        visibility:visible;
     }
 
     .election{
