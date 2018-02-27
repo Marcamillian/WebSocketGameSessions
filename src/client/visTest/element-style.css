@@ -15,18 +15,43 @@ button{
         text-align: center;
 
         background-color: #EBEAE8;
+        display:flex;
+        justify-content:space-around;
     }
     .player-card p{
-        display:inline-block;
-        width:80%;
-        margin-top:auto;
-        margin-bottom:auto;
+        width:70%;
     }
     .player-card img{
         display: inline-block;
-        height:80%;
-        margin-top:1%;
+        width:10%;
+        background-size:cover;
     }
+
+/* PLAYER CARD DEPENDING ON GAMESTATE*/
+    .join-game .player-card .player-action{
+        background-image:url('./../assets/Checkmark_Wait.svg')
+    }
+    .join-game .player-card.ready .player-action{
+        background-image:url('./../assets/Checkmark_Yes.svg')
+    }
+
+    .in-game .player-card.president .player-state {
+        background-image:url('./../assets/President.svg')
+    }
+    .in-game .player-card.prev-gov .player-state {
+        background-image:url('./../assets/PrevGov.svg')
+    }
+    .in-game .player-card.chancellor .player-state {
+        background-image:url('./../assets/Chancellor.svg')
+    }
+    
+    .legislative .player-card .player-action{
+        background-image:url('./../assets/VotePending.svg')
+    }
+    .legislative .player-card.vote-cast .player-action{
+        background-image:url('./../assets/VoteCast.svg')
+    }
+
 
 /* VOTE CARD - gov vote or policy choice*/
     .vote-card{    
@@ -147,6 +172,3 @@ button{
     .flip-card.edge-flip.top.flipped{
         transform: rotateX(-180deg)
     }
-
-
-/*  */
