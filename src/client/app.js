@@ -30,7 +30,7 @@ let exposedFunctions = (()=>{
     let gamePhase;
 
     // DisplayModule
-    let displayModule = ()=>{
+    let displayModule = function displayModule(){
 
         let getSomeHTML = ()=>{
             return "Something"
@@ -107,10 +107,7 @@ let exposedFunctions = (()=>{
             generateVoteCard,
             generateEnvelopeContents
         }
-    }
-
-
-    let testing = displayModule();
+    }()
 
     // utility funtions
     const showMessage = (message)=>{
@@ -440,7 +437,7 @@ let exposedFunctions = (()=>{
     voteNoButton.onclick = ()=>{castVote(false)}
 
     return{
-        testing
+        displayModule
     }
 
 })();
