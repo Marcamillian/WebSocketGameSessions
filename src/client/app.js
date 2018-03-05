@@ -2,21 +2,21 @@
 
 let exposedFunctions = (()=>{
     const messages = document.querySelector('#messages .content');
-    const wsButton = document.querySelector('#wsButton');
+    const wsButton = document.querySelector('#ws-button');
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
-    const createGame = document.querySelector('#createGame')
-    const leaveGame = document.querySelector('#leaveGame')
+    const createGame = document.querySelector('#create-game')
+    const leaveGame = document.querySelector('#leave-game')
     const displayBody = document.querySelector('body');
     const urlJoinGame = document.querySelector('#url-join')
 
 
-    const playerNameInput = document.querySelector('#player_name')
-    const gameRefInput = document.querySelector('#game_ref')
-    let playerDisplay = document.querySelector('#player-list .content')
-    let lobbyReadyButton = document.querySelector('#lobby-ready')
+    const playerNameInput = document.querySelector('#player-name')
+    const gameRefInput = document.querySelector('#game-ref')
+    let playerDisplay = document.querySelector('.player-list')
+    let lobbyReadyButton = document.querySelector('#ready-button')
     let privateInfoDisplay = document.querySelector('#private-info')
-    let gameRefDisplay = document.querySelector('#game-ref-display')
+    let gameRefDisplay = document.querySelector('.gref-block .code')
     let playerNameDisplay = document.querySelector('#name-display')
     let voteYesButton = document.querySelector('#ingame-vote #yes')
     let voteNoButton = document.querySelector('#ingame-vote #no')
@@ -101,11 +101,19 @@ let exposedFunctions = (()=>{
             return divFlipContainer
         }
 
+        const emptyElement = (htmlElement)=>{
+            while(htmlElement.children.length > 0){
+                htmlElement.children[0].remove()
+            }
+            return htmlElement
+        }
+
         return {
             getSomeHTML,
             generatePlayerCard,
             generateVoteCard,
-            generateEnvelopeContents
+            generateEnvelopeContents,
+            emptyElement
         }
     }()
 
@@ -182,12 +190,12 @@ let exposedFunctions = (()=>{
             let presList = gameState.players.filter((player)=>{return player.president})[0]
             let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false;
 
+            //!!!
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
-            showGameRef(gameRef);
-            showPlayerName(privateInfo.playerName);
-            gameStateDisplay(gameState.gamePhase)
-            showPlayers(gameState.players, gameState.gamePhase, isPresident)
-            showPrivateInfo(privateInfo)
+            showGameRef(gameRef); // update the code in the game ref block
+            gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
+            showPlayers(gameState.players) // show al of the players
+            //showPrivateInfo(privateInfo)
         })
         
         ws.on("connectSuccess",()=>{
@@ -251,13 +259,12 @@ let exposedFunctions = (()=>{
     const showPlayers = (playerArray, gamePhase, extraOptions)=>{
         
         // 1-  remove the elements from the list
-        while(playerDisplay.children.length > 0){
-            playerDisplay.children[0].remove()
-        }
+        playerDisplay = displayModule.emptyElement(playerDisplay)
 
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
 
+            /*
             let addEl = document.createElement('li');
             addEl.innerText = playerObject["playerName"]
 
@@ -282,8 +289,8 @@ let exposedFunctions = (()=>{
             // add classes
             if(playerObject['president']) addEl.classList.add("president")
             if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
-
-            playerDisplay.appendChild(addEl)
+            */
+            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject))
         }) 
     }
 
@@ -356,10 +363,7 @@ let exposedFunctions = (()=>{
     }
 
     const showGameRef = (gameRef)=>{
-        clearElement(gameRefDisplay)
-        let el = document.createElement('p')
-        el.innerText = gameRef;
-        gameRefDisplay.appendChild(el)
+        return gameRefDisplay.innerText = gameRef;
     }
 
     const showPlayerName = (playerName)=>{

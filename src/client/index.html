@@ -1,81 +1,71 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <head>
-        <meta charset="utf-8">
-        <title> Express Session Demo</title>
-        <link rel="stylesheet" type="text/css" href="styles.css"/>
-        <script src="./socket.io/socket.io.js"></script>
-    </head>
+</meta>
 
-    <body class="connect">
+<head>
+    <link rel="stylesheet" type="text/css" href="element-style.css">
+    <link rel="stylesheet" type="text/css" href="element-position.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Homemade+Apple" rel="stylesheet">
+    <script src="./socket.io/socket.io.js"></script>
+</head>
 
-        <!-- pre joining the game -->
-        <button id="wsButton" type="button" title="Open WebSocket connection">
-            Connect to server
-        </button>
+<body class="connect">
 
-        <!-- for joining a game session -->
-        <form>
-            <input id="player_name" type="text" label="player_name">Player Name</input>
-            <input id="game_ref" type="text" label="game_ref">Game to Join</input>
-        </form>
+    <div class="gref-block">
+        <p> Game Reference</p>
+        <p class="code"> gh6j </p>
+        <button id="leave-game"> Leave Game </button>
+    </div>
 
-        <button id="login" type="button" title="Simulate login">
-            Simulate login
-        </button>
-        <button id="logout" type="button" title="Simulate logout">
-            Simulate Logout
-        </button>
+    <div class="player-list">
+
+    </div>
+
+    <div class="card-area">
+        <!-- 
+        <button> Ready</button>-->
+        <!-- -->
+        <div class="vote-card">
+            <p> Liberal </p>
+        </div>
+        <div class="vote-card">
+            <p> Liberal </p>
+        </div>
+        <div class="vote-card">
+            <p> Fascist </p>
+        </div>
         
-        <button id="createGame" type="button" title="Start new game instance">
-            Create Game
-        </button>
-        <button id="leaveGame" type="button" title="Leave current game" class="in-game">
-            Leave Game
-        </button>
-        <button id="url-join" type="button"> URL Join </button>
+    </div>
 
-
-        <!-- ingame player display -->
-        <div id="player-list">
-            <h2 class="title"> Players</h2>
-            <ul class="content">
-                <li> Some Player</li>
-            </ul>
+    <div class="envelope">
+        <div class="sleeve"> </div>
+        <div class="flap flip-card vertical edge-flip top">
+            <div class="front"> <p> playerName</p> </div>
+            <div class="back"> </div>
         </div>
-
-        <!-- personal details display -->
-        <div id="game-ref-display">
+        <div class="env-contents">
+            <div class="env-card flip-card horizontal" onclick="toggleClass(this, 'flipped')">
+                <div class="front"> Fascist </div>
+                <div class="back"> Hitler </div>
+            </div>
         </div>
-        <div id="name-display">
-        </div>
+        
+    </div>
 
-        <!-- private info-->
-        <div id="private-info">
-            <p> PrivateInfo</p>
-        </div>
+    <div class="connect-items">
+        <button id="ws-button"> Connect </button>
+    </div>
 
-        <!-- ready button to whilst in lobby-->
-        <button id="lobby-ready"> ready up</button>
+    <div class="join-controls">
+        <input id="player-name"placeholder="Player Name"></input>
+        <input id="game-ref" placeholder="Game Reference"></input>
+        <button id="create-game"> Create Game </button>
+        <button id="url-join"> Join Game </button>
+    </div>
 
+    <button id="ready-button"> Ready Up</button>
 
-        <!-- vote buttons for the  -->
-        <div id="ingame-vote">
-            <p> Vote for Government</p>
-            <button id="yes">Yes</button>
-            <button id="no">No</button>
-        </div>
-
-        <!-- legislative session -->
-        <div id="ingame-policy-pick">
-            <p>Some policies</p>
-            <button>Policy</button>
-            <button>Policy</button>
-        </div>
-
-
-        <script src="app.js"></script> 
-    </body>
-</html>
+    <script src="app.js"></script>
+</body>
