@@ -1,0 +1,24 @@
+<svg width="54" height="46" viewBox="0 0 54 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>Voted</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(918 1479)">
+<g id="Voted">
+<g id="Rectangle 4">
+<mask id="mask0_outline_ins">
+<use xlink:href="#path0_fill" fill="white" transform="translate(-910 -1475)"/>
+</mask>
+<g mask="url(#mask0_outline_ins)">
+<use xlink:href="#path1_stroke_2x" transform="translate(-910 -1475)"/>
+</g>
+</g>
+<g id="Vector 2">
+<use xlink:href="#path2_stroke" transform="translate(-916.5 -1475.5)"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" d="M 0 0L 39 0L 39 36L 0 36L 0 0Z"/>
+<path id="path1_stroke_2x" d="M 0 0L 0 -3L -3 -3L -3 0L 0 0ZM 39 0L 42 0L 42 -3L 39 -3L 39 0ZM 39 36L 39 39L 42 39L 42 36L 39 36ZM 0 36L -3 36L -3 39L 0 39L 0 36ZM 0 3L 39 3L 39 -3L 0 -3L 0 3ZM 36 0L 36 36L 42 36L 42 0L 36 0ZM 39 33L 0 33L 0 39L 39 39L 39 33ZM 3 36L 3 0L -3 0L -3 36L 3 36Z"/>
+<path id="path2_stroke" d="M -1.23109 2.73576C 18.3103 11.5294 31.3365 21.1753 44.986 42.137L 50.014 38.863C 35.6635 16.8247 21.6897 6.47063 1.23109 -2.73576L -1.23109 2.73576ZM 49.7689 -2.73576C 29.3103 6.47063 15.3365 16.8247 0.986006 38.863L 6.01399 42.137C 19.6635 21.1753 32.6897 11.5294 52.2311 2.73576L 49.7689 -2.73576Z"/>
+</defs>
+</svg>

@@ -1,6 +1,6 @@
 /* global fetch, Websocket, location */
 
-(()=>{
+let exposedFunctions = (()=>{
     const messages = document.querySelector('#messages .content');
     const wsButton = document.querySelector('#wsButton');
     const logout = document.querySelector('#logout');
@@ -28,6 +28,86 @@
     // game session variables
     let currentGameRef;
     let gamePhase;
+
+    // DisplayModule
+    let displayModule = function displayModule(){
+
+        let getSomeHTML = ()=>{
+            return "Something"
+        }
+
+        const generatePlayerCard =({
+            playerName = 'playerName',
+            president = false,
+            chancellor = false,
+            ready = false,
+            prevGov = false,
+            proposedChancellor = false,
+            voteCast = undefined} = {})=>{
+                
+                let divPlayerCard = document.createElement('div');
+                let paraPlayerName = document.createElement('p')
+                let imagePlayerState = document.createElement('img');
+                let imagePlayerAction = document.createElement('img');
+
+                divPlayerCard.classList.add('player-card');
+                if (president) divPlayerCard.classList.add('president');
+                if (chancellor) divPlayerCard.classList.add('chancellor');
+                if (ready) divPlayerCard.classList.add('ready');
+                if (prevGov) divPlayerCard.classList.add('prev-gov')
+                if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
+                if (voteCast) divPlayerCard.classList.add('vote-cast')
+
+                paraPlayerName.innerText = playerName;
+
+                divPlayerCard.appendChild(imagePlayerState);
+                divPlayerCard.appendChild(paraPlayerName);
+                divPlayerCard.appendChild(imagePlayerAction);
+
+                return divPlayerCard
+        }
+
+        const generateVoteCard = (cardText)=>{
+            let divVoteCard = document.createElement('div')
+            let paraCardText = document.createElement('p')
+
+            divVoteCard.classList.add('vote-card');
+            paraCardText.innerText = cardText;
+
+            divVoteCard.appendChild(paraCardText)
+
+            return divVoteCard;
+        }
+
+        const generateEnvelopeContents = ({
+            character = "<Character not defined>",
+            alignment = "<Alignment not defined>"})=>{
+
+            let divFlipContainer = document.createElement('div');
+            let divCardFront = document.createElement('div');
+            let divCardBack = document.createElement('div');
+            
+            divFlipContainer.classList.add('flip-card','horizontal')
+
+            divCardFront.classList.add('front')
+            divCardFront.innerHTML = alignment;
+            
+            divCardBack.classList.add('back');
+            divCardBack.innerHTML = character;
+
+            divFlipContainer.appendChild(divCardFront);
+            divFlipContainer.appendChild(divCardBack);
+
+            return divFlipContainer
+        }
+
+        return {
+            getSomeHTML,
+            generatePlayerCard,
+            generateVoteCard,
+            generateEnvelopeContents
+        }
+    }()
 
     // utility funtions
     const showMessage = (message)=>{
@@ -336,6 +416,8 @@
     voteYesButton.onclick = ()=>{castVote(true); }
     voteNoButton.onclick = ()=>{castVote(false)}
 
-
+    return{
+        displayModule
+    }
 
 })();

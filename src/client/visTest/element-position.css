@@ -1,0 +1,187 @@
+
+html{
+    height: calc(100% - 15px);
+    width: calc(100% - 32px);
+}
+
+body{
+    height:100%;
+    width:100%;
+
+    /*max-width: 1000px;*/
+
+    padding: 15px 16px 0px 16px;
+    margin:0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: [header-start] 10% [header-mid] 10% [header-end] 2% [main-start] 45% [main-end] 2% [buttons-start] 19% [buttons-end] 2% [envelope-start] 10% [envelope-end];   
+    align-items: stretch;
+    justify-items: stretch;
+
+    font-family:'Roboto';
+}
+
+p,div{
+    padding:0px;
+    margin:0px;
+    
+}
+
+/** Element visibility per round **/
+
+    /* hide all by default*/
+    div.gref-block,
+    div.player-list,
+    div.card-area,
+    div.envelope,
+    div.connect-items,
+    div.join-controls,
+    button#ready-button{
+        visibility:hidden;
+    }
+
+    .connect .connect-button{
+        visibility:visible;
+    }
+
+    .join-game .join-controls{
+        visibility: visible;
+    }
+
+    .lobby div.player-list,
+    .lobby div.gref-block,
+    .lobby button#ready-button{
+        visibility: visible;
+    }
+
+    .in-game .gref-block,
+    .in-game .player-list,
+    .in-game .card-area,
+    .in-game .envelope{
+        visibility:visible;
+    }
+
+    .election{
+
+    }
+
+    .legislative{
+        
+    }
+
+
+/** GAME REF BLOCK **/
+
+.gref-block{ /* positional information */
+    display:flex;
+    flex-direction: column;
+    grid-column: 5 / 7;
+    grid-row: header-start / header-mid;
+    text-align: center;
+}
+.gref-block button{
+    width:auto;
+    margin: 2px auto 2px auto;
+    font-size: 0.75em;
+}
+.gref-block .code{
+    font-size: 2em;
+}
+.gref-block p{
+    font-size: 0.75em;
+}
+
+/** PLAYER LIST **/
+
+.player-list{
+    grid-column: 1 / 7;
+    grid-row: main-start / main-end;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.player-list div{
+    width: 100%;
+    height: 21%;
+}
+
+
+/** INTERACTION BLOCK / PLAYER CARDS **/
+
+.card-area{
+    grid-column: 1/7;
+    grid-row: buttons-start / buttons-end;
+
+    display:flex;
+    justify-content:space-around;
+    align-items: center;
+}
+.card-area button, .card-area .vote-card{
+    width: 30%;
+    font-size:1.5em;
+}
+.card-area button{
+    height:50%
+}
+
+/** ENVELOPE **/
+
+.envelope{
+    grid-column: 2/6;
+    grid-row: envelope-start / envelope-end;
+    font-size:1.5em;
+    position:relative;
+}
+
+/** CONNECT BUTTON **/
+.connect-items{
+    grid-column:2/6;
+    grid-row:4/5;
+
+    display:flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size:2em;
+}
+.connect-items button{
+    font-size:inherit;
+}
+
+/** JOIN-DETAILS **/
+.join-controls{
+    grid-column:2/6;
+    grid-row: main-start/buttons-end;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    align-items:center;
+}
+.join-controls input{
+    text-align: center;
+    height:10%;
+    font-size: 1.5em;
+}
+.join-controls #createGame{
+    height:10%;
+    width:70%;
+    font-size:1.5em;
+}
+.join-controls #url-join{
+    height:20%;
+    font-size:2em;
+}
+
+/** LOBBY ITEMS **/
+
+#ready-button{
+    grid-column:2/6;
+    grid-row: buttons-start/buttons-end;
+
+    font-size:2em;
+}
+
