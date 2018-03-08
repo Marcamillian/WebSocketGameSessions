@@ -60,6 +60,9 @@ let exposedFunctions = (()=>{
 
                 paraPlayerName.innerText = playerName;
 
+                imagePlayerState.classList.add('player-state');
+                imagePlayerAction.classList.add('player-action');
+
                 divPlayerCard.appendChild(imagePlayerState);
                 divPlayerCard.appendChild(paraPlayerName);
                 divPlayerCard.appendChild(imagePlayerAction);
@@ -204,6 +207,7 @@ let exposedFunctions = (()=>{
 
         ws.on("gameCreated", ({ result, type, data })=>{
             console.log(`Game created: ${data.gameRef}`)
+            gameRefInput.value = data.gameRef;
         })
 
         ws.on("gameJoined", ({result, type, data})=>{

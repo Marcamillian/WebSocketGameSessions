@@ -30,27 +30,27 @@ button{
 
 /* PLAYER CARD DEPENDING ON GAMESTATE*/
     .lobby .player-card .player-action{
-        background-image:url('./../assets/Checkmark_Wait.svg')
+        background-image:url('./assets/Checkmark_Wait.svg')
     }
     .lobby .player-card.ready .player-action{
-        background-image:url('./../assets/Checkmark_Yes.svg')
+        background-image:url('./assets/Checkmark_Yes.svg')
     }
 
     .in-game .player-card.president .player-state {
-        background-image:url('./../assets/President.svg')
+        background-image:url('./assets/President.svg')
     }
     .in-game .player-card.prev-gov .player-state {
-        background-image:url('./../assets/PrevGov.svg')
+        background-image:url('./assets/PrevGov.svg')
     }
     .in-game .player-card.chancellor .player-state {
-        background-image:url('./../assets/Chancellor.svg')
+        background-image:url('./assets/Chancellor.svg')
     }
     
     .election .player-card .player-action{
-        background-image:url('./../assets/VotePending.svg')
+        background-image:url('./assets/VotePending.svg')
     }
     .election .player-card.vote-cast .player-action{
-        background-image:url('./../assets/VoteCast.svg')
+        background-image:url('./assets/VoteCast.svg')
     }
 
 
