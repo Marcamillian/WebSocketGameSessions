@@ -21,7 +21,11 @@ let exposedFunctions = (()=>{
     let voteYesButton = document.querySelector('#ingame-vote #yes')
     let voteNoButton = document.querySelector('#ingame-vote #no')
     let policyPickDisplay = document.querySelector('#ingame-policy-pick')
+    let envelopeContents = document.querySelector(".envelope .env-contents")
 
+    let envelope = document.querySelector('.envelope');
+    let envelopeFlap = document.querySelector('.envelope .flap')
+    
     
     let ws;
 
@@ -83,6 +87,7 @@ let exposedFunctions = (()=>{
         }
 
         const generateEnvelopeContents = ({
+
             character = "<Character not defined>",
             alignment = "<Alignment not defined>"})=>{
 
@@ -198,7 +203,7 @@ let exposedFunctions = (()=>{
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
             showPlayers(gameState.players) // show al of the players
-            //showPrivateInfo(privateInfo)
+            showPrivateInfo(privateInfo) // TODO: The information that is passed here doesn't include character or role for some reason
         })
         
         ws.on("connectSuccess",()=>{
@@ -252,13 +257,7 @@ let exposedFunctions = (()=>{
         console.log(`new game ref set to ${currentGameRef}`)
         return gameRef
     }
-/*
-    const getGameState = (gameState)=>{
-        fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(updateGameState)
-            .catch((err)=> showMessage(err.message))
-    }*/
+
 
     const showPlayers = (playerArray, gamePhase, extraOptions)=>{
         
@@ -267,33 +266,6 @@ let exposedFunctions = (()=>{
 
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
-
-            /*
-            let addEl = document.createElement('li');
-            addEl.innerText = playerObject["playerName"]
-
-            switch(gamePhase){
-                case "lobby":
-                    if(playerObject['ready']) {
-                        addEl.classList.add('ready')
-                    }
-                break;
-                case "proposal":
-                    if(extraOptions && !playerObject.president && !playerObject.prevGov){
-                        let electButton = document.createElement('button')
-                        electButton.addEventListener('click',()=>{playerSelect(playerObject["playerName"])})
-                        electButton.innerText = "Select Player"
-                        
-                        addEl.appendChild(electButton)
-                    }
-                break;
-            }
-            
-
-            // add classes
-            if(playerObject['president']) addEl.classList.add("president")
-            if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
-            */
             playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject))
         }) 
     }
@@ -306,8 +278,22 @@ let exposedFunctions = (()=>{
         return gameRefInput.value
     }
 
-    const showPrivateInfo = (privateInfo)=>{
+    const showPrivateInfo = ({
+        playerName = "<No name given>",
+        character = "<No charater>",
+        alignment = "<No Alignment>",
+        teamMates = ["No team mates"],
+        policyHand =  ["No cards"]}={} )=>{
 
+        // set the name on the envelope
+        playerNameDisplay.innerText = playerName;
+
+        // generate the cards
+        envelopeContents = displayModule.emptyElement(envelopeContents);
+        envelopeContents = envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment))
+
+        return 
+        /*
         let teamTitle, teamEl,
          alignmentEl, characterEl,
          policyPickTitle, policyButtons;
@@ -350,12 +336,13 @@ let exposedFunctions = (()=>{
             })
         }
 
-        // TODO: if there is a policyHand attached - show the policyHand in the voting things
 
         privateInfoDisplay.appendChild(alignmentEl)
         privateInfoDisplay.appendChild(characterEl)
         if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
         if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
+
+        */
     }
 
     const clearElement = (element)=>{
@@ -389,6 +376,22 @@ let exposedFunctions = (()=>{
         ws.emit("discardPolicy", {policyDiscard: policyAlignment})
     }
 
+    const toggleEnvelopeOpen = ()=>{
+        if(!envelope.classList.contains('open')){
+            toggleClass(envelopeFlap, "flipped")
+            window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+            window.setTimeout(()=>{toggleClass(envelope, "show-card")}, 1000)
+        }else{
+            toggleClass(envelope, "show-card")
+            window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+            window.setTimeout(()=>{toggleClass(envelopeFlap, "flipped")}, 1000)
+        }
+    }
+
+    const toggleClass = (element, tag)=>{
+        element.classList.toggle(tag);
+    }
+
     // BUTTON CLICK FUNCTIONS
  
     wsButton.onclick = ()=>{
@@ -420,9 +423,14 @@ let exposedFunctions = (()=>{
         ws.emit("readyUp")
         
     }
-
+    /* TODO: get the election buttons working/generated again
     voteYesButton.onclick = ()=>{castVote(true); }
     voteNoButton.onclick = ()=>{castVote(false)}
+    */
+    envelopeFlap.addEventListener("click", ()=>{
+        toggleEnvelopeOpen()
+    })
+
 
     return{
         displayModule
