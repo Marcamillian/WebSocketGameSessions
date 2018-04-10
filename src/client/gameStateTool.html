@@ -1,49 +1,145 @@
 <!DOCTYPE html>
 <html>
 <header>
+    <style>
+        /* FORM AREAS */
+        .state-form{
+            display:flex;
+            flex-wrap:wrap;
+        }
+        .game-details, .player-details{
+            width:calc( 50% - 32px);
+        }
 
+
+
+        /* PLAYER OPTION DISPLAY */
+        .all-player-options{
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        .player-details{
+            display:flex;
+        }
+        fieldset.player-options{
+            width:calc( 50% - 32px);
+        }
+        .player-options label{
+            font-weight: bold;
+        }
+        .player-options div label{
+            font-weight:normal;
+        }
+
+    </style>
 </header>
 
 <body>
-    <form>
-        <label> gameRef </label>
-        <input type=text>
-
-        <label>gamePhase</label>
-
-        <label>players</label>
-
-        <label>player1</label>
-            <label> playerName</label>
-            <label> playerRef</label>
-            <label> alignment</label>
-            <label> character</label>
-            <label> president </label>
-            <label> ready</label>
-            <label> prevGov</label>
-            <label> proposedChancellor</label>
-            <label> voteCast</label>
-
-        <label>policyDeck</label>
-            <label>fascist</label>
-            <label>liberal</label>
-
-        <label> policyDiscardPile</label>
-            <label> fascist</label>
-            <lael> liberal</lael>
+    <form class="state-form">
+        <fieldset class="game-details">
+            <legend> Game Details</legend>
+            <div>
+                <h3> gameRef </h3>
+                <input type=text>
+            </div>
         
-        <label> policyHand</label>
-            <label> fascist</label>
-            <label>liberal</label>
+            <div>
+                <h3>gamePhase</h3>
+                <select>
+                    <option>lobby</option>
+                    <option>proposal</option>
+                    <option>election</option>
+                    <option>legislative</option> 
+                    <option>power</option>
+                    <option>endgame</option>
+                </select>
+            </div>
+
+            <fieldset>
+                <legend>Cards</legend>
+                <div>
+                    <h3> policyHand</h3>
+                    <label> fascist</label>
+                    <input type="number">
+                    <label>liberal</label>
+                    <input type="number">
+                </div>
+
+                <div>
+                    <h3> policyDiscardPile</h3>
+                    <label> fascist</label>
+                    <input type="number">
+                    <label>liberal</label>
+                    <input type="number">
+                </div>
+
+                <div>
+                    <h3>policyDeck</h3>
+                    <label>fascist</label>
+                    <p class="deck-contents fascist"></h3>
+                    <label>liberal</label>
+                    <p class="deck-contents liberal"></h3>
+                </div>
+            </fieldset>
             
-        <label> voteFailTrack</label>
+            <fieldset>
+                <legend>Progress Tracks</legend>
+                <div>
+                    <h3> voteFailTrack</h3>
+                    <input type="radio" name="fail-track" value=0>0</input>
+                    <input type="radio" name="fail-track" value=1>1</input>
+                    <input type="radio" name="fail-track" value=2>2</input>
+                    <input type="radio" name="fail-track" value=3>3</input>
+                </div>
+                            
 
-        <label> policyTrackFascist</label>
+                <div>
+                    <h3> policyTrackFascist</h3>
+                    <input type="radio" name="policy-track-fascist" value=0>0
+                    <input type="radio" name="policy-track-fascist" value=1>1
+                    <input type="radio" name="policy-track-fascist" value=2>2
+                    <input type="radio" name="policy-track-fascist" value=3>3
+                    <input type="radio" name="policy-track-fascist" value=2>4
+                    <input type="radio" name="policy-track-fascist" value=3>5
+                </div>
 
-        <label> policyTrackLiberal</label>
+                <div>
+                    <h3> policyTrackLiberal</h3>
+                    <input type="radio" name="policy-track-liberal" value=0>0</input>
+                    <input type="radio" name="policy-track-liberal" value=1>1</input>
+                    <input type="radio" name="policy-track-liberal" value=2>2</input>
+                    <input type="radio" name="policy-track-liberal" value=3>3</input>
+                    <input type="radio" name="policy-track-liberal" value=2>4</input>
+                    <input type="radio" name="policy-track-liberal" value=3>5</input>
+                </div>
 
-        <label> power target</label>
+                <div>
+                    <h3> power target</h3>
+                </div>
+            </fieldset>
+            
+        </fieldset>
+
+        <fieldset class="player-details">
+            <legend> Player Details</legend>
+            <h3>player number</h3>
+            <select class="player-number">
+                <option value=5>5</option>
+                <option value=6>6</option>
+                <option value=7>7</option>
+                <option value=8>8</option>
+                <option value=9>9</option>
+                <option value=10>10</option>
+            </select>
+
+            <h3>players</h3>
+            <div class="all-player-options">
+            </div>
+        </fieldset>
 
     </form>
+
 </body>
+<script src="stateTool.js"></script>
 </html>
