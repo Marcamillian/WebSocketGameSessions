@@ -1,6 +1,47 @@
 /* DEFINE CONSTANTS */
 
 const allPlayerOptions = document.querySelector('.all-player-options');
+// player option defaults
+const optionDefault =  {
+  alignment : {value:'liberal', formName:'alignment'},
+  character :{value:'liberal', formName:'character'},
+  president : {value:'false', formName:'president'},
+  chancellor: {value: 'false', formName:'chancellor'},
+  ready : {value:'true', formName:'ready'},
+  prevGov : {value:'false', formName:'prev-gov'},
+  proposedChancellor : {value:'false', formName:'proposed-chancellor'},
+  voteCast : {value:'undefined', formName:'vote-cast'}
+}
+
+const gameStateTemplate = {
+    gamePhase: 'lobby',     // 'lobby' || 'proposal' || 'election' || 'legislative' || 'power' || 'endgame'
+    players:[], // collection of player objects
+    policyDeck:[], // collection of card objects to be drawn
+    policyDiscardPile:[], // collection of card objects discarded
+    policyHand:[],  // hand of cards for the govornment to pick
+    voteFailTrack:[false, false, false],  // prevent repeated failed elections
+    policyTrackFascist:[false, false, false, false, false, false], // 6 long - policies played
+    policyTrackLiberal:[false, false, false, false, false],  // 5 long - policies played
+    powerTarget: undefined  // target of the power 
+}
+
+const playerTemplate = {
+  playerRef: undefined, // string to link req.session
+  playerName: undefined, // string for display name
+
+  alignment: undefined, // string to show what side they are on
+  character: undefined, // if they are fascist/hitler/liberal
+
+  president: false,   // currently govornment
+  chancellor: false,  // currently govornment
+  // lobby phase
+  ready: false,           // ready to start the game
+  // proposal phase
+  prevGov: false,       // if they were in the last successful gov
+  proposedChancellor: false,
+  // vote phase
+  voteCast: undefined
+}
 
 /* GENERATE HTML ELEMENTS */    
 
@@ -22,6 +63,9 @@ const genPlayerFormEl = (playerNumber)=>{
 
     playerContainer.appendChild(createLabel('president'));
     playerContainer.appendChild(createRadiogroup(`p${playerNumber}_president`, ['true','false'],'false'));
+
+    playerContainer.appendChild(createLabel('chancellor'));
+    playerContainer.appendChild(createRadiogroup(`p${playerNumber}_chancellor`, ['true','false'],'false'));
 
     playerContainer.appendChild(createLabel('ready'))
     playerContainer.appendChild(createRadiogroup(`p${playerNumber}_ready`, ['true', 'false'],'true'));
@@ -105,16 +149,6 @@ const retrievePlayerSetting = (playerNumber = 0, optionName)=>{
 
 const setPlayerDefault = (playerHtml,options={}, playerNumber=0)=>{
 
-  const optionDefault =  {
-    alignment : {value:'liberal', formName:'alignment'},
-    character :{value:'liberal', formName:'character'},
-    president : {value:'false', formName:'president'},
-    ready : {value:'true', formName:'ready'},
-    prevGov : {value:'false', formName:'prev-gov'},
-    proposedChancellor : {value:'false', formName:'proposed-chancellor'},
-    voteCast : {value:'undefined', formName:'vote-cast'}
-  }
-
   playerHtml.querySelector(`input[name=p${playerNumber}_player-name]`).value = `player_${playerNumber}`;
   playerHtml.querySelector(`input[name=p${playerNumber}_player-ref]`).value = `p${playerNumber}`;
 
@@ -138,6 +172,38 @@ const setAllPlayersDefault = ()=>{
         setPlayerDefault(playerHtml, undefined, index);
     })
     return true;
+}
+
+const getAllPlayerSettings = ()=>{
+    let playerSettings = [];
+
+    document.querySelectorAll('.player-options').forEach((playerOptionsEl, index)=>{
+
+        let player = Object.assign({},playerTemplate);
+
+        player['playerName'] = playerOptionsEl.querySelector(`input[name=p${index}_player-name]`).value;
+        player['playerRef'] = playerOptionsEl.querySelector(`input[name=p${index}_player-ref]`).value;
+        player['alignment'] = playerOptionsEl.querySelector(`input[name=p${index}_alignment]`).value;
+        player['character'] = playerOptionsEl.querySelector(`input[name=p${index}_character]`).value;
+        player['president'] = playerOptionsEl.querySelector(`input[name=p${index}_president]`).value;
+        player['chancellor'] = playerOptionsEl.querySelector(`input[name=p${index}_chancellor]`).value;
+        player['ready'] = playerOptionsEl.querySelector(`input[name=p${index}_ready]`).value;
+        player['prevGov'] = playerOptionsEl.querySelector(`input[name=p${index}_prev-gov]`).value;
+        player['proposedChancellor'] = playerOptionsEl.querySelector(`input[name=p${index}_proposed-chancellor]`).value;
+        player['voteCast'] = playerOptionsEl.querySelector(`input[name=p${index}_vote-cast]`).value;
+
+        playerSettings.push(player);
+    })
+
+    return playerSettings;
+}
+
+const getCreatedGameState = ()=>{
+    let gameState = Object.assign({},gameStateTemplate);
+
+    gameState.players = getAllPlayerSettings()
+
+    return gameState;
 }
 
 /* ==== SET UP EVENT LISTENERS */
