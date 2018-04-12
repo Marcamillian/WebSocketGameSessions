@@ -43,6 +43,8 @@ const playerTemplate = {
   voteCast: undefined
 }
 
+const policyDeckNumbers = {fascist: 11, liberal:6}
+
 /* GENERATE HTML ELEMENTS */    
 
 const genPlayerFormEl = (playerNumber)=>{
@@ -120,8 +122,6 @@ const createRadiogroup = (labelName, options = [], checkedValue)=>{
         button.setAttribute('type', 'radio');
         button.setAttribute('name', labelName);
         button.setAttribute('value', option)
-        // TODO: this is not setting the radiobutton as checked
-          // because they have the same name - only the last is set
 
         label.innerText = option;
 
@@ -204,6 +204,46 @@ const getCreatedGameState = ()=>{
     gameState.players = getAllPlayerSettings()
 
     return gameState;
+}
+
+// TODO: check that card numbers are right
+const checkCardNumbers = ()=>{
+  let policyHand = {
+    fascist: Number(document.querySelector('.card-info .policy-hand.fascist').value),
+    liberal: Number(document.querySelector('.card-info .policy-hand.liberal').value)  
+  }
+
+  let policyDiscard = {
+    fascist: Number(document.querySelector('.card-info .policy-discard.fascist').value),
+    liberal: Number(document.querySelector('.card-info .policy-discard.liberal').value)
+  }
+
+  let policyDeckElements = {
+    fascist: document.querySelector('.card-info .policy-deck.fascist'),
+    liberal: document.querySelector('.card-info .policy-deck.liberal')
+  }
+  
+  if(policyHand.fascist + policyHand.liberal > 3) throw new Error(`Too many cards in hand | ${policyHand.fascist + policyHand.liberal}`);
+
+  let notInDeck = {
+      liberal: policyHand.liberal + policyDiscard.liberal,
+      fascist: policyHand.fascist + policyDiscard.fascist
+  }
+
+  if (notInDeck.liberal > policyDeckNumbers.liberal) throw new Error(`Too many liberal cards in play - ${notInDeck.liberal} is bigger than the max in deck: ${policyDeckNumbers.liberal}`);
+  if (notInDeck.liberal > policyDeckNumbers.liberal) throw new Error(`Too many fascist cards in play - ${notInDeck.fascist} is bigger than the max in deck: ${policyDeckNumbers.fascist}`);
+
+  return {
+      liberal: policyDeckNumbers.liberal - notInDeck.liberal,
+      fascist: policyDeckNumbers.fascist - notInDeck.fascist
+  }
+}
+
+const setDeckNumbers = ()=>{
+    let deck = checkCardNumbers();
+    
+    document.querySelector('.policy-deck.fascist').innerHTML = deck.fascist;
+    document.querySelector('.policy-deck.liberal').innerHTML = deck.liberal;
 }
 
 /* ==== SET UP EVENT LISTENERS */
