@@ -141,6 +141,7 @@ const emptyElement = (el)=>{
 
 /* CHANGING AND RETRIEVING FORM VALUES */
 
+// player Information
 const retrievePlayerSetting = (playerNumber = 0, optionName)=>{
     const playerOptionEl = document.querySelectorAll('.player-options')[playerNumber]
 
@@ -198,25 +199,11 @@ const getAllPlayerSettings = ()=>{
     return playerSettings;
 }
 
-const getCreatedGameState = ()=>{
-    let gameState = Object.assign({},gameStateTemplate);
-
-    gameState.players = getAllPlayerSettings()
-
-    return gameState;
-}
-
-// TODO: check that card numbers are right
+// card information
 const checkCardNumbers = ()=>{
-  let policyHand = {
-    fascist: Number(document.querySelector('.card-info .policy-hand.fascist').value),
-    liberal: Number(document.querySelector('.card-info .policy-hand.liberal').value)  
-  }
-
-  let policyDiscard = {
-    fascist: Number(document.querySelector('.card-info .policy-discard.fascist').value),
-    liberal: Number(document.querySelector('.card-info .policy-discard.liberal').value)
-  }
+    let cardNumbers = getCardData();
+    let policyHand = cardNumbers.policyHand;
+    let policyDiscard = cardNumbers.policyDiscard;
 
   let policyDeckElements = {
     fascist: document.querySelector('.card-info .policy-deck.fascist'),
@@ -233,6 +220,7 @@ const checkCardNumbers = ()=>{
   if (notInDeck.liberal > policyDeckNumbers.liberal) throw new Error(`Too many liberal cards in play - ${notInDeck.liberal} is bigger than the max in deck: ${policyDeckNumbers.liberal}`);
   if (notInDeck.liberal > policyDeckNumbers.liberal) throw new Error(`Too many fascist cards in play - ${notInDeck.fascist} is bigger than the max in deck: ${policyDeckNumbers.fascist}`);
 
+  // return how many 
   return {
       liberal: policyDeckNumbers.liberal - notInDeck.liberal,
       fascist: policyDeckNumbers.fascist - notInDeck.fascist
@@ -246,6 +234,40 @@ const setDeckNumbers = ()=>{
     document.querySelector('.policy-deck.liberal').innerHTML = deck.liberal;
 }
 
+const getCardData = ()=>{
+    let policyHand = {
+        fascist: Number(document.querySelector('.card-info .policy-hand.fascist').value),
+        liberal: Number(document.querySelector('.card-info .policy-hand.liberal').value)  
+    }
+
+    let policyDiscard = {
+        fascist: Number(document.querySelector('.card-info .policy-discard.fascist').value),
+        liberal: Number(document.querySelector('.card-info .policy-discard.liberal').value)
+    }
+
+    let policyDeck = {
+        fascist: Number(document.querySelector('p.policy-deck.fascist').innerText) || 0,
+        liberal: Number(document.querySelector('p.policy-deck.liberal').innerText) || 0
+    }
+
+    return {
+        policyHand,
+        policyDiscard,
+        policyDeck
+    }
+}
+
+const createFilledArray = (fillNumber, arrayLength, baseOption, fillOption)=>{
+    if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
+
+    let fillArray = Array(arrayLength).fill(baseOption);
+
+    return fillArray.map((value, index)=>{return (index < fillNumber) ? true : false})
+}
+
+
+// track information
+
 const getProgressTrackData = ()=>{
     const voteFailSetting = document.querySelector('input[name=fail-track]:checked').value;
     const liberalTrackSetting = document.querySelector('input[name=policy-track-liberal]:checked').value;
@@ -253,9 +275,64 @@ const getProgressTrackData = ()=>{
 
     return{
         voteFailTrack: voteFailSetting,
-        voteTrackLiberal: liberalTrackSetting,
-        voteTrackFascist: fascistTrackSetting
+        policyTrackLiberal: liberalTrackSetting,
+        policyTrackFascist: fascistTrackSetting
     }
+}
+
+const createBooleanTrack = (fillNumber, trackLength)=>{
+    if(fillNumber > trackLength) throw new Error(`number higher than track length fillNumber:${fillNumber} > trackLength:${trackLength}`)
+    let track = Array(trackLength).fill(false);
+    
+    return track.map((value, index)=>{ return (index < fillNumber) ? true : false})
+}
+
+
+// game phase
+const getGameReference = ()=>{
+    return document.querySelector('input[name=game-ref]').value;
+}
+
+// game phase
+const getGamePhase = ()=>{
+    return document.querySelector('select[name=game-phase]').value;
+}
+
+// getting complete state
+const getCreatedGameState = ()=>{
+    let gameState = Object.assign({},gameStateTemplate);
+    let gameRef = getGameReference();
+    let cardData = getCardData();
+    let progressTrackData = getProgressTrackData();
+
+    // game phase
+    gameState.gamePhase = getGamePhase()
+    // player information
+    gameState.players = getAllPlayerSettings()
+
+    // card information
+    gameState.policyHand = createFilledArray(cardData.policyHand.liberal,
+        cardData.policyHand.liberal + cardData.policyHand.fascist,
+        'fascist',
+        'liberal'
+    )
+    gameState.policyDiscardPile = createFilledArray( cardData.policyHand.liberal,
+        cardData.policyDiscard.liberal + cardData.policyDiscard.fascist,
+        'fascist',
+        'liberal'
+    )
+    gameState.policyDeck = createFilledArray( cardData.policyDeck.liberal,
+        cardData.policyDeck.liberal + cardData.policyDeck.fascist,
+        'fascist',
+        'liberal'
+    )
+
+    // track information
+    gameState.voteFailTrack = createBooleanTrack(progressTrackData.voteFailTrack, gameStateTemplate.voteFailTrack.length);
+    gameState.policyTrackLiberal = createBooleanTrack(progressTrackData.policyTrackLiberal, gameStateTemplate.policyTrackLiberal.length);
+    gameState.policyTrackFascist = createBooleanTrack(progressTrackData.policyTrackFascist, gameStateTemplate.policyTrackFascist.length);
+
+    return gameState;
 }
 
 /* ==== SET UP EVENT LISTENERS */
