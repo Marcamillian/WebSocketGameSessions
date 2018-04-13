@@ -180,6 +180,14 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
     }
 })
 
+// send test gameState
+app.put('/gameInstance/:gameRef/stateTest', (req,res)=>{
+    let gameRef = req.params.gameRef;
+    let gameState = JSON.parse(req.headers["game-state"]);
+
+    console.log(gameState);
+})
+
 
 //  ======  CREATE THE HTTP SERVER  ==== 
 server = http.createServer(app)

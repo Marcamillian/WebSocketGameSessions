@@ -301,7 +301,7 @@ const getGamePhase = ()=>{
 // getting complete state
 const getCreatedGameState = ()=>{
     let gameState = Object.assign({},gameStateTemplate);
-    let gameRef = getGameReference();
+    
     let cardData = getCardData();
     let progressTrackData = getProgressTrackData();
 
@@ -334,6 +334,16 @@ const getCreatedGameState = ()=>{
 
     return gameState;
 }
+//sendGameState
+const sendGameState = ()=>{
+    let gameRef = getGameReference();
+    let myHeaders = new Headers({
+        "game-state": JSON.stringify(getCreatedGameState())
+    })
+    // TODO: If gameRef not defined - error
+    return fetch(`/gameinstance/${gameRef}/stateTest`, {method:'PUT', credentials:'same-origin', headers: myHeaders})
+        .then(()=>{console.log("sent the gameState")})
+}
 
 /* ==== SET UP EVENT LISTENERS */
 
@@ -348,6 +358,8 @@ document.querySelector('.player-number').addEventListener('change',(event)=>{
 
     setAllPlayersDefault();
 })
+
+document.querySelector('button.send-state').addEventListener('click',sendGameState)
 
 /* INIT IMPLEMENTATION DETAILS */
 
