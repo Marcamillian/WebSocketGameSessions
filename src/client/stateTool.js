@@ -246,6 +246,18 @@ const setDeckNumbers = ()=>{
     document.querySelector('.policy-deck.liberal').innerHTML = deck.liberal;
 }
 
+const getProgressTrackData = ()=>{
+    const voteFailSetting = document.querySelector('input[name=fail-track]:checked').value;
+    const liberalTrackSetting = document.querySelector('input[name=policy-track-liberal]:checked').value;
+    const fascistTrackSetting = document.querySelector('input[name=policy-track-fascist]:checked').value;
+
+    return{
+        voteFailTrack: voteFailSetting,
+        voteTrackLiberal: liberalTrackSetting,
+        voteTrackFascist: fascistTrackSetting
+    }
+}
+
 /* ==== SET UP EVENT LISTENERS */
 
 document.querySelector('.player-number').addEventListener('change',(event)=>{
