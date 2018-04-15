@@ -184,19 +184,30 @@ const getAllPlayerSettings = ()=>{
 
         player['playerName'] = playerOptionsEl.querySelector(`input[name=p${index}_player-name]`).value;
         player['playerRef'] = playerOptionsEl.querySelector(`input[name=p${index}_player-ref]`).value;
-        player['alignment'] = playerOptionsEl.querySelector(`input[name=p${index}_alignment]`).value;
-        player['character'] = playerOptionsEl.querySelector(`input[name=p${index}_character]`).value;
-        player['president'] = playerOptionsEl.querySelector(`input[name=p${index}_president]`).value;
-        player['chancellor'] = playerOptionsEl.querySelector(`input[name=p${index}_chancellor]`).value;
-        player['ready'] = playerOptionsEl.querySelector(`input[name=p${index}_ready]`).value;
-        player['prevGov'] = playerOptionsEl.querySelector(`input[name=p${index}_prev-gov]`).value;
-        player['proposedChancellor'] = playerOptionsEl.querySelector(`input[name=p${index}_proposed-chancellor]`).value;
-        player['voteCast'] = playerOptionsEl.querySelector(`input[name=p${index}_vote-cast]`).value;
+        player['alignment'] = playerOptionsEl.querySelector(`input[name=p${index}_alignment]:checked`).value;
+        player['character'] = playerOptionsEl.querySelector(`input[name=p${index}_character]:checked`).value;
+        player['president'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_president]:checked`).value);
+        player['chancellor'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_chancellor]:checked`).value);
+        player['ready'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_ready]:checked`).value);
+        player['prevGov'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_prev-gov]:checked`).value);
+        player['proposedChancellor'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_proposed-chancellor]:checked`).value);
+        player['voteCast'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_vote-cast]:checked`).value);
+        if(typeof player.voteCast )
 
         playerSettings.push(player);
     })
 
     return playerSettings;
+}
+
+const stringToBool = (string)=>{
+    switch(string.toLowerCase()){
+        case "true": return true
+        break;
+        case "false": return false;
+        break;
+        default: return undefined;
+    }
 }
 
 // card information

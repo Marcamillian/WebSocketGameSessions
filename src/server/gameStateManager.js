@@ -190,6 +190,29 @@ const gameStateManager = function(){
 
     }
 
+    // TODO: Write test for this
+    const filterGameState = (gameState)=>{
+        let filteredState = {};
+
+        filteredState['players'] = gameState.players.map( (playerInfo)=>{
+            return {
+                playerName: playerInfo.playerName,
+                president: playerInfo.president,
+                chancellor: playerInfo.chancellor,
+                ready: playerInfo.ready,
+                prevGov: playerInfo.prevGov,
+                proposedChancellor: playerInfo.proposedChancellor,
+                voteCast: playerInfo.voteCast
+            }
+        })
+        filteredState['gamePhase'] = gameState.gamePhase;
+        filteredState['voteFailTrack'] = gameState.voteFailTrack;
+        filteredState['policyTrackFascist'] = gameState.policyTrackFascist;
+        filteredState['policyTrackLiberal'] = gameState.policyTrackLiberal;
+
+        return filteredState;
+    }
+
     const joinGame = (sessionKey, playerRef, playerName)=>{
         if(gameStates[sessionKey]){
 
@@ -575,31 +598,32 @@ const gameStateManager = function(){
     // function to search for playerRef
 
     return Object.create({
-        createNewGame: createNewGame,
-        initGame: initGame, // for testing purposes
-        joinGame:joinGame,
-        leaveGame: leaveGame,
+        createNewGame,
+        initGame, // for testing purposes
+        joinGame,
+        leaveGame,
 
-        getGameState: getGameState,
-        getPlayerRefs: getPlayerRefs,
-        getGameForPlayer: getGameForPlayer,
-        getPrivatePlayerInfo: getPrivatePlayerInfo,
-        getPlayer:getPlayer,
+        getGameState,
+        filterGameState,
+        getPlayerRefs,
+        getGameForPlayer,
+        getPrivatePlayerInfo,
+        getPlayer,
 
-        update: update,
-        readyPlayer: readyPlayer,
-        proposeChancellor: proposeChancellor,
-        castVote: castVote,
-        policyDiscard: policyDiscard,
-        assignRoles: assignRoles,
-        nameToRef: nameToRef,
-        selectPlayer: selectPlayer,
-        genPolicyDeck: genPolicyDeck,
-        shuffleArraysTogether: shuffleArraysTogether,
-        drawPolicyHand: drawPolicyHand,
-        rotateGovernment: rotateGovernment,
-        enactPolicy: enactPolicy,
-        clearVotes:clearVotes
+        update,
+        readyPlayer,
+        proposeChancellor,
+        castVote,
+        policyDiscard,
+        assignRoles,
+        nameToRef,
+        selectPlayer,
+        genPolicyDeck,
+        shuffleArraysTogether,
+        drawPolicyHand,
+        rotateGovernment,
+        enactPolicy,
+        clearVotes
     })
 
 }

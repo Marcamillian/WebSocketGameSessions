@@ -230,8 +230,6 @@
             })
         }
 
-        // TODO: if there is a policyHand attached - show the policyHand in the voting things
-
         privateInfoDisplay.appendChild(allignmentEl)
         privateInfoDisplay.appendChild(characterEl)
         if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}

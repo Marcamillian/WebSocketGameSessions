@@ -185,7 +185,8 @@ app.put('/gameInstance/:gameRef/stateTest', (req,res)=>{
     let gameRef = req.params.gameRef;
     let gameState = JSON.parse(req.headers["game-state"]);
 
-    console.log(gameState);
+    console.log(stateManager.filterGameState(gameState));
+    console.log("done")
 })
 
 
@@ -274,11 +275,12 @@ wss.on('connection', (ws,req)=>{
     
 });
 
-wss.broadcast = (gameRef)=>{
-    let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
-    let gameState = stateManager.getGameState(gameRef)
+wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef))=>{
 
-    wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
+    let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
+    let clientsInGame = [...wss.clients].filter((ws)=>{return playersInGame.includes(ws.userId)});
+
+    clientsInGame.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
 
         let message = {
             result: 'OK',
