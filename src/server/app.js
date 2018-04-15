@@ -182,11 +182,20 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
 
 // send test gameState
 app.put('/gameInstance/:gameRef/stateTest', (req,res)=>{
-    let gameRef = req.params.gameRef;
-    let gameState = JSON.parse(req.headers["game-state"]);
+    try{
+        let gameRef = req.params.gameRef;
+        let gameState = JSON.parse(req.headers["game-state"]);
+        let privateInfo = stateManager.getPrivatePlayerInfo(undefined, gameState.players[0].playerRef ,gameState)
 
-    console.log(stateManager.filterGameState(gameState));
-    console.log("done")
+        wss.broadcast(gameRef, gameState, privateInfo);
+
+        res.send({result:'OK', messasge:'game state sent to client'})
+    }catch(e){
+        res.send({result:'Error', mesage: e.message})
+    }
+
+
+
 })
 
 
@@ -275,19 +284,21 @@ wss.on('connection', (ws,req)=>{
     
 });
 
-wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef))=>{
+wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privateInfo)=>{
 
     let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
     let clientsInGame = [...wss.clients].filter((ws)=>{return playersInGame.includes(ws.userId)});
 
     clientsInGame.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
 
+        let hiddenInfo = (privateInfo == undefined) ? stateManager.getPrivatePlayerInfo(gameRef,ws.userId) : privateInfo;
+
         let message = {
             result: 'OK',
             type: 'updateGameState',
             gameRef: gameRef,
             gameState: gameState,
-            privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.userId)
+            privateInfo: hiddenInfo
         }
 
         if(playersInGame.includes(ws.userId)){

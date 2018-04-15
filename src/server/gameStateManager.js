@@ -285,12 +285,12 @@ const gameStateManager = function(){
 
         privateInfo["playerName"] = player[0].playerName;
         privateInfo["character"] = player[0].character;
-        privateInfo["allignment"] = player[0].allignment;
+        privateInfo["alignment"] = player[0].alignment;
 
         // make a list of the teammate indexes -- if he is a fascist
-        if(player[0].allignment == 'fascist'){
+        if(player[0].alignment == 'fascist'){
             gameState.players.forEach((player,index)=>{
-                if(player.allignment == 'fascist') teamMates.push(player.playerName)
+                if(player.alignment == 'fascist') teamMates.push(player.playerName)
             })
             privateInfo["teamMates"] = teamMates;
         }
@@ -421,12 +421,12 @@ const gameStateManager = function(){
         //set everyone as a liberal
         playerList.map((player)=>{
             player.character = 'liberal';
-            player.allignment = 'liberal';
+            player.alignment = 'liberal';
         })
 
         // make the first X in the randomised position array fascist        
         for (var i=0; i< fascistCount; i++){
-            playerList[positions[i]].allignment = 'fascist';
+            playerList[positions[i]].alignment = 'fascist';
             playerList[positions[i]].character = 'fascist'
         }
         // make the first in the randomised array hitler
