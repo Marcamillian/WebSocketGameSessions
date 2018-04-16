@@ -13,7 +13,7 @@ let exposedFunctions = (()=>{
 
     const playerNameInput = document.querySelector('#player-name')
     const gameRefInput = document.querySelector('#game-ref')
-    let playerDisplay = document.querySelector('.player-list')
+    let playerDisplay = document.querySelector('.player-list .content')
     let lobbyReadyButton = document.querySelector('#ready-button')
     let privateInfoDisplay = document.querySelector('#private-info')
     let gameRefDisplay = document.querySelector('.gref-block .code')
@@ -196,9 +196,10 @@ let exposedFunctions = (()=>{
             //!!!
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
-            gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players) // show al of the players
-            //showPrivateInfo(privateInfo)
+            showPlayerName(privateInfo.playerName);
+            gameStateDisplay(gameState.gamePhase); // change the class on the body element to show phase elements
+            showPlayers(gameState.players, gameState.gamePhase, isPresident); // show al of the players
+            showPrivateInfo(privateInfo);
         })
         
         ws.on("connectSuccess",()=>{
@@ -268,7 +269,6 @@ let exposedFunctions = (()=>{
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
 
-            /*
             let addEl = document.createElement('li');
             addEl.innerText = playerObject["playerName"]
 
@@ -293,9 +293,11 @@ let exposedFunctions = (()=>{
             // add classes
             if(playerObject['president']) addEl.classList.add("president")
             if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
-            */
-            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject))
-        }) 
+            
+            playerDisplay.appendChild(addEl);
+        })
+
+        return playerDisplay;
     }
 
     const getPlayerNameInput =()=>{

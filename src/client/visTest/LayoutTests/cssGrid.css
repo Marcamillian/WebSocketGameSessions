@@ -1,0 +1,25 @@
+body{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr ;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+    "left-top middle-top right-top"
+    "left-bottom middle-bottom right-bottom";
+
+    grid-column-gap: 150px;
+    margin: 50px 200px 50px 200px;
+    line-height: 1.5em;
+    font-size: 20px;
+}
+
+.item-a{
+    grid-area: middle-top;
+}
+
+.item-b{
+    grid-area:right-top
+}
+
+left-content{
+    color:red;
+}

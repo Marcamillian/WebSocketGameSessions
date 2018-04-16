@@ -1,0 +1,66 @@
+body{
+    display: grid;
+    grid-template-columns: left 1fr middle 1fr right;
+    grid-template-rows: 1fr 3fr 1fr;
+    grid-template-areas:
+    "header header"
+    "left right"
+    "footer-left footer-right";
+    align-items: center;
+    justify-items: center;
+}
+
+.title{
+    /* LINE DEFINITION 
+    grid-column: left / right;*/
+    grid-row: 1 / 2;
+    grid-column: header-start / header-end;
+    
+
+    /*AREA DEFINIION
+     grid-area: header;*/
+    
+}
+
+.article-a{
+    /* LINE DEFINITION
+    grid-column: left  middle;*/
+    grid-row: 2  3;
+    grid-column: left-start / left-end;
+
+
+    /* AREA DEFINITION
+     grid-area:left */
+
+}
+
+.article-b{
+    /* LINE DEFINITION 
+    grid-column: middle  right;*/
+    grid-row: 2 / 3;
+    grid-column: right-start / right-end;
+
+
+    /* AREA DEFINITION 
+     grid-area: right*/
+
+}
+
+.about-us{
+    /* LINE DEFINITION*/
+    grid-row: 3 / 4;
+    grid-column: footer-right-start / footer-right-end
+
+    /* AREA DEFINITION 
+    grid-area: footer-left*/
+}
+
+.about-parent{
+
+    /* LINE DEFINITION*/
+    grid-row: 3 / 4;
+    grid-column: footer-left-start / footer-left-end;
+
+    /* AREA DEFINITION
+    grid-area: footer-right*/
+}

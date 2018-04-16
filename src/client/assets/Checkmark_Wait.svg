@@ -1,0 +1,20 @@
+<svg width="44" height="44" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>Checkmark_Wait</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(851 1599)">
+<g id="Checkmark_Wait">
+<g id="Ellipse">
+<mask id="mask0_outline_ins">
+<use xlink:href="#path0_fill" fill="white" transform="translate(-851 -1599)"/>
+</mask>
+<g mask="url(#mask0_outline_ins)">
+<use xlink:href="#path1_stroke_2x" transform="translate(-851 -1599)" fill="#828282"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" d="M 44 22C 44 34.1503 34.1503 44 22 44C 9.84974 44 0 34.1503 0 22C 0 9.84974 9.84974 0 22 0C 34.1503 0 44 9.84974 44 22Z"/>
+<path id="path1_stroke_2x" d="M 18.5 31L 17.4393 32.0607L 18.5948 33.2161L 19.6474 31.9662L 18.5 31ZM 10.9393 25.5607L 17.4393 32.0607L 19.5607 29.9393L 13.0607 23.4393L 10.9393 25.5607ZM 19.6474 31.9662L 35.6474 12.9662L 33.3526 11.0338L 17.3526 30.0338L 19.6474 31.9662ZM 41 22C 41 32.4934 32.4934 41 22 41L 22 47C 35.8071 47 47 35.8071 47 22L 41 22ZM 22 41C 11.5066 41 3 32.4934 3 22L -3 22C -3 35.8071 8.19288 47 22 47L 22 41ZM 3 22C 3 11.5066 11.5066 3 22 3L 22 -3C 8.19288 -3 -3 8.19288 -3 22L 3 22ZM 22 3C 32.4934 3 41 11.5066 41 22L 47 22C 47 8.19288 35.8071 -3 22 -3L 22 3Z"/>
+</defs>
+</svg>

@@ -85,7 +85,7 @@ const gameStateManager = function(){
                     president.prevGov = true;   // set president as prevGov
 
                     // deal the policyhand
-                    gameState = drawPolicyHand({gameState:gameState}) // failing here - gameState not defined
+                    gameState = drawPolicyHand({gameState:gameState});
                     // set the gamephase to legislative
                     gameState.gamePhase = 'legislative'
                     return gameState
@@ -385,6 +385,7 @@ const gameStateManager = function(){
         let policyHand = gameState.policyHand
         let policyIndex = policyHand.indexOf(policyType)
 
+        // !! TODO: For some reason this policy hand is empty
         if(policyIndex != -1){ //if there is a policy of that hand
             var head = policyHand.slice(0, policyIndex)
             var tail = policyHand.slice(policyIndex)

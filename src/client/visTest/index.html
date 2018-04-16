@@ -8,18 +8,40 @@
     <link rel="stylesheet" type="text/css" href="element-style.css">
     <link rel="stylesheet" type="text/css" href="element-position.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto|Homemade+Apple" rel="stylesheet">
-    <script src="./socket.io/socket.io.js"></script>
 </head>
 
-<body class="connect">
+<body class="in-game">
 
     <div class="gref-block">
         <p> Game Reference</p>
         <p class="code"> gh6j </p>
-        <button id="leave-game"> Leave Game </button>
+        <button> Leave Game </button>
     </div>
 
     <div class="player-list">
+        <div class="player-card chancellor">
+            <img class="player-state">
+                <p> playerName </p>
+            <img class="player-action">
+        </div>
+
+        <div class="player-card president">
+            <img class="player-state">
+                <p> playerName </p>
+            <img class="player-action">
+        </div>
+
+        <div class="player-card prev-gov ready voted">
+            <img class="player-state">
+                <p> playerName </p>
+            <img class="player-action">
+        </div>
+
+        <div class="player-card prev-gov">
+            <img class="player-state">
+                <p> playerName </p>
+            <img class="player-action">
+        </div>
 
     </div>
 
@@ -55,17 +77,17 @@
     </div>
 
     <div class="connect-items">
-        <button id="ws-button"> Connect </button>
+        <button id="wsButton"> Connect </button>
     </div>
 
     <div class="join-controls">
-        <input id="player-name"placeholder="Player Name"></input>
-        <input id="game-ref" placeholder="Game Reference"></input>
-        <button id="create-game"> Create Game </button>
+        <input id="player_name"placeholder="Player Name"></input>
+        <input id="game_ref" placeholder="Game Reference"></input>
+        <button id="createGame"> Create Game </button>
         <button id="url-join"> Join Game </button>
     </div>
 
     <button id="ready-button"> Ready Up</button>
 
-    <script src="app.js"></script>
+    <script src="UIInteractions.js"></script>
 </body>
