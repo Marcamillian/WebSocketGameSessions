@@ -25,6 +25,7 @@ sessionParser = session({
 })
 
 // CONFIGURE EXPRESS APP - serve files from the right folder
+app.set('port', (process.env.PORT || 8080))
 app.use(express.static('./src/client'));
 app.use(sessionParser);
 
@@ -176,6 +177,24 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
         console.log(e);
         res.send({result: 'Error', message:e.message})
     }
+})
+
+// send test gameState
+app.put('/gameInstance/:gameRef/stateTest', (req,res)=>{
+    try{
+        let gameRef = req.params.gameRef;
+        let gameState = JSON.parse(req.headers["game-state"]);
+        let privateInfo = stateManager.getPrivatePlayerInfo(undefined, gameState.players[0].playerRef ,gameState)
+
+        wss.broadcast(gameRef, gameState, privateInfo);
+
+        res.send({result:'OK', messasge:'game state sent to client'})
+    }catch(e){
+        res.send({result:'Error', mesage: e.message})
+    }
+
+
+
 })
 
 
@@ -416,48 +435,36 @@ wss.on('connection', (ws)=>{
     ws.emit("connectSuccess")
 });
 
-wss.broadcast = (gameRef)=>{
-    let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
-    let gameState = stateManager.getGameState(gameRef)
+wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privateInfo)=>{
+
+    try{
+        let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
+        //let clientsInGame = [...wss.clients].filter((ws)=>{return playersInGame.includes(ws.userId)});
+        let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
 
 
-    Object.keys(wss.sockets.connected).forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
-        let ws = wss.sockets.connected[socketKey]
-        if(playersInGame.includes(ws.id)){
+        clientsInGame.forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
+
+            let ws = wss.sockets.connected[socketKey]
+            let hiddenInfo = (privateInfo == undefined) ? stateManager.getPrivatePlayerInfo(gameRef,ws.id) : privateInfo;
+
             let response = {
                 result: 'OK',
                 type: 'updateGameState',
                 data:{
                     gameRef: gameRef,
                     gameState: gameState,
-                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.id)
+                    privateInfo: hiddenInfo
                 }
             }
 
             ws.emit("updateGameState",response) // send the gamestate to the players in the game
             //ws.send(JSON.stringify(message));
-        }
-    })
-
-    /*
-    wss.clients.forEach((ws)=>{ // if the clients playerRef is included in game - broadcast to them
-        
-        if(playersInGame.includes(ws.id)){
-            let message = {
-                result: 'OK',
-                type: 'updateGameState',
-                data:{
-                    gameRef: gameRef,
-                    gameState: gameState,
-                    privateInfo: stateManager.getPrivatePlayerInfo(gameRef,ws.id)
-                }
-            }
-
-            ws.emit("updateGameState",JSON.stringify(message)) // send the gamestate to the players in the game
-            //ws.send(JSON.stringify(message));
-        }
-    })*/
+        })
+    }catch(e){
+        throw new Error(`websocket broadcast failed || ${e.message}`)
+    }
 }
 
 // START THE SERVER
-server.listen(8080, ()=> console.log('Listening on http://localhost:8080'))
+server.listen(app.get('port'), ()=> console.log(`Listening on port ${app.get('port')}`));

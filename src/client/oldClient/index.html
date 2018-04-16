@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title> Express Session Demo</title>
+        <link rel="stylesheet" type="text/css" href="styles.css"/>
+        <script src="../socket.io/socket.io.js"></script>
+    </head>
+
+    <body class="connect">
+
+        <!-- pre joining the game -->
+        <button id="ws-button" type="button" title="Open WebSocket connection">
+            Connect to server
+        </button>
+
+        <!-- for joining a game session -->
+        <form>
+            <input id="player-name" type="text" label="player_name">Player Name</input>
+            <input id="game-ref" type="text" label="game_ref">Game to Join</input>
+        </form>
+
+        <button id="login" type="button" title="Simulate login">
+            Simulate login
+        </button>
+        <button id="logout" type="button" title="Simulate logout">
+            Simulate Logout
+        </button>
+        
+        <button id="create-game" type="button" title="Start new game instance">
+            Create Game
+        </button>
+        <button id="leave-game" type="button" title="Leave current game" class="in-game">
+            Leave Game
+        </button>
+        <button id="url-join" type="button"> URL Join </button>
+
+
+        <!-- ingame player display -->
+        <div class="player-list">
+            <h2 class="title"> Players</h2>
+            <ul class="content">
+                <li> Some Player</li>
+            </ul>
+        </div>
+
+        <!-- personal details display -->
+        <div class="gref-block">
+            <div class="code"></div>
+            <div id="name-display"></div>
+        </div>
+
+        <!-- private info-->
+        <div id="private-info">
+            <p> PrivateInfo</p>
+        </div>
+
+        <!-- ready button to whilst in lobby-->
+        <button id="ready-button"> ready up</button>
+
+
+        <!-- vote buttons for the  -->
+        <div id="ingame-vote">
+            <p> Vote for Government</p>
+            <button id="yes">Yes</button>
+            <button id="no">No</button>
+        </div>
+
+        <!-- legislative session -->
+        <div id="ingame-policy-pick">
+            <p>Some policies</p>
+            <button>Policy</button>
+            <button>Policy</button>
+        </div>
+
+
+        <script src="app.js"></script> 
+    </body>
+</html>
