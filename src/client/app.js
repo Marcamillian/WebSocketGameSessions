@@ -86,22 +86,20 @@ let exposedFunctions = (()=>{
             return divVoteCard;
         }
 
-        const generateEnvelopeContents = ({
-
-            character = "<Character not defined>",
-            alignment = "<Alignment not defined>"})=>{
+        const generateEnvelopeContents = (character, alignment)=>{
 
             let divFlipContainer = document.createElement('div');
             let divCardFront = document.createElement('div');
             let divCardBack = document.createElement('div');
             
-            divFlipContainer.classList.add('flip-card','horizontal')
+            divFlipContainer.classList.add('env-card','flip-card','horizontal')
+            divFlipContainer.addEventListener('click', ()=>{toggleClass(divFlipContainer, 'flipped')});
 
             divCardFront.classList.add('front')
-            divCardFront.innerHTML = alignment;
+            divCardFront.innerText = `Alignment ---  ${alignment}`;
             
             divCardBack.classList.add('back');
-            divCardBack.innerHTML = character;
+            divCardBack.innerText = `Role --- ${character}`;
 
             divFlipContainer.appendChild(divCardFront);
             divFlipContainer.appendChild(divCardBack);
@@ -287,10 +285,10 @@ let exposedFunctions = (()=>{
 
         // set the name on the envelope
         playerNameDisplay.innerText = playerName;
-
-        // generate the cards
+        // empty old costumes
         envelopeContents = displayModule.emptyElement(envelopeContents);
-        envelopeContents = envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment))
+        // generate the cards
+        envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment));
 
         return 
         /*
