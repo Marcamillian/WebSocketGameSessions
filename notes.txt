@@ -12,6 +12,8 @@ Example for browser communication - https://github.com/websockets/ws/blob/master
     'data': {someObject}
 } 
 
+[ ] - Create send selection button
+
 
 
 =====
@@ -46,6 +48,7 @@ Desired State -
 
 === 
 
+[ DONE ]
 PlayerCard select process
 - call function to draw players to screen - passing list of players 
 - if it is the proposal or powers phase we need callbacks

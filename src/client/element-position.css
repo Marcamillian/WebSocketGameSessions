@@ -60,6 +60,10 @@ p,div{
         visibility:visible;
     }
 
+    .proposal .card-area{
+        visibility:visible;
+    }
+
     .election .card-area{
         visibility: visible;
     }
@@ -124,6 +128,9 @@ p,div{
 }
 .card-area button{
     height:50%
+}
+.card-area *{
+    visibility: inherit;
 }
 
 /** ENVELOPE **/

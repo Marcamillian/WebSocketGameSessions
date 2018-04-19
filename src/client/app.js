@@ -5,26 +5,28 @@ let exposedFunctions = (()=>{
     const wsButton = document.querySelector('#ws-button');
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
-    const createGame = document.querySelector('#create-game')
-    const leaveGame = document.querySelector('#leave-game')
+    const createGame = document.querySelector('#create-game');
+    const leaveGame = document.querySelector('#leave-game');
     const displayBody = document.querySelector('body');
-    const urlJoinGame = document.querySelector('#url-join')
+    const urlJoinGame = document.querySelector('#url-join');
 
 
-    const playerNameInput = document.querySelector('#player-name')
-    const gameRefInput = document.querySelector('#game-ref')
-    let playerDisplay = document.querySelector('.player-list')
-    let lobbyReadyButton = document.querySelector('#ready-button')
-    let privateInfoDisplay = document.querySelector('#private-info')
-    let gameRefDisplay = document.querySelector('.gref-block .code')
-    let playerNameDisplay = document.querySelector('#name-display')
-    let voteYesButton = document.querySelector('#ingame-vote #yes')
-    let voteNoButton = document.querySelector('#ingame-vote #no')
-    let policyPickDisplay = document.querySelector('#ingame-policy-pick')
-    let envelopeContents = document.querySelector(".envelope .env-contents")
+    const playerNameInput = document.querySelector('#player-name');
+    const gameRefInput = document.querySelector('#game-ref');
+    let playerDisplay = document.querySelector('.player-list');
 
+    let privateInfoDisplay = document.querySelector('#private-info');
+    let gameRefDisplay = document.querySelector('.gref-block .code');
+    let playerNameDisplay = document.querySelector('#name-display');
+    let cardAreaDisplay = document.querySelector('.card-area');
+
+    let lobbyReadyButton = document.querySelector('#ready-button');
+    let voteYesButton = document.querySelector('#ingame-vote #yes');
+    let voteNoButton = document.querySelector('#ingame-vote #no');
+    
     let envelope = document.querySelector('.envelope');
-    let envelopeFlap = document.querySelector('.envelope .flap')
+    let envelopeFlap = document.querySelector('.envelope .flap');
+    let envelopeContents = document.querySelector(".envelope .env-contents");
     
     
     let ws;
@@ -40,7 +42,6 @@ let exposedFunctions = (()=>{
             return "Something"
         }
 
-        // TODO: Player card needs president elect buttons
         const generatePlayerCard =({
             playerName = 'playerName',
             president = false,
@@ -202,6 +203,7 @@ let exposedFunctions = (()=>{
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
             showPlayers(gameState.players,gameState.gamePhase, isPresident) // show al of the players
+            showCards(gameState.policyHand, gameState.gamePhase, isPresident);
             showPrivateInfo(privateInfo)
         })
         
@@ -290,6 +292,30 @@ let exposedFunctions = (()=>{
             
             playerDisplay.appendChild(playerCard);
         }) 
+    }
+
+    const showCards = (cardArray, gamePhase, isPresident)=>{
+        // 1- remove the cards from the list
+        cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
+
+        // 2 - add the new cards
+        switch(gamePhase){
+            case 'proposal':
+                if(isPresident){
+                    let acceptCard = displayModule.generateVoteCard('propose chancellor');
+                    acceptCard.addEventListener('click',()=>{
+                        playerSelect(getSelectedPlayer());
+                    })
+                    cardAreaDisplay.appendChild(acceptCard);
+                }
+            break;
+            case 'election':
+
+            break;
+            case 'legislative':
+
+            break;
+        }
     }
 
     const getPlayerNameInput =()=>{
