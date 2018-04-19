@@ -327,7 +327,7 @@ const getCreatedGameState = ()=>{
         'fascist',
         'liberal'
     )
-    gameState.policyDiscardPile = createFilledArray( cardData.policyHand.liberal,
+    gameState.policyDiscardPile = createFilledArray( cardData.policyDiscard.liberal,
         cardData.policyDiscard.liberal + cardData.policyDiscard.fascist,
         'fascist',
         'liberal'

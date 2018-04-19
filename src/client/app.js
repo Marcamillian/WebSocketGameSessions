@@ -318,7 +318,13 @@ let exposedFunctions = (()=>{
                 })
             break;
             case 'legislative':
-
+                cardArray.forEach((cardName)=>{
+                    let policyCard = displayModule.generateVoteCard(cardName);
+                    policyCard.addEventListener('click',()=>{
+                        discardPolicy(cardName);
+                    })
+                    cardAreaDisplay.appendChild(policyCard);
+                })
             break;
         }
     }
@@ -476,11 +482,6 @@ let exposedFunctions = (()=>{
         ws.emit("readyUp")
         
     }
-    
-    /* TODO: get the election buttons working/generated again
-    voteYesButton.onclick = ()=>{castVote(true); }
-    voteNoButton.onclick = ()=>{castVote(false)}
-    */
     
     envelopeFlap.addEventListener("click", ()=>{
         toggleEnvelopeOpen()
