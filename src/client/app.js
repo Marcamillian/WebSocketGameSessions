@@ -203,7 +203,7 @@ let exposedFunctions = (()=>{
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
             showPlayers(gameState.players,gameState.gamePhase, isPresident) // show al of the players
-            showCards(gameState.policyHand, gameState.gamePhase, isPresident);
+            showCards(privateInfo.policyHand, gameState.gamePhase, isPresident);
             showPrivateInfo(privateInfo)
         })
         
@@ -290,7 +290,7 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray, gamePhase, isPresident, isChancellor)=>{
+    const showCards = (cardArray= [], gamePhase, isPresident, isChancellor)=>{
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
@@ -311,7 +311,7 @@ let exposedFunctions = (()=>{
                     let voteCard = displayModule.generateVoteCard(cardName);
                     voteCard.addEventListener('click', ()=>{
                         document.querySelectorAll('.vote-card').forEach((el)=>{el.classList.remove('selected')});
-                        toggleClass(voteCard, 'selected');  // set the selected class for visual feedback
+                        voteCard.classList.add('selected');  // set the selected class for visual feedback
                         castVote(cardName);
                     });
                     cardAreaDisplay.appendChild(voteCard);
