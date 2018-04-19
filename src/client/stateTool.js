@@ -268,12 +268,12 @@ const getCardData = ()=>{
     }
 }
 
-const createFilledArray = (fillNumber, arrayLength, baseOption, fillOption)=>{
+const createFilledArray = (fillNumber, arrayLength, baseOption = false, fillOption = true)=>{
     if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
 
     let fillArray = Array(arrayLength).fill(baseOption);
 
-    return fillArray.map((value, index)=>{return (index < fillNumber) ? true : false})
+    return fillArray.map((value, index)=>{return (index < fillNumber) ? fillOption : baseOption})
 }
 
 
@@ -311,8 +311,8 @@ const getGamePhase = ()=>{
 
 // getting complete state
 const getCreatedGameState = ()=>{
+
     let gameState = Object.assign({},gameStateTemplate);
-    
     let cardData = getCardData();
     let progressTrackData = getProgressTrackData();
 
@@ -347,6 +347,9 @@ const getCreatedGameState = ()=>{
 }
 //sendGameState
 const sendGameState = ()=>{
+
+    checkCardNumbers();
+
     let gameRef = getGameReference();
     let myHeaders = new Headers({
         "game-state": JSON.stringify(getCreatedGameState())
