@@ -302,7 +302,8 @@ let exposedFunctions = (()=>{
         switch(gamePhase){
             case 'proposal':
                 if(isPresident){
-                    let acceptCard = displayModule.generateVoteCard('propose chancellor');
+                    let acceptCard = document.createElement('button');
+                    acceptCard.innerText = "Propose Chancellor";
                     acceptCard.addEventListener('click',()=>{
                         playerSelect(getSelectedPlayer());
                     })
