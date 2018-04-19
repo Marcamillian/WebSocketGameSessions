@@ -49,7 +49,7 @@ let exposedFunctions = (()=>{
             prevGov = false,
             proposedChancellor = false,
             voteCast = undefined} = {},
-            choosePlayerCallback)=>{
+            cardClickCallback)=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -60,9 +60,9 @@ let exposedFunctions = (()=>{
                 if (president) divPlayerCard.classList.add('president');
                 if (chancellor) divPlayerCard.classList.add('chancellor');
                 if (ready) divPlayerCard.classList.add('ready');
-                if (prevGov) divPlayerCard.classList.add('prev-gov')
+                if (prevGov) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
-                if (voteCast) divPlayerCard.classList.add('vote-cast')
+                if (voteCast) divPlayerCard.classList.add('vote-cast');
 
                 paraPlayerName.innerText = playerName;
 
@@ -72,6 +72,10 @@ let exposedFunctions = (()=>{
                 divPlayerCard.appendChild(imagePlayerState);
                 divPlayerCard.appendChild(paraPlayerName);
                 divPlayerCard.appendChild(imagePlayerAction);
+                
+                if(cardClickCallback){
+                    divPlayerCard.addEventListener('click', ()=>{ cardClickCallback(divPlayerCard) });
+                }
 
                 return divPlayerCard
         }
@@ -202,7 +206,7 @@ let exposedFunctions = (()=>{
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players) // show al of the players
+            showPlayers(gameState.players,gameState.gamePhase, isPresident) // show al of the players
             showPrivateInfo(privateInfo)
         })
         
@@ -262,21 +266,33 @@ let exposedFunctions = (()=>{
         // remove "seleted" class from other cards
         document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
         // add "selected" class
-        displayModule.toggleClass(element, 'selected')
+        toggleClass(element, 'selected')
     }
 
     const getPlayerChoice = ()=>{
-        return document.querySelectorAll('.player-card.selected p').innerText;
+        return document.querySelector('.player-card.selected p').innerText;
     }
 
-    const showPlayers = (playerArray, gamePhase, extraOptions)=>{
+    const showPlayers = (playerArray, gamePhase, isPresident)=>{
         
+        let callback  = undefined;
+
         // 1-  remove the elements from the list
         playerDisplay = displayModule.emptyElement(playerDisplay)
 
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
-            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject))
+
+            if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
+                if( !playerObject.prevGov && !playerObject.president){ //if this specific player is clickable
+                    callback = choosePlayerCard
+                }else{
+
+                }
+            }
+            
+
+            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject, callback))
         }) 
     }
 
@@ -445,7 +461,8 @@ let exposedFunctions = (()=>{
 
 
     return{
-        displayModule
+        displayModule,
+        getPlayerChoice
     }
 
 })();

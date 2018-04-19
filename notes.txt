@@ -43,3 +43,26 @@ Desired State -
 [DONE]: Set previous govornment
 
 [DONE]: Deal with prevGov assign - assign && remove at vote pass
+
+=== 
+
+PlayerCard select process
+- call function to draw players to screen - passing list of players 
+- if it is the proposal or powers phase we need callbacks
+  - what players can be selected?
+    - proposal phase
+      - NOT yourself
+      - NOT prevGov
+      - NOT dead players
+    - powers
+      - depends on power?
+      - can you pick yourself?
+      - NOT dead players
+
+- follow on - need vote/send button to relay the selected players
+
+
+
+- What click functions do we need?
+  - for electing a chancellor 
+  - for directing a power
