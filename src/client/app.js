@@ -259,13 +259,6 @@ let exposedFunctions = (()=>{
         return gameRef
     }
 
-    const setSelectedCard = (element)=>{
-        // remove "seleted" class from other cards
-        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
-        // add "selected" class
-        toggleClass(element, 'selected')
-    }
-
     const getSelectedPlayer = ()=>{
         return document.querySelector('.player-card.selected p').innerText;
     }
@@ -284,7 +277,10 @@ let exposedFunctions = (()=>{
 
             if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
                 if( !playerObject.prevGov && !playerObject.president){ //if this specific player is clickable
-                    playerCard.addEventListener('click', ()=>{ setSelectedCard(playerCard)} )
+                    playerCard.addEventListener('click', ()=>{
+                        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
+                        toggleClass(playerCard, 'selected');
+                    })
                 }else{
                     playerCard.classList.add('not-selectable');
                 }
@@ -294,7 +290,7 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray, gamePhase, isPresident)=>{
+    const showCards = (cardArray, gamePhase, isPresident, isChancellor)=>{
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
@@ -311,7 +307,15 @@ let exposedFunctions = (()=>{
                 }
             break;
             case 'election':
-
+                ['Yes', 'No'].forEach((cardName)=>{
+                    let voteCard = displayModule.generateVoteCard(cardName);
+                    voteCard.addEventListener('click', ()=>{
+                        document.querySelectorAll('.vote-card').forEach((el)=>{el.classList.remove('selected')});
+                        toggleClass(voteCard, 'selected');  // set the selected class for visual feedback
+                        castVote(cardName);
+                    });
+                    cardAreaDisplay.appendChild(voteCard);
+                })
             break;
             case 'legislative':
 
