@@ -48,8 +48,7 @@ let exposedFunctions = (()=>{
             ready = false,
             prevGov = false,
             proposedChancellor = false,
-            voteCast = undefined} = {},
-            cardClickCallback)=>{
+            voteCast = undefined} = {} )=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -72,10 +71,6 @@ let exposedFunctions = (()=>{
                 divPlayerCard.appendChild(imagePlayerState);
                 divPlayerCard.appendChild(paraPlayerName);
                 divPlayerCard.appendChild(imagePlayerAction);
-                
-                if(cardClickCallback){
-                    divPlayerCard.addEventListener('click', ()=>{ cardClickCallback(divPlayerCard) });
-                }
 
                 return divPlayerCard
         }
@@ -262,14 +257,14 @@ let exposedFunctions = (()=>{
         return gameRef
     }
 
-    const choosePlayerCard = (element)=>{
+    const setSelectedCard = (element)=>{
         // remove "seleted" class from other cards
         document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
         // add "selected" class
         toggleClass(element, 'selected')
     }
 
-    const getPlayerChoice = ()=>{
+    const getSelectedPlayer = ()=>{
         return document.querySelector('.player-card.selected p').innerText;
     }
 
@@ -283,16 +278,17 @@ let exposedFunctions = (()=>{
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
 
+            let playerCard = displayModule.generatePlayerCard(playerObject);
+
             if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
                 if( !playerObject.prevGov && !playerObject.president){ //if this specific player is clickable
-                    callback = choosePlayerCard
+                    playerCard.addEventListener('click', ()=>{ setSelectedCard(playerCard)} )
                 }else{
-
+                    playerCard.classList.add('not-selectable');
                 }
             }
             
-
-            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject, callback))
+            playerDisplay.appendChild(playerCard);
         }) 
     }
 
@@ -462,7 +458,7 @@ let exposedFunctions = (()=>{
 
     return{
         displayModule,
-        getPlayerChoice
+        getSelectedPlayer
     }
 
 })();

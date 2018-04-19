@@ -30,6 +30,9 @@ button{
     .player-card.selected{
         color:#ff9900;
     }
+    .player-card.not-selectable p{
+        color:#BDBDBD;
+    }
 
 /* PLAYER CARD DEPENDING ON GAMESTATE*/
     .lobby .player-card .player-action{
