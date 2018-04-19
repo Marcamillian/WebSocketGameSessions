@@ -28,7 +28,7 @@ Progress Points
 
 ==== 
 
-TODO: Fedback on you having voted suceessfully (how many others have voted)
+[DONE] Fedback on you having voted suceessfully (how many others have voted)
 
 [DONE] Get Policies showing for pres/chanc
 Current state - Can go through to legislative - default policy buttons shown for all
@@ -36,7 +36,7 @@ Desired State -
 
 [DONE] Trigger Endpoint for discarding a policy
 
-TODO: Client visibility for chancellor
+[DONE]: Client visibility for chancellor
 
 [DONE]: Remove the chancellor
 [DONE]: Move on the president

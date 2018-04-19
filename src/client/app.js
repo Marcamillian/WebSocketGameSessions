@@ -40,6 +40,7 @@ let exposedFunctions = (()=>{
             return "Something"
         }
 
+        // TODO: Player card needs president elect buttons
         const generatePlayerCard =({
             playerName = 'playerName',
             president = false,
@@ -47,7 +48,8 @@ let exposedFunctions = (()=>{
             ready = false,
             prevGov = false,
             proposedChancellor = false,
-            voteCast = undefined} = {})=>{
+            voteCast = undefined} = {},
+            choosePlayerCallback)=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -201,7 +203,7 @@ let exposedFunctions = (()=>{
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
             showPlayers(gameState.players) // show al of the players
-            showPrivateInfo(privateInfo) // TODO: The information that is passed here doesn't include character or role for some reason
+            showPrivateInfo(privateInfo)
         })
         
         ws.on("connectSuccess",()=>{
@@ -256,6 +258,16 @@ let exposedFunctions = (()=>{
         return gameRef
     }
 
+    const choosePlayerCard = (element)=>{
+        // remove "seleted" class from other cards
+        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
+        // add "selected" class
+        displayModule.toggleClass(element, 'selected')
+    }
+
+    const getPlayerChoice = ()=>{
+        return document.querySelectorAll('.player-card.selected p').innerText;
+    }
 
     const showPlayers = (playerArray, gamePhase, extraOptions)=>{
         
@@ -421,10 +433,12 @@ let exposedFunctions = (()=>{
         ws.emit("readyUp")
         
     }
+    
     /* TODO: get the election buttons working/generated again
     voteYesButton.onclick = ()=>{castVote(true); }
     voteNoButton.onclick = ()=>{castVote(false)}
     */
+    
     envelopeFlap.addEventListener("click", ()=>{
         toggleEnvelopeOpen()
     })

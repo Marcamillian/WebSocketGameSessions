@@ -56,17 +56,16 @@ p,div{
 
     .in-game .gref-block,
     .in-game .player-list,
-    .in-game .card-area,
     .in-game .envelope{
         visibility:visible;
     }
 
-    .election{
-
+    .election .card-area{
+        visibility: visible;
     }
 
-    .legislative{
-        
+    .legislative .card-area{
+        visibility: visible;
     }
 
 
