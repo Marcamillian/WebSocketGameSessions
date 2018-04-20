@@ -8,7 +8,7 @@ const WebSocket = require('ws');
 const io = require('socket.io')
 const util = require('util')
  
-const GameStateManager = require('./GameStateManager')
+const GameStateManager = require('./gameStateManager')
 
 // game objects
 var app = express();  // express app - for handelling routes
@@ -469,4 +469,4 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
 }
 
 // START THE SERVER
-server.listen(app.get('port'), ()=> console.log(`Listening on port ${app.get('port')}`));
+server.listen(app.get('port'), ()=> console.log(`Listening on port ${app.get('port')}`))
