@@ -203,7 +203,7 @@ let exposedFunctions = (()=>{
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
             showPlayers(gameState.players,gameState.gamePhase, isPresident) // show al of the players
-            showCards(privateInfo.policyHand, gameState.gamePhase, isPresident);
+            showCards(privateInfo.policyHand, gameState.gamePhase, isPresident, privateInfo.voteCast);
             showPrivateInfo(privateInfo)
         })
         
@@ -290,14 +290,14 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray= [], gamePhase, isPresident, isChancellor)=>{
+    const showCards = (cardArray= [], gamePhase, isPresident, isChancellor, voteCast)=>{
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
         // 2 - add the new cards
         switch(gamePhase){
             case 'proposal':
-                if(isPresident){
+                if(isPresident == true){
                     let acceptCard = document.createElement('button');
                     acceptCard.innerText = "Propose Chancellor";
                     acceptCard.addEventListener('click',()=>{
@@ -307,12 +307,16 @@ let exposedFunctions = (()=>{
                 }
             break;
             case 'election':
-                ['Yes', 'No'].forEach((cardName)=>{
-                    let voteCard = displayModule.generateVoteCard(cardName);
+                [true, false].forEach((voteBool)=>{
+                    let cardText = (voteBool) ? 'Yes' : 'No'
+                    let voteCard = displayModule.generateVoteCard(cardText);
+
+                    // set one of the cards to selected if they are
+                    if(voteCast == true && voteBool){ voteCard.classList.add('selected') }
+                    else if(voteCast === false && !voteBool){ voteCard.classList.add('selected') } 
+
                     voteCard.addEventListener('click', ()=>{
-                        document.querySelectorAll('.vote-card').forEach((el)=>{el.classList.remove('selected')});
-                        voteCard.classList.add('selected');  // set the selected class for visual feedback
-                        castVote(cardName);
+                        castVote(voteBool);
                     });
                     cardAreaDisplay.appendChild(voteCard);
                 })

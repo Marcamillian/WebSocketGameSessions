@@ -303,8 +303,11 @@ const gameStateManager = function(){
                 privateInfo["policyHand"] = gameState.policyHand
             }
         }
-        
 
+        if(player.voteCast != undefined){
+            privateInfo["voteCast"] = player.voteCast;
+        }
+        
         return privateInfo
     }
 

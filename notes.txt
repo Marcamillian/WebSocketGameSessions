@@ -12,9 +12,14 @@ Example for browser communication - https://github.com/websockets/ws/blob/master
     'data': {someObject}
 } 
 
-[ ] - Create send selection button
+==
+
+[   ] - TODO: the election vote card animation doesn't work becuase of the page refresh when retrieving the new gameState
 
 
+==
+
+[DONE] - Create send selection button
 
 =====
 
