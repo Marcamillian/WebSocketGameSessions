@@ -62,7 +62,7 @@ let exposedFunctions = (()=>{
                 if (ready) divPlayerCard.classList.add('ready');
                 if (prevGov) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
-                if (voteCast) divPlayerCard.classList.add('vote-cast');
+                if (voteCast != undefined) divPlayerCard.classList.add('vote-cast');
 
                 paraPlayerName.innerText = playerName;
 
@@ -195,15 +195,14 @@ let exposedFunctions = (()=>{
             const gameRef = data.gameRef;
             const gameState = data.gameState;
             const privateInfo = data.privateInfo;
-            let presList = gameState.players.filter((player)=>{return player.president})[0]
-            let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false;
+            
+            let thisPlayerObject = gameState.players.filter((player)=>{ return player.playerName == privateInfo.playerName})[0];
 
-            //!!!
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players,gameState.gamePhase, isPresident) // show al of the players
-            showCards(privateInfo.policyHand, gameState.gamePhase, isPresident, privateInfo.voteCast);
+            showPlayers(gameState.players,gameState.gamePhase, thisPlayerObject) // show al of the players
+            showCards(privateInfo.policyHand, gameState.gamePhase, thisPlayerObject, privateInfo.voteCast);
             showPrivateInfo(privateInfo)
         })
         
@@ -263,9 +262,10 @@ let exposedFunctions = (()=>{
         return document.querySelector('.player-card.selected p').innerText;
     }
 
-    const showPlayers = (playerArray, gamePhase, isPresident)=>{
+    const showPlayers = (playerArray, gamePhase, thisPlayerObject)=>{
         
         let callback  = undefined;
+        let isPresident = thisPlayerObject.president;
 
         // 1-  remove the elements from the list
         playerDisplay = displayModule.emptyElement(playerDisplay)
@@ -276,7 +276,7 @@ let exposedFunctions = (()=>{
             let playerCard = displayModule.generatePlayerCard(playerObject);
 
             if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
-                if( !playerObject.prevGov && !playerObject.president){ //if this specific player is clickable
+                if( !playerObject.prevGov && !playerObject.president){ //if this specific player in the array is clickable
                     playerCard.addEventListener('click', ()=>{
                         document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
                         toggleClass(playerCard, 'selected');
@@ -290,14 +290,14 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray= [], gamePhase, isPresident, isChancellor, voteCast)=>{
+    const showCards = (cardArray= [], gamePhase, thisPlayerObject, voteCast)=>{
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
         // 2 - add the new cards
         switch(gamePhase){
             case 'proposal':
-                if(isPresident == true){
+                if(thisPlayerObject.president == true){
                     let acceptCard = document.createElement('button');
                     acceptCard.innerText = "Propose Chancellor";
                     acceptCard.addEventListener('click',()=>{

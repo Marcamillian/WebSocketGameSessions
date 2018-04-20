@@ -278,17 +278,17 @@ const gameStateManager = function(){
         let gameState = (suppliedState) ? suppliedState : gameStates[gameRef]
 
         // find the user
-        player = gameState.players.filter((player)=>{ return player.playerRef == userId})
+        player = gameState.players.filter((player)=>{ return player.playerRef == userId})[0]
 
         if(player.length == 0) throw new Error("playerRef not in game")    // ensure the player is in there
         else if (player.length > 1) throw new Error("repeated playerRef in game")   // make sure there arn't doubles
 
-        privateInfo["playerName"] = player[0].playerName;
-        privateInfo["character"] = player[0].character;
-        privateInfo["alignment"] = player[0].alignment;
+        privateInfo["playerName"] = player.playerName;
+        privateInfo["character"] = player.character;
+        privateInfo["alignment"] = player.alignment;
 
         // make a list of the teammate indexes -- if he is a fascist
-        if(player[0].alignment == 'fascist'){
+        if(player.alignment == 'fascist'){
             gameState.players.forEach((player,index)=>{
                 if(player.alignment == 'fascist') teamMates.push(player.playerName)
             })
@@ -297,9 +297,9 @@ const gameStateManager = function(){
 
         if(gameState.gamePhase == 'legislative'){   // if in the legislative phase
 
-            if(player[0].president && gameState.policyHand.length == 3){  // if the president && 3 cards in hand
+            if(player.president && gameState.policyHand.length == 3){  // if the president && 3 cards in hand
                 privateInfo["policyHand"] = gameState.policyHand; 
-            }else if(player[0].chancellor && gameState.policyHand.length ==2){  // else if the chancellor and 2 cards in hand
+            }else if(player.chancellor && gameState.policyHand.length ==2){  // else if the chancellor and 2 cards in hand
                 privateInfo["policyHand"] = gameState.policyHand
             }
         }
