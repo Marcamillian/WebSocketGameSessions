@@ -27,6 +27,12 @@ button{
         background-repeat: no-repeat;
         background-position: 50% 50%;
     }
+    .player-card.selected{
+        color:#ff9900;
+    }
+    .player-card.not-selectable p{
+        color:#BDBDBD;
+    }
 
 /* PLAYER CARD DEPENDING ON GAMESTATE*/
     .lobby .player-card .player-action{

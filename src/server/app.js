@@ -183,8 +183,10 @@ app.put(`/gameInstance/:gameRef/policyDiscard/:policyDiscard`,(req,res)=>{
 app.put('/gameInstance/:gameRef/stateTest', (req,res)=>{
     try{
         let gameRef = req.params.gameRef;
-        let gameState = JSON.parse(req.headers["game-state"]);
+        let gameState = JSON.parse(req.headers["game-state"])
         let privateInfo = stateManager.getPrivatePlayerInfo(undefined, gameState.players[0].playerRef ,gameState)
+
+        gameState = stateManager.filterGameState(gameState);
 
         wss.broadcast(gameRef, gameState, privateInfo);
 

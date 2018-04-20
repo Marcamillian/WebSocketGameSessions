@@ -5,23 +5,29 @@ let exposedFunctions = (()=>{
     const wsButton = document.querySelector('#ws-button');
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
-    const createGame = document.querySelector('#create-game')
-    const leaveGame = document.querySelector('#leave-game')
+    const createGame = document.querySelector('#create-game');
+    const leaveGame = document.querySelector('#leave-game');
     const displayBody = document.querySelector('body');
-    const urlJoinGame = document.querySelector('#url-join')
+    const urlJoinGame = document.querySelector('#url-join');
 
 
-    const playerNameInput = document.querySelector('#player-name')
-    const gameRefInput = document.querySelector('#game-ref')
-    let playerDisplay = document.querySelector('.player-list')
-    let lobbyReadyButton = document.querySelector('#ready-button')
-    let privateInfoDisplay = document.querySelector('#private-info')
-    let gameRefDisplay = document.querySelector('.gref-block .code')
-    let playerNameDisplay = document.querySelector('#name-display')
-    let voteYesButton = document.querySelector('#ingame-vote #yes')
-    let voteNoButton = document.querySelector('#ingame-vote #no')
-    let policyPickDisplay = document.querySelector('#ingame-policy-pick')
+    const playerNameInput = document.querySelector('#player-name');
+    const gameRefInput = document.querySelector('#game-ref');
+    let playerDisplay = document.querySelector('.player-list');
 
+    let privateInfoDisplay = document.querySelector('#private-info');
+    let gameRefDisplay = document.querySelector('.gref-block .code');
+    let playerNameDisplay = document.querySelector('#name-display');
+    let cardAreaDisplay = document.querySelector('.card-area');
+
+    let lobbyReadyButton = document.querySelector('#ready-button');
+    let voteYesButton = document.querySelector('#ingame-vote #yes');
+    let voteNoButton = document.querySelector('#ingame-vote #no');
+    
+    let envelope = document.querySelector('.envelope');
+    let envelopeFlap = document.querySelector('.envelope .flap');
+    let envelopeContents = document.querySelector(".envelope .env-contents");
+    
     
     let ws;
 
@@ -43,7 +49,7 @@ let exposedFunctions = (()=>{
             ready = false,
             prevGov = false,
             proposedChancellor = false,
-            voteCast = undefined} = {})=>{
+            voteCast = undefined} = {} )=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -54,9 +60,9 @@ let exposedFunctions = (()=>{
                 if (president) divPlayerCard.classList.add('president');
                 if (chancellor) divPlayerCard.classList.add('chancellor');
                 if (ready) divPlayerCard.classList.add('ready');
-                if (prevGov) divPlayerCard.classList.add('prev-gov')
+                if (prevGov) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
-                if (voteCast) divPlayerCard.classList.add('vote-cast')
+                if (voteCast != undefined) divPlayerCard.classList.add('vote-cast');
 
                 paraPlayerName.innerText = playerName;
 
@@ -82,21 +88,20 @@ let exposedFunctions = (()=>{
             return divVoteCard;
         }
 
-        const generateEnvelopeContents = ({
-            character = "<Character not defined>",
-            alignment = "<Alignment not defined>"})=>{
+        const generateEnvelopeContents = (character, alignment)=>{
 
             let divFlipContainer = document.createElement('div');
             let divCardFront = document.createElement('div');
             let divCardBack = document.createElement('div');
             
-            divFlipContainer.classList.add('flip-card','horizontal')
+            divFlipContainer.classList.add('env-card','flip-card','horizontal')
+            divFlipContainer.addEventListener('click', ()=>{toggleClass(divFlipContainer, 'flipped')});
 
             divCardFront.classList.add('front')
-            divCardFront.innerHTML = alignment;
+            divCardFront.innerText = `Alignment ---  ${alignment}`;
             
             divCardBack.classList.add('back');
-            divCardBack.innerHTML = character;
+            divCardBack.innerText = `Role --- ${character}`;
 
             divFlipContainer.appendChild(divCardFront);
             divFlipContainer.appendChild(divCardBack);
@@ -190,15 +195,15 @@ let exposedFunctions = (()=>{
             const gameRef = data.gameRef;
             const gameState = data.gameState;
             const privateInfo = data.privateInfo;
-            let presList = gameState.players.filter((player)=>{return player.president})[0]
-            let isPresident = (presList != undefined) ? presList.playerName == privateInfo.playerName : false;
+            
+            let thisPlayerObject = gameState.players.filter((player)=>{ return player.playerName == privateInfo.playerName})[0];
 
-            //!!!
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players) // show al of the players
-            //showPrivateInfo(privateInfo)
+            showPlayers(gameState.players,gameState.gamePhase, thisPlayerObject) // show al of the players
+            showCards(privateInfo.policyHand, gameState.gamePhase, thisPlayerObject, privateInfo.voteCast);
+            showPrivateInfo(privateInfo)
         })
         
         ws.on("connectSuccess",()=>{
@@ -252,50 +257,80 @@ let exposedFunctions = (()=>{
         console.log(`new game ref set to ${currentGameRef}`)
         return gameRef
     }
-/*
-    const getGameState = (gameState)=>{
-        fetch(`/gameinstance/${currentGameRef}`, {method:'GET', credentials:'same-origin'})
-            .then(handleResponse)
-            .then(updateGameState)
-            .catch((err)=> showMessage(err.message))
-    }*/
 
-    const showPlayers = (playerArray, gamePhase, extraOptions)=>{
+    const getSelectedPlayer = ()=>{
+        return document.querySelector('.player-card.selected p').innerText;
+    }
+
+    const showPlayers = (playerArray, gamePhase, thisPlayerObject)=>{
         
+        let callback  = undefined;
+        let isPresident = thisPlayerObject.president;
+
         // 1-  remove the elements from the list
         playerDisplay = displayModule.emptyElement(playerDisplay)
 
         // 2- add the new names to the list
         playerArray.forEach((playerObject)=>{
 
-            /*
-            let addEl = document.createElement('li');
-            addEl.innerText = playerObject["playerName"]
+            let playerCard = displayModule.generatePlayerCard(playerObject);
 
-            switch(gamePhase){
-                case "lobby":
-                    if(playerObject['ready']) {
-                        addEl.classList.add('ready')
-                    }
-                break;
-                case "proposal":
-                    if(extraOptions && !playerObject.president && !playerObject.prevGov){
-                        let electButton = document.createElement('button')
-                        electButton.addEventListener('click',()=>{playerSelect(playerObject["playerName"])})
-                        electButton.innerText = "Select Player"
-                        
-                        addEl.appendChild(electButton)
-                    }
-                break;
+            if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
+                if( !playerObject.prevGov && !playerObject.president){ //if this specific player in the array is clickable
+                    playerCard.addEventListener('click', ()=>{
+                        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
+                        toggleClass(playerCard, 'selected');
+                    })
+                }else{
+                    playerCard.classList.add('not-selectable');
+                }
             }
             
-
-            // add classes
-            if(playerObject['president']) addEl.classList.add("president")
-            if(playerObject['proposedChancellor']) addEl.classList.add("proposed-chancellor")
-            */
-            playerDisplay.appendChild(displayModule.generatePlayerCard(playerObject))
+            playerDisplay.appendChild(playerCard);
         }) 
+    }
+
+    const showCards = (cardArray= [], gamePhase, thisPlayerObject, voteCast)=>{
+        // 1- remove the cards from the list
+        cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
+
+        // 2 - add the new cards
+        switch(gamePhase){
+            case 'proposal':
+                if(thisPlayerObject.president == true){
+                    let acceptCard = document.createElement('button');
+                    acceptCard.innerText = "Propose Chancellor";
+                    acceptCard.addEventListener('click',()=>{
+                        playerSelect(getSelectedPlayer());
+                    })
+                    cardAreaDisplay.appendChild(acceptCard);
+                }
+            break;
+            case 'election':
+                [true, false].forEach((voteBool)=>{
+                    let cardText = (voteBool) ? 'Yes' : 'No'
+                    let voteCard = displayModule.generateVoteCard(cardText);
+
+                    // set one of the cards to selected if they are
+                    if(voteCast == true && voteBool){ voteCard.classList.add('selected') }
+                    else if(voteCast === false && !voteBool){ voteCard.classList.add('selected') } 
+
+                    voteCard.addEventListener('click', ()=>{
+                        castVote(voteBool);
+                    });
+                    cardAreaDisplay.appendChild(voteCard);
+                })
+            break;
+            case 'legislative':
+                cardArray.forEach((cardName)=>{
+                    let policyCard = displayModule.generateVoteCard(cardName);
+                    policyCard.addEventListener('click',()=>{
+                        discardPolicy(cardName);
+                    })
+                    cardAreaDisplay.appendChild(policyCard);
+                })
+            break;
+        }
     }
 
     const getPlayerNameInput =()=>{
@@ -306,8 +341,22 @@ let exposedFunctions = (()=>{
         return gameRefInput.value
     }
 
-    const showPrivateInfo = (privateInfo)=>{
+    const showPrivateInfo = ({
+        playerName = "<No name given>",
+        character = "<No charater>",
+        alignment = "<No Alignment>",
+        teamMates = ["No team mates"],
+        policyHand =  ["No cards"]}={} )=>{
 
+        // set the name on the envelope
+        playerNameDisplay.innerText = playerName;
+        // empty old costumes
+        envelopeContents = displayModule.emptyElement(envelopeContents);
+        // generate the cards
+        envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment));
+
+        return 
+        /*
         let teamTitle, teamEl,
          alignmentEl, characterEl,
          policyPickTitle, policyButtons;
@@ -350,12 +399,13 @@ let exposedFunctions = (()=>{
             })
         }
 
-        // TODO: if there is a policyHand attached - show the policyHand in the voting things
 
         privateInfoDisplay.appendChild(alignmentEl)
         privateInfoDisplay.appendChild(characterEl)
         if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
         if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
+
+        */
     }
 
     const clearElement = (element)=>{
@@ -389,6 +439,22 @@ let exposedFunctions = (()=>{
         ws.emit("discardPolicy", {policyDiscard: policyAlignment})
     }
 
+    const toggleEnvelopeOpen = ()=>{
+        if(!envelope.classList.contains('open')){
+            toggleClass(envelopeFlap, "flipped")
+            window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+            window.setTimeout(()=>{toggleClass(envelope, "show-card")}, 1000)
+        }else{
+            toggleClass(envelope, "show-card")
+            window.setTimeout(()=>{toggleClass(envelope, "open")}, 999)
+            window.setTimeout(()=>{toggleClass(envelopeFlap, "flipped")}, 1000)
+        }
+    }
+
+    const toggleClass = (element, tag)=>{
+        element.classList.toggle(tag);
+    }
+
     // BUTTON CLICK FUNCTIONS
  
     wsButton.onclick = ()=>{
@@ -420,12 +486,15 @@ let exposedFunctions = (()=>{
         ws.emit("readyUp")
         
     }
+    
+    envelopeFlap.addEventListener("click", ()=>{
+        toggleEnvelopeOpen()
+    })
 
-    voteYesButton.onclick = ()=>{castVote(true); }
-    voteNoButton.onclick = ()=>{castVote(false)}
 
     return{
-        displayModule
+        displayModule,
+        getSelectedPlayer
     }
 
 })();

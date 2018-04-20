@@ -56,17 +56,20 @@ p,div{
 
     .in-game .gref-block,
     .in-game .player-list,
-    .in-game .card-area,
     .in-game .envelope{
         visibility:visible;
     }
 
-    .election{
-
+    .proposal .card-area{
+        visibility:visible;
     }
 
-    .legislative{
-        
+    .election .card-area{
+        visibility: visible;
+    }
+
+    .legislative .card-area{
+        visibility: visible;
     }
 
 
@@ -125,6 +128,9 @@ p,div{
 }
 .card-area button{
     height:50%
+}
+.card-area *{
+    visibility: inherit;
 }
 
 /** ENVELOPE **/

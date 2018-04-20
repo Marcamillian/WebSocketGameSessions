@@ -14,6 +14,17 @@ Example for browser communication - https://github.com/websockets/ws/blob/master
 
 
 
+
+
+
+====
+
+[DONE] - the election vote card animation doesn't work becuase of the page refresh when retrieving the new gameState
+
+====
+
+[DONE] - Create send selection button
+
 =====
 
 Existing Progress
@@ -28,7 +39,7 @@ Progress Points
 
 ==== 
 
-TODO: Fedback on you having voted suceessfully (how many others have voted)
+[DONE] Fedback on you having voted suceessfully (how many others have voted)
 
 [DONE] Get Policies showing for pres/chanc
 Current state - Can go through to legislative - default policy buttons shown for all
@@ -36,10 +47,34 @@ Desired State -
 
 [DONE] Trigger Endpoint for discarding a policy
 
-TODO: Client visibility for chancellor
+[DONE]: Client visibility for chancellor
 
 [DONE]: Remove the chancellor
 [DONE]: Move on the president
 [DONE]: Set previous govornment
 
 [DONE]: Deal with prevGov assign - assign && remove at vote pass
+
+=== 
+
+[ DONE ]
+PlayerCard select process
+- call function to draw players to screen - passing list of players 
+- if it is the proposal or powers phase we need callbacks
+  - what players can be selected?
+    - proposal phase
+      - NOT yourself
+      - NOT prevGov
+      - NOT dead players
+    - powers
+      - depends on power?
+      - can you pick yourself?
+      - NOT dead players
+
+- follow on - need vote/send button to relay the selected players
+
+
+
+- What click functions do we need?
+  - for electing a chancellor 
+  - for directing a power
