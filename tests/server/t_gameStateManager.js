@@ -194,7 +194,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         ts.end()
     })
 
-    t.test("Success vote - hitler chancellor", (ts)=>{
+    t.test("Success vote - hitler chancellor enough fascist to finish", (ts)=>{
         let gsManager = GameStateManager()
 
         let gameState1 = StateTemplate();
@@ -214,12 +214,45 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         gameState1.players.push(player3)
         gameState1.players.push(player4)
 
+        gameState1.policyTrackFascist = [true, true, true, false, false, false]
+
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
         let result = gsManager.update(undefined,gameState1)
         //let hasPresident = gameState.players.
 
         ts.equals(result.gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
+        ts.end()
+    })
+    
+    t.test("Success vote - hitler chancellor NOT enough fascist to finish", (ts)=>{
+        let gsManager = GameStateManager()
+
+        let gameState1 = StateTemplate();
+        let player1 = PlayerTemplate()
+        let player2 = PlayerTemplate()
+        let player3 = PlayerTemplate()
+        let player4 = PlayerTemplate()
+
+        gameState1.gamePhase = 'election'
+
+        player1.proposedChancellor = true;
+        player1.character = 'hitler';
+        player2.president = true;
+
+        gameState1.players.push(player1)
+        gameState1.players.push(player2)
+        gameState1.players.push(player3)
+        gameState1.players.push(player4)
+
+        gameState1.policyTrackFascist = [false, false, false, false, false, false]
+
+        gameState1.players.forEach((player)=>{player.voteCast = true})
+        debugger;
+        let result = gsManager.update(undefined,gameState1)
+        //let hasPresident = gameState.players.
+        
+        ts.equals(result.gamePhase, "legislative", "Success vote - hitler doesn't have enough power to win")
         ts.end()
     })
 

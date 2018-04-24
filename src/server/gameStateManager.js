@@ -67,8 +67,12 @@ const gameStateManager = function(){
                     let chancellor = gameState.players.filter((player)=>{return player.proposedChancellor})[0]
                     let president = gameState.players.filter((player)=>{return player.president})[0]
 
+                    let passedFascistPolicies = gameState.policyTrackFascist.reduce((accum, policy)=>{
+                        return (policy === true) ? accum + 1 : accum
+                    },0)
+
                     // TODO: also need check for facist policy track
-                    if(chancellor.character == "hitler"/* && policy track*/){ // if chancellor is hitler
+                    if(chancellor.character == "hitler" && passedFascistPolicies >= 3 ){ // if chancellor is hitler && enough fascist policies
                         gameState.gamePhase = 'endGame' // fascists win
                         return gameState
                     }
@@ -97,8 +101,6 @@ const gameStateManager = function(){
                     
                     return gameState
                 }
-                
-
 
             break;
             case "legislative":
@@ -280,7 +282,7 @@ const gameStateManager = function(){
         // find the user
         player = gameState.players.filter((player)=>{ return player.playerRef == userId})[0]
 
-        if(player.length == 0) throw new Error("playerRef not in game")    // ensure the player is in there
+        if(player == undefined) throw new Error("playerRef not in game")    // ensure the player is in there
         else if (player.length > 1) throw new Error("repeated playerRef in game")   // make sure there arn't doubles
 
         privateInfo["playerName"] = player.playerName;
