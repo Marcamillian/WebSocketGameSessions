@@ -537,18 +537,18 @@ const gameStateManager = function(){
     const enactPolicy = (args)=>{ // args gameRef: gameState:
         const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
         let trackIndex;
-
+        
         // check that we have the right numebr of policies
         if(gameState.policyHand.length < 1) throw new Error("no policies to enact")
         else if(gameState.policyHand.length > 1 ) throw new Error("more than one policy to enact")
 
         // add to the right track
         if(gameState.policyHand[0] == 'liberal'){
-            trackIndex = gameState.policyTrackLiberal.indexOf('false')
-            gameState.policyTrackLiberal[trackIndex+1] = true;
+            trackIndex = gameState.policyTrackLiberal.indexOf(false)
+            gameState.policyTrackLiberal[trackIndex] = true;
         }else if(gameState.policyHand[0] == 'fascist'){
-            trackIndex = gameState.policyTrackFascist.indexOf('false')
-            gameState.policyTrackFascist[trackIndex+1]= true;
+            trackIndex = gameState.policyTrackFascist.indexOf(false)
+            gameState.policyTrackFascist[trackIndex]= true;
         }else{
             throw new Error(`Unknown policy type: ${gameState.policyHand[0]}`)
         }

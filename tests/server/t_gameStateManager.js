@@ -248,7 +248,7 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         gameState1.policyTrackFascist = [false, false, false, false, false, false]
 
         gameState1.players.forEach((player)=>{player.voteCast = true})
-        debugger;
+
         let result = gsManager.update(undefined,gameState1)
         //let hasPresident = gameState.players.
         
@@ -1068,12 +1068,28 @@ test("Test function: enactPolicy",(t)=>{
             policyTrackLiberal:[false, false, false, false,false,],
             policyTrackFascist:[false, false, false, false, false, false]
         }
-
+        
         const result = stateManager.enactPolicy({gameState: gameState});
-
-        ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy");
+        debugger;
+        ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy"); // !!
         ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
+
+        ts.end()
+    })
+
+    test('second liberal policy passed', (ts)=>{
+        const gameState = {
+            policyHand:['liberal'],
+            policyTrackLiberal:[true, false, false, false, false, false],
+            policyTrackFascist:[false, false, false, false, false, false]
+        }
+        debugger;
+        const result = stateManager.enactPolicy({gameState: gameState});
+        ts.equals(result.policyTrackLiberal[1], true, "second item is true in liberal track"); //!!
+        ts.equals(result.policyTrackLiberal.filter(val => val == true).length, 2, "there are 2 true items in the liberal track");
+        ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has nothing");
+        ts.equals(result.policyHand.length, 0, "policy hand is empty");
 
         ts.end()
     })
@@ -1086,8 +1102,8 @@ test("Test function: enactPolicy",(t)=>{
         }
 
         const result = stateManager.enactPolicy({gameState: gameState});
-
-        ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy");
+        debugger;
+        ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy"); //!!
         ts.equals(result.policyTrackLiberal.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
 
