@@ -185,7 +185,12 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         let result = gsManager.update(undefined,gameState1);
 
+        // see if the player votes contain either true or false
+        let playerVotes = result.players.map( player => player.voteCast);
+        let votesDirty = playerVotes.includes(true) || playerVotes.includes(false);
+
         ts.equals(result.gamePhase, "legislative", "Success vote - move to legislative")
+        ts.equals(votesDirty, false , "Votes have been reset to undefined")
         ts.equals(player3.prevGov, true, "president is part of a successful gov")
         ts.equals(player1.prevGov, true, "chancellor is part of a successful gov")
         ts.equals(player2.prevGov, false, "No longer previous government")
@@ -221,7 +226,12 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         let result = gsManager.update(undefined,gameState1)
         //let hasPresident = gameState.players.
 
-        ts.equals(result.gamePhase, "endGame", "Success vote - hitler is chancellor - end game")
+        // see if the player votes contain either true or false
+        let playerVotes = result.players.map( player => player.voteCast);
+        let votesDirty = playerVotes.includes(true) || playerVotes.includes(false);
+
+        ts.equals(result.gamePhase, "endGame", "Success vote - hitler is chancellor - end game");
+        ts.equals(votesDirty, false , "Votes have been reset to undefined");
         ts.end()
     })
     
@@ -250,9 +260,13 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         gameState1.players.forEach((player)=>{player.voteCast = true})
 
         let result = gsManager.update(undefined,gameState1)
-        //let hasPresident = gameState.players.
+        
+        // see if the player votes contain either true or false
+        let playerVotes = result.players.map( player => player.voteCast);
+        let votesDirty = playerVotes.includes(true) || playerVotes.includes(false);
         
         ts.equals(result.gamePhase, "legislative", "Success vote - hitler doesn't have enough power to win")
+        ts.equals(votesDirty, false , "Votes have been reset to undefined")
         ts.end()
     })
 
@@ -276,7 +290,13 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
         gameState1.players.forEach((player)=>{player.voteCast = false})
 
-        ts.equals(gsManager.update(undefined,gameState1).gamePhase, "proposal", "Unsuccessful gov election - elect another")
+        let result = gsManager.update(undefined,gameState1)
+        // see if the player votes contain either true or false
+        let playerVotes = result.players.map( player => player.voteCast);
+        let votesDirty = playerVotes.includes(true) || playerVotes.includes(false);
+
+        ts.equals(result.gamePhase, "proposal", "Unsuccessful gov election - elect another")
+        ts.equals(votesDirty, false , "Votes have been reset to undefined")
         ts.end()
     })
 
@@ -1071,7 +1091,7 @@ test("Test function: enactPolicy",(t)=>{
         
         const result = stateManager.enactPolicy({gameState: gameState});
         debugger;
-        ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy"); // !!
+        ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy"); 
         ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
 
@@ -1086,7 +1106,7 @@ test("Test function: enactPolicy",(t)=>{
         }
         debugger;
         const result = stateManager.enactPolicy({gameState: gameState});
-        ts.equals(result.policyTrackLiberal[1], true, "second item is true in liberal track"); //!!
+        ts.equals(result.policyTrackLiberal[1], true, "second item is true in liberal track");
         ts.equals(result.policyTrackLiberal.filter(val => val == true).length, 2, "there are 2 true items in the liberal track");
         ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has nothing");
         ts.equals(result.policyHand.length, 0, "policy hand is empty");
@@ -1103,7 +1123,7 @@ test("Test function: enactPolicy",(t)=>{
 
         const result = stateManager.enactPolicy({gameState: gameState});
         debugger;
-        ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy"); //!!
+        ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy");
         ts.equals(result.policyTrackLiberal.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
 

@@ -71,9 +71,9 @@ const gameStateManager = function(){
                         return (policy === true) ? accum + 1 : accum
                     },0)
 
-                    // TODO: also need check for facist policy track
                     if(chancellor.character == "hitler" && passedFascistPolicies >= 3 ){ // if chancellor is hitler && enough fascist policies
                         gameState.gamePhase = 'endGame' // fascists win
+                        gameState.players = resetPlayerVotes(gameState.players);
                         return gameState
                     }
 
@@ -92,16 +92,15 @@ const gameStateManager = function(){
                     gameState = drawPolicyHand({gameState:gameState});
                     // set the gamephase to legislative
                     gameState.gamePhase = 'legislative'
-                    return gameState
                     
                 }else{  // vote fails
 
                     gameState = rotateGovernment({gameState:gameState});
                     gameState.gamePhase = 'proposal';
-                    
-                    return gameState
                 }
 
+                gameState.players = resetPlayerVotes(gameState.players);
+                return gameState
             break;
             case "legislative":
 
@@ -141,6 +140,13 @@ const gameStateManager = function(){
         return gameState // pass back the updated state
     }
     
+    const resetPlayerVotes = (players)=>{
+        players.forEach((player)=>{
+            player.voteCast = undefined;
+        })
+        return players;
+    }
+
     const createNewGame = ()=>{
         let sessionRef = createSessionKey(4)
 
@@ -390,7 +396,6 @@ const gameStateManager = function(){
         let policyHand = gameState.policyHand
         let policyIndex = policyHand.indexOf(policyType)
 
-        // !! TODO: For some reason this policy hand is empty
         if(policyIndex != -1){ //if there is a policy of that hand
             var head = policyHand.slice(0, policyIndex)
             var tail = policyHand.slice(policyIndex)
