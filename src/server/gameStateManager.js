@@ -67,9 +67,13 @@ const gameStateManager = function(){
                     let chancellor = gameState.players.filter((player)=>{return player.proposedChancellor})[0]
                     let president = gameState.players.filter((player)=>{return player.president})[0]
 
-                    // TODO: also need check for facist policy track
-                    if(chancellor.character == "hitler"/* && policy track*/){ // if chancellor is hitler
+                    let passedFascistPolicies = gameState.policyTrackFascist.reduce((accum, policy)=>{
+                        return (policy === true) ? accum + 1 : accum
+                    },0)
+
+                    if(chancellor.character == "hitler" && passedFascistPolicies >= 3 ){ // if chancellor is hitler && enough fascist policies
                         gameState.gamePhase = 'endGame' // fascists win
+                        gameState.players = resetPlayerVotes(gameState.players);
                         return gameState
                     }
 
@@ -88,18 +92,15 @@ const gameStateManager = function(){
                     gameState = drawPolicyHand({gameState:gameState});
                     // set the gamephase to legislative
                     gameState.gamePhase = 'legislative'
-                    return gameState
                     
                 }else{  // vote fails
 
                     gameState = rotateGovernment({gameState:gameState});
                     gameState.gamePhase = 'proposal';
-                    
-                    return gameState
                 }
-                
 
-
+                gameState.players = resetPlayerVotes(gameState.players);
+                return gameState
             break;
             case "legislative":
 
@@ -139,6 +140,13 @@ const gameStateManager = function(){
         return gameState // pass back the updated state
     }
     
+    const resetPlayerVotes = (players)=>{
+        players.forEach((player)=>{
+            player.voteCast = undefined;
+        })
+        return players;
+    }
+
     const createNewGame = ()=>{
         let sessionRef = createSessionKey(4)
 
@@ -280,7 +288,7 @@ const gameStateManager = function(){
         // find the user
         player = gameState.players.filter((player)=>{ return player.playerRef == userId})[0]
 
-        if(player.length == 0) throw new Error("playerRef not in game")    // ensure the player is in there
+        if(player == undefined) throw new Error("playerRef not in game")    // ensure the player is in there
         else if (player.length > 1) throw new Error("repeated playerRef in game")   // make sure there arn't doubles
 
         privateInfo["playerName"] = player.playerName;
@@ -388,7 +396,6 @@ const gameStateManager = function(){
         let policyHand = gameState.policyHand
         let policyIndex = policyHand.indexOf(policyType)
 
-        // !! TODO: For some reason this policy hand is empty
         if(policyIndex != -1){ //if there is a policy of that hand
             var head = policyHand.slice(0, policyIndex)
             var tail = policyHand.slice(policyIndex)
@@ -535,18 +542,18 @@ const gameStateManager = function(){
     const enactPolicy = (args)=>{ // args gameRef: gameState:
         const gameState = (args.gameRef) ? gameStates[gameRef] : args.gameState;
         let trackIndex;
-
+        
         // check that we have the right numebr of policies
         if(gameState.policyHand.length < 1) throw new Error("no policies to enact")
         else if(gameState.policyHand.length > 1 ) throw new Error("more than one policy to enact")
 
         // add to the right track
         if(gameState.policyHand[0] == 'liberal'){
-            trackIndex = gameState.policyTrackLiberal.indexOf('false')
-            gameState.policyTrackLiberal[trackIndex+1] = true;
+            trackIndex = gameState.policyTrackLiberal.indexOf(false)
+            gameState.policyTrackLiberal[trackIndex] = true;
         }else if(gameState.policyHand[0] == 'fascist'){
-            trackIndex = gameState.policyTrackFascist.indexOf('false')
-            gameState.policyTrackFascist[trackIndex+1]= true;
+            trackIndex = gameState.policyTrackFascist.indexOf(false)
+            gameState.policyTrackFascist[trackIndex]= true;
         }else{
             throw new Error(`Unknown policy type: ${gameState.policyHand[0]}`)
         }

@@ -7,8 +7,8 @@
     "start": "node src/server/app.js",
     "test": "tap tests/server/*.js",
     "debug": "node --inspect src/server/app.js",
-    "test-debug": "node debug src/tests/test-debug.js",
     "test-client": "tap tests/client/*.js",
+    "test-server-debug": "tap --debug tests/server/*.js",
     "test-server": "tap tests/server/*.js"
   },
   "author": "Marc Vousden",
