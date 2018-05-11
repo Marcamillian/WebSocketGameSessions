@@ -14,17 +14,13 @@
   "author": "Marc Vousden",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.15.4",
-    "express-session": "^1.15.5",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "http": "0.0.0",
-    "socket.io": "^2.0.4",
-    "tap": "^10.7.2",
-    "tape": "^4.8.0",
-    "url": "^0.11.0",
-    "uuid": "^3.1.0",
-    "ws": "^3.1.0"
+    "socket.io": "^2.1.0"
   },
   "devDependencies": {
-    "tape": "^4.8.0"
+    "tap": "^11.1.5",
+    "tape": "^4.9.0"
   }
 }
