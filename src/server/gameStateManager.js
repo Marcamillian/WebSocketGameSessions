@@ -248,6 +248,13 @@ const gameStateManager = function(){
         }
     }
 
+    const joinSpectator = ( { sessionKey, gameState = gameStates[sessionKey], spectatorRef } = {} )=>{
+        if(gameState == undefined) throw new Error(`No gameState found for gameRef: ${sessionKey}`)
+        if(spectatorRef == undefined) throw new Error(`No spectator reference defined`) 
+        gameState.spectators.push(spectatorRef)
+        return gameState;
+    }
+
     const getPlayerRefs = ( gameRef, suppliedStates )=>{
 
         let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
@@ -612,6 +619,7 @@ const gameStateManager = function(){
         createNewGame,
         initGame, // for testing purposes
         joinGame,
+        joinSpectator,
         leaveGame,
 
         getGameState,

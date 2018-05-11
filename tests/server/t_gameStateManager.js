@@ -846,8 +846,6 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.end()
     })
 
-
-
     t.end()
 })
 
@@ -1153,6 +1151,43 @@ test("Test function: enactPolicy",(t)=>{
 
         ts.throws(()=>{stateManager.enactPolicy({gameState: gameState})},/more than one policy to enact/i, "Error when multiple policies in hand" )
 
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: joinSpectator", (t)=>{
+    
+    t.test("joining a spectator ref", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        let result = stateManager.joinSpectator({gameState: testState, spectatorRef:'s1'})
+
+        ts.equal(result.spectators.length, 1, "Only one spectator added");
+        ts.equal(result.spectators[0], 's1', "Correct spectator")
+        ts.end()
+    })
+
+    t.test("Join without spectatorRef", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        ts.throws(()=>{stateManager.joinSpectator({gameState:testState})}, /No spectator reference defined/i, "Throws error when no spectator reference given")
+        ts.end()
+    })
+
+    t.test("Join without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+        
+        ts.throws(()=>{stateManager.joinSpectator()}, /No gameState found for gameRef/i, "Error thrown when no gameState or sessionKey given")
         ts.end()
     })
 
