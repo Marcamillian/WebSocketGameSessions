@@ -9,6 +9,7 @@ let exposedFunctions = (()=>{
     const leaveGame = document.querySelector('#leave-game');
     const displayBody = document.querySelector('body');
     const urlJoinGame = document.querySelector('#url-join');
+    const spectatorJoin = document.querySelector('#spectator-join')
 
 
     const playerNameInput = document.querySelector('#player-name');
@@ -222,6 +223,13 @@ let exposedFunctions = (()=>{
             const errorMessage = data.errorMessage;
             gameStateDisplay("lobby")
             console.log(`Joined game ${data.gameRef}`)
+        })
+
+        ws.on("spectatorJoined", ({result, type, data})=>{
+            if(result != "OK"){ console.log(data.errorMessage); return }
+            const gameRef = data.gameRef;
+            gameStateDisplay("lobby")
+            console.log(`Spectating game : ${gameRef}`)
         })
 
         ws.on("gameLeft", ({result, type, data})=>{
@@ -480,6 +488,10 @@ let exposedFunctions = (()=>{
 
     urlJoinGame.onclick = ()=>{
         ws.emit("joinGame", {playerName: getPlayerNameInput(), gameRef: getGameRefInput()})
+    }
+
+    spectatorJoin.onclick = ()=>{
+        ws.emit("joinSpectator", {gameRef: getGameRefInput()})
     }
 
     lobbyReadyButton.onclick = ()=>{ 

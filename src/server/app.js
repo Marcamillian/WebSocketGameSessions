@@ -3,8 +3,6 @@
 const session = require('express-session')
 const express = require('express');
 const http = require('http');
-const uuid = require('uuid')
-const WebSocket = require('ws');
 const io = require('socket.io')
 const util = require('util')
  
@@ -35,9 +33,7 @@ app.use(sessionParser);
 
 // login to the game
 app.post('/login', (req, res)=>{
-    const id= uuid.v4();
     if (!req.session.userId){
-        req.session.userId = id; // if there is already a session under that user // !!! REMOVING THIS AS ITS NOW IN THE WEBSOCKET SETUP
         res.send({result:"OK", message: 'Session updated '})
     } else {
         // get the game that they are in - this makes sure that the actually have a session
@@ -299,6 +295,17 @@ wss.on('connection', (ws)=>{
                 data: {errorMessage: errorMessage}
             })
         }
+    })
+
+    ws.on("joinSpectator", ( {gameRef="XXXX"} = {} ) =>{
+        console.log(`Someone trying to spectate gameRef ${gameRef}`)
+        ws.emit('spectatorJoined',{
+            "result":"OK",
+            "type": "joinGame",
+            "data": {
+                "gameRef": gameRef
+            }
+        })
     })
 
     ws.on("leaveGame", ( )=>{
