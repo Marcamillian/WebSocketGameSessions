@@ -298,14 +298,27 @@ wss.on('connection', (ws)=>{
     })
 
     ws.on("joinSpectator", ( {gameRef="XXXX"} = {} ) =>{
-        console.log(`Someone trying to spectate gameRef ${gameRef}`)
-        ws.emit('spectatorJoined',{
-            "result":"OK",
-            "type": "joinGame",
-            "data": {
-                "gameRef": gameRef
-            }
-        })
+        try{
+            console.log(`Someone trying to spectate gameRef ${gameRef}`)
+            stateManager.joinSpectator({gameRef: gameRef, spectatorRef: ws.id })
+            ws.emit('spectatorJoined',{
+                "result":"OK",
+                "type": "joinGame",
+                "data": {
+                    "gameRef": gameRef
+                }
+            })
+            wss.broadcast(gameRef)
+        }catch(e){
+            let errorMessage = `Error - Join spectator: ${e.message}`;
+            console.log(errorMessage);
+            ws.emit("spectatorJoined",{
+                result: "failed",
+                type:"joinSpectator",
+                data:{errorMessage: errorMessage}
+            })
+        }
+        
     })
 
     ws.on("leaveGame", ( )=>{
@@ -448,7 +461,7 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
 
     try{
         let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
-        let spectatorsInGame = undefined; // ! TODO : write the function to get spectators 
+        let spectatorsInGame = stateManager.getSpectatorRefs({gameRef:gameRef}); // ! TODO : write the function to get spectators 
 
         let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
 
@@ -471,7 +484,18 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
             //ws.send(JSON.stringify(message));
         })
 
-        // ! TODO : Send data to the spectators
+        spectatorsInGame.forEach((socketKey)=>{
+            let ws = wss.sockets.connected[socketKey];
+            let response = {
+                result: "OK",
+                type: "updateSpectator",
+                data:{
+                    gameRef: gameRef,
+                    gameState: gameState
+                }
+            }
+            ws.emit("updateSpectator", response)
+        })
 
     }catch(e){
         throw new Error(`websocket broadcast failed || ${e.message}`)
