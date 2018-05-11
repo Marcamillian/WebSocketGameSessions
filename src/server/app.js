@@ -448,9 +448,9 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
 
     try{
         let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
-        //let clientsInGame = [...wss.clients].filter((ws)=>{return playersInGame.includes(ws.userId)});
-        let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
+        let spectatorsInGame = undefined; // ! TODO : write the function to get spectators 
 
+        let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
 
         clientsInGame.forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
 
@@ -470,6 +470,9 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
             ws.emit("updateGameState",response) // send the gamestate to the players in the game
             //ws.send(JSON.stringify(message));
         })
+
+        // ! TODO : Send data to the spectators
+
     }catch(e){
         throw new Error(`websocket broadcast failed || ${e.message}`)
     }
