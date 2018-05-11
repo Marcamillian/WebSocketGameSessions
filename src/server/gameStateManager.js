@@ -170,13 +170,13 @@ const gameStateManager = function(){
         return Math.random().toString(36).substring(2,2+length)
     }
 
-    const getGameState = (sessionKey)=>{
+    const getGameState = (gameRef)=>{
 
-        if(gameStates[sessionKey]){
+        if(gameStates[gameRef]){
 
             let returnState = {};
 
-            let targetState = gameStates[sessionKey];
+            let targetState = gameStates[gameRef];
             returnState['players'] = targetState.players.map( (playerInfo)=>{ return {playerName: playerInfo.playerName,
                                                                                       president: playerInfo.president,
                                                                                       chancellor: playerInfo.chancellor,
@@ -192,7 +192,7 @@ const gameStateManager = function(){
 
             return returnState
         }else{
-            throw new Error(`No game with the key ${sessionKey}`)
+            throw new Error(`No game with the key ${gameRef}`)
         }
 
 
@@ -221,18 +221,18 @@ const gameStateManager = function(){
         return filteredState;
     }
 
-    const joinGame = (sessionKey, playerRef, playerName)=>{
-        if(gameStates[sessionKey]){
+    const joinGame = (gameRef, playerRef, playerName)=>{
+        if(gameStates[gameRef]){
 
             // check the playerName isn't already in there
-            let playerNames = gameStates[sessionKey].players.map((player)=>{return player.playerName})  // get a list of the playerNames
+            let playerNames = gameStates[gameRef].players.map((player)=>{return player.playerName})  // get a list of the playerNames
             if(playerNames.includes(playerName)) throw new Error("PlayerName already taken")// check if name is already in there
 
             var newPlayer = PlayerTemplate();
             newPlayer.playerName = playerName;
             newPlayer.playerRef = playerRef;
 
-            gameStates[sessionKey].players.push( newPlayer );
+            gameStates[gameRef].players.push( newPlayer );
 
             return true;
         }else{
@@ -240,12 +240,19 @@ const gameStateManager = function(){
         }
     }
 
-    const leaveGame = (sessionKey, playerRef)=>{
-        if(gameStates[sessionKey]){
-            gameStates[sessionKey].players = gameStates[sessionKey].players.filter((player)=>{ return player.playerRef != playerRef })
+    const leaveGame = (gameRef, playerRef)=>{
+        if(gameStates[gameRef]){
+            gameStates[gameRef].players = gameStates[gameRef].players.filter((player)=>{ return player.playerRef != playerRef })
         }else{
             throw new Error("Session doesn't exist")
         }
+    }
+
+    const joinSpectator = ( { gameRef, gameState = gameStates[gameRef], spectatorRef } = {} )=>{
+        if(gameState == undefined) throw new Error(`No gameState found for gameRef: ${gameRef}`)
+        if(spectatorRef == undefined) throw new Error(`No spectator reference defined`) 
+        gameState.spectators.push(spectatorRef)
+        return gameState;
     }
 
     const getPlayerRefs = ( gameRef, suppliedStates )=>{
@@ -259,6 +266,11 @@ const gameStateManager = function(){
         }
     }
  
+    const getSpectatorRefs = ( { gameRef, gameState = gameStates[gameRef] }={} )=>{
+        if(gameState == undefined) throw new Error(`No gameState found for gameRef: ${gameRef}`)
+        return gameState.spectators;
+    }
+
     const getGameForPlayer= (userId, suppliedStates)=>{
 
         let states = (suppliedStates) ? suppliedStates : gameStates // alt test if you want to mock the gameStates
@@ -328,6 +340,7 @@ const gameStateManager = function(){
         else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
     }
 
+    
 
 
     // === affect game state ===
@@ -612,11 +625,13 @@ const gameStateManager = function(){
         createNewGame,
         initGame, // for testing purposes
         joinGame,
+        joinSpectator,
         leaveGame,
 
         getGameState,
         filterGameState,
         getPlayerRefs,
+        getSpectatorRefs,
         getGameForPlayer,
         getPrivatePlayerInfo,
         getPlayer,

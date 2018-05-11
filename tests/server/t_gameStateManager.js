@@ -846,8 +846,6 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.end()
     })
 
-
-
     t.end()
 })
 
@@ -1159,3 +1157,64 @@ test("Test function: enactPolicy",(t)=>{
     t.end()
 })
 
+test("Test function: joinSpectator", (t)=>{
+    
+    t.test("joining a spectator ref", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        let result = stateManager.joinSpectator({gameState: testState, spectatorRef:'s1'})
+
+        ts.equal(result.spectators.length, 1, "Only one spectator added");
+        ts.equal(result.spectators[0], 's1', "Correct spectator")
+        ts.end()
+    })
+
+    t.test("Join without spectatorRef", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        ts.throws(()=>{stateManager.joinSpectator({gameState:testState})}, /No spectator reference defined/i, "Throws error when no spectator reference given")
+        ts.end()
+    })
+
+    t.test("Join without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+        
+        ts.throws(()=>{stateManager.joinSpectator()}, /No gameState found for gameRef/i, "Error thrown when no gameState or sessionKey given")
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: getSpectatorRefs", (t)=>{
+    t.test("Normal get spectator refs", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:['s1']
+        }
+
+        let result = stateManager.getSpectatorRefs({gameState: testState});
+
+        ts.equal(result.length, 1, "Returns correct number of spectators");
+        ts.equal(result[0], 's1', "Returns correct spectatorRef value")
+
+        ts.end()
+
+    })
+
+    t.test("getSpectatorRefs without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+
+        ts.throws(()=>{stateManager.getSpectatorRefs()}, /No gameState found for gameRef:/i, "Throws error when no gameState defined")
+        ts.end()
+    })
+})
