@@ -301,6 +301,7 @@ wss.on('connection', (ws)=>{
         try{
             console.log(`Someone trying to spectate gameRef ${gameRef}`)
             stateManager.joinSpectator({gameRef: gameRef, spectatorRef: ws.id })
+            ws.currentGame = gameRef;
             ws.emit('spectatorJoined',{
                 "result":"OK",
                 "type": "joinGame",
@@ -326,8 +327,13 @@ wss.on('connection', (ws)=>{
             let gameRef = ws.currentGame;
             let userId = ws.id;
 
-            stateManager.leaveGame(gameRef, userId)
-            ws.currentGame = undefined;
+            if(stateManager.getPlayerRefs(gameRef).includes(userId)){   // if the leaving client is a player
+                stateManager.leaveGame(gameRef, userId);
+                ws.currentGame = undefined;
+            }else if(stateManager.getSpectatorRefs({gameRef}).includes(userId)){ // if the leaving user is a spectator
+                stateManager.removeSpectator({gameRef, spectatorRef: userId}) 
+                ws.currentGame = undefined;
+            }
 
             ws.emit("gameLeft", {result: "OK", type:"leaveGame", data:{message:`Left game ${gameRef}`}})
             wss.broadcast(gameRef)

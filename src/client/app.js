@@ -193,9 +193,7 @@ let exposedFunctions = (()=>{
     const addWsEventListeners = (ws)=>{
         
         ws.on("updateGameState", ({ result, type, data })=>{
-            const gameRef = data.gameRef;
-            const gameState = data.gameState;
-            const privateInfo = data.privateInfo;
+            const {gameRef, gameState, privateInfo} = data;
             
             let thisPlayerObject = gameState.players.filter((player)=>{ return player.playerName == privateInfo.playerName})[0];
 
@@ -210,7 +208,12 @@ let exposedFunctions = (()=>{
         ws.on("updateSpectator", ({result, type, data})=>{
             let {gameRef, gameState} = data;
             
-
+            if(!currentGameRef) currentGameRef = gameRef
+            showGameRef(gameRef)
+            gameStateDisplay(gameState.gamePhase)
+            showPlayers(gameState.players, gameState.gamePhase, {president:false})
+            showCards(undefined, gameState.gamePhase, {president:false}, undefined)
+            
             console.log("updated the spectator");
         })
         
@@ -241,6 +244,7 @@ let exposedFunctions = (()=>{
 
         ws.on("gameLeft", ({result, type, data})=>{
             if(result !='OK'){ console.log(data.errorMessage); return }
+            gameStateDisplay("joinGame")
             console.log(data.message)
         })
 
