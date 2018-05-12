@@ -255,6 +255,14 @@ const gameStateManager = function(){
         return gameState;
     }
 
+    const removeSpectator = ( {gameRef, gameState = gameStates[gameRef], spectatorRef } = {})=>{
+        if(gameState == undefined) throw new Error(`No gameState found for gameRef: ${gameRef}`)
+        if(spectatorRef == undefined) throw new Error(`No spectatorRef defined`)
+        if( !gameState.spectators.includes(spectatorRef)) throw new Error(`spectatorRef is not spectating PlayerRef: ${spectatorRef}`)
+        gameState.spectators = gameState.spectators.filter((playerRef)=>{ return playerRef != spectatorRef})
+        return gameState;
+    }
+
     const getPlayerRefs = ( gameRef, suppliedStates )=>{
 
         let states = ( suppliedStates ) ? suppliedStates : gameStates // alt test if you want to mock gameState
@@ -626,6 +634,7 @@ const gameStateManager = function(){
         initGame, // for testing purposes
         joinGame,
         joinSpectator,
+        removeSpectator,
         leaveGame,
 
         getGameState,

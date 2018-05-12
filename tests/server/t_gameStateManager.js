@@ -1218,3 +1218,46 @@ test("Test function: getSpectatorRefs", (t)=>{
         ts.end()
     })
 })
+
+test("Test function: removeSpectator", (t)=>{
+    t.test("Remove with player in game", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators:['s1']
+        }
+
+        let result = stateManager.removeSpectator({spectatorRef: 's1', gameState: testState});
+    
+        ts.equal(result.spectators.length, 0, "No spectators left");
+        ts.end()
+    })
+
+    t.test("Try to remove a spectator not spectating", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators: ['s1']
+        }
+
+        ts.throws(()=>{stateManager.removeSpectator( {spectatorRef: 's2', gameState: testState} )}, /spectatorRef is not spectating/i, "Error thrown removing player not spectating");
+        ts.end()
+    })
+
+    t.test("Call function without playerRef defined", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators: ['s1']
+        }
+
+        ts.throws(()=>{stateManager.removeSpectator( {gameState:testState} )}, /No spectatorRef defined/i, "Error thrown if no playerRef defined")
+        ts.end()
+    })
+
+    t.test("Call function without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+        
+        ts.throws(()=>{stateManager.removeSpectator( )}, /No gameState found for gameRef/i, "Error thrown if no gameState provided")
+        ts.end()
+    })
+
+    t.end()
+})
