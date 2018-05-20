@@ -1,6 +1,34 @@
 StateTemplate = require('./stateTemplate.js')
 PlayerTemplate = require('./playerTemplate.js')
 
+const powerObject = {
+    fiveOrSix:[
+        "no-power",
+        "no-power",
+        "top-3 cards",
+        "kill",
+        "kill",
+        "end"
+    ],
+    sevenOrEight:[
+        "no-power",
+        "inspect",
+        "special-election",
+        "kill",
+        "kill",
+        "end"
+    ],
+    nineOrTen:[
+        "investigate",
+        "investigate",
+        "special-election",
+        "kill",
+        "kill",
+        "end"
+    ]
+
+}
+
 const gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
@@ -339,13 +367,13 @@ const gameStateManager = function(){
         return privateInfo
     }
 
-    const getPlayer = (args)=>{ // args { gameRef ; testState ; targetPlayer}
-        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
-        let player = gameState.players.filter((player)=>{ return player.playerRef == args.playerRef })
+    const getPlayer = ( {gameRef , gameState = gameStates[gameRef], playerRef} )=>{ // args { gameRef ; testState ; targetPlayer}
+    
+        let player = gameState.players.filter((player)=>{ return player.playerRef == playerRef })
 
         if(player.length == 1) return player[0]
-        else if(player.length < 1) throw new Error(`PlayerRef ${args.targetPlayer} not in game`)
-        else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
+        else if(player.length < 1) throw new Error(`PlayerRef ${playerRef} not in game`)
+        else throw new Error(`PlayerRef ${playerRef} has multiple entries`)
     }
 
     
@@ -377,9 +405,7 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const proposeChancellor = (gameRef, playerRef, testState)=>{
-
-        let gameState = (testState) ? testState : gameStates[gameRef]
+    const proposeChancellor = ({gameRef, gameState = gameStates[gameRef], playerRef})=>{
 
         let matchedPlayers = gameState.players.filter((player)=>{return player.playerRef == playerRef})
         
@@ -482,18 +508,53 @@ const gameStateManager = function(){
         else throw new Error("player not in game")
     }
 
-    const selectPlayer = (args)=>{
-        // aruments = {gameRef || testState || selectedPlayer || actingPlayer }
-        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
-        let player = getPlayer({gameRef: args.gameRef, playerRef: args.actingPlayer})
-        let target = getPlayer({gameRef: args.gameRef, playerRef: args.selectedPlayer})
+    const selectPlayer = ( { gameRef, gameState = gameStates[gameRef] , selectedPlayer, actingPlayer } = {} )=>{
+        
+        let player = getPlayer({gameState: gameState, playerRef: actingPlayer})
+        let target = getPlayer({gameState: gameState, playerRef: selectedPlayer})
 
         if(gameState.gamePhase == "proposal"){
             if(player.president) { // if proposer and target are valid
-                if(!target.prevGov){ proposeChancellor(args.gameRef, args.selectedPlayer)
+                if(!target.prevGov){ proposeChancellor({gameState: gameState, playerRef: selectedPlayer})
                 }else{ throw new Error("Selected player in previous govornment")}
             }else{ throw new Error("Selecting player not president")}
-        }else {throw new Error("phase doesn't allow selecting")}
+        }else if(gameState.gamePhase == "power"){
+            // do we need to check that a facist card was played? - should be handeled with
+            const fascistPolicyCount = gameState.policyTrackFascist.reduce((acc,policy )=>{
+                return (policy) ? acc+1 : acc
+            },0)
+            
+            // decide on power
+            const powerName = getPower({
+                numberOfPlayers: gameState.players.length,
+                fascistPolicyCount: fascistPolicyCount
+            })
+            // enact power
+
+
+        }else{ throw new Error("phase doesn't allow selecting") }
+
+        return gameState;
+
+    }
+
+    const getPower = ( { numberOfPlayers, fascistPolicyCount } )=>{
+
+        if(fascistPolicyCount < 1) throw new Error(`Not enough policies for a power : ${fascistPolicyCount} policies`)
+        else if(fascistPolicyCount >= 6) throw new Error(`Game should have ended : ${fascistPolicyCount} policies`)
+
+        // check how many players there are
+        if (numberOfPlayers < 5) throw new Error(`Not enough players for a game: ${numberOfPlayers} players`);
+        else if( numberOfPlayers <= 6 ){
+            return powerObject.fiveOrSix[fascistPolicyCount - 1]
+        }else if( numberOfPlayers <= 8 ){
+            return powerObject.sevenOrEight[fascistPolicyCount - 1]
+        }else if( numberOfPlayers <= 10){
+            return powerObject.nineOrTen[fascistPolicyCount - 1]
+        }else{
+            throw new Error(`Too many players in the game : ${numberOfPlayers} players`)
+        }
+
 
     }
 
@@ -658,7 +719,8 @@ const gameStateManager = function(){
         drawPolicyHand,
         rotateGovernment,
         enactPolicy,
-        clearVotes
+        clearVotes,
+        getPower
     })
 
 }

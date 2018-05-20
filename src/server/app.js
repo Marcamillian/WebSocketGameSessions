@@ -467,7 +467,7 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
 
     try{
         let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
-        let spectatorsInGame = stateManager.getSpectatorRefs({gameRef:gameRef}); // ! TODO : write the function to get spectators 
+        let spectatorsInGame = stateManager.getSpectatorRefs({gameRef:gameRef});
 
         let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
 

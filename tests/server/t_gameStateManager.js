@@ -465,7 +465,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        let result = base.gsManager.proposeChancellor(undefined, "player1", base.gs)
+        let result = base.gsManager.proposeChancellor({playerRef: "player1", gameState:base.gs})
 
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == 'player1'})[0]
         ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
@@ -479,7 +479,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player3", base.gs)}, /No players with that playerRef/i, "Proposed chancellor not in game")
+        ts.throws(()=>{base.gsManager.proposeChancellor({ playerRef:"player3", gameState:base.gs} )}, /No players with that playerRef/i, "Proposed chancellor not in game")
         ts.end()
     })
 
@@ -491,7 +491,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.player2.playerRef = "player1"
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player1", base.gs), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
+        ts.throws(()=>{base.gsManager.proposeChancellor({playerRef:"player1", gameState:base.gs}), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
 
         ts.end()
     })
@@ -895,7 +895,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player2", playerName:"two"}]
         }
 
-        ts.equals(stateManager.getPlayer({testState:gameState, playerRef:"player1"}).playerName, "one", "Checking getting a player")
+        ts.equals(stateManager.getPlayer({gameState:gameState, playerRef:"player1"}).playerName, "one", "Checking getting a player")
         ts.end()
     })
 
@@ -906,7 +906,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player2", playerName:"two"}]
         }
 
-        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player3"})}, /not in game/i, "Searching for player not there")
+        ts.throws(()=>{stateManager.getPlayer({gameState:gameState, playerRef:"player3"})}, /not in game/i, "Searching for player not there")
         ts.end()
     })
 
@@ -917,7 +917,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player1", playerName:"two"}]
         }
 
-        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player1"})}, /has multiple entries/i, "Searching for player represented twice")
+        ts.throws(()=>{stateManager.getPlayer({gameState:gameState, playerRef:"player1"})}, /has multiple entries/i, "Searching for player represented twice")
         ts.end()
     })
 
@@ -1088,7 +1088,7 @@ test("Test function: enactPolicy",(t)=>{
         }
         
         const result = stateManager.enactPolicy({gameState: gameState});
-        debugger;
+        
         ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy"); 
         ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
@@ -1102,7 +1102,6 @@ test("Test function: enactPolicy",(t)=>{
             policyTrackLiberal:[true, false, false, false, false, false],
             policyTrackFascist:[false, false, false, false, false, false]
         }
-        debugger;
         const result = stateManager.enactPolicy({gameState: gameState});
         ts.equals(result.policyTrackLiberal[1], true, "second item is true in liberal track");
         ts.equals(result.policyTrackLiberal.filter(val => val == true).length, 2, "there are 2 true items in the liberal track");
@@ -1120,7 +1119,7 @@ test("Test function: enactPolicy",(t)=>{
         }
 
         const result = stateManager.enactPolicy({gameState: gameState});
-        debugger;
+        
         ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy");
         ts.equals(result.policyTrackLiberal.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
@@ -1258,6 +1257,141 @@ test("Test function: removeSpectator", (t)=>{
         ts.throws(()=>{stateManager.removeSpectator( )}, /No gameState found for gameRef/i, "Error thrown if no gameState provided")
         ts.end()
     })
+
+    t.end()
+})
+
+// TODO : Test select player
+test("Test selectPlayer function", (t)=>{
+    t.test("Select player for chancellor proposal", (ts)=>{
+
+        const stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: "proposal",
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president: true},
+                {playerRef: 'p2', playerName: 'player2'}
+            ]
+        }
+        
+        const result = stateManager.selectPlayer({gameState: testState, selectedPlayer:'p2', actingPlayer:'p1'});
+        const  targetPlayer = result.players.filter((player)=>{return player.playerRef == 'p2'})[0]
+
+        ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
+
+        ts.end()
+    })
+
+    t.end()
+})
+
+// TODO: Test powers
+    // investigate power
+    // next president power
+    // kill power
+
+test.skip("Testing power : Investigate", (t)=>{
+    
+    t.test("Counting the fascist poicies passed", (ts)=>{
+        const stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'power',
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president:true},
+                {playerRef: 'p2', playerName: 'player2'}
+            ],
+            policyTrackFascist: [true, false, false, false, false, false]
+        }
+        
+        result = stateManager.selectPlayer({gameState:testState, selectedPlayer: 'p2', actingPlayer: 'p1'})
+
+        //ts.equal(result, 6, "No policies")
+
+        // 
+        ts.end()
+
+    })
+    t.end()
+})
+
+// !! TODO: Write tests for the policy numbers
+test("Testing getPower",(t)=>{
+    
+    const stateManager = GameStateManager();
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:5, 
+        fascistPolicyCount: 1
+      }),
+      "no-power",
+      "No power with 5 people 1 fascist policies"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:7, 
+        fascistPolicyCount: 2
+      }),
+      "inspect",
+      "No power with 7 people 2 fascist policies"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:9, 
+        fascistPolicyCount: 1
+      }),
+      "investigate",
+      "No power with 9 people 1 fascist policy"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:5, 
+        fascistPolicyCount: 5
+      }),
+      "kill",
+      "No power with 5 people 5 fascist policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:7, 
+          fascistPolicyCount: 0
+        })
+      },
+      /Not enough policies for a power/i,
+      "Too few policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:7, 
+          fascistPolicyCount: 6
+        })
+      },
+      /Game should have ended/i,
+      "Too many fascist policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:4, 
+          fascistPolicyCount: 1
+        })
+      },
+      /Not enough players for a game/i,
+      "Too few players for a game"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:11, 
+          fascistPolicyCount: 1
+        })
+      },
+      /Too many players in the game/i,
+      "Too many players for a game"
+    );
 
     t.end()
 })
