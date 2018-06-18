@@ -1326,15 +1326,15 @@ test("Testing getPower",(t)=>{
         fascistPolicyCount: 1
       }),
       "no-power",
-      "No power with 5 people 1 fascist policies"
+      "No power with 5 people 1 fascist policys"
     );
 
     t.equals(stateManager.getPower({
         numberOfPlayers:7, 
         fascistPolicyCount: 2
       }),
-      "inspect",
-      "No power with 7 people 2 fascist policies"
+      "investigate",
+      "Investigate with 7 people 2 fascist policies"
     );
 
     t.equals(stateManager.getPower({
