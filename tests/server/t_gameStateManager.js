@@ -312,7 +312,8 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyHand = ['fascist']
+        gameState.policyHand = ['fascist'];
+        gameState.players = [{},{},{},{},{}]
         
         let result = gsManager.update(undefined,gameState)
 
@@ -330,7 +331,8 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         gameState.gamePhase = 'legislative'
         gameState.policyHand = ['liberal']
-
+        gameState.players = [{},{},{},{},{}]
+        // !! TODO: this is thowing an error that there arn't enough fascist policies - shouldn't be checking for a power when liberal passed
         t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
         ts.end()
@@ -341,11 +343,36 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         let gameState = StateTemplate();
 
-        gameState.gamePhase = 'legislative'
-        gameState.policyHand = ['fascist']
-        gameState.policyTrackFascist = [true, true, true, false, false, false]
+        gameState.gamePhase = 'legislative';
+        gameState.policyHand = ['fascist'];
+        gameState.policyTrackFascist = [true, true, true, false, false, false];
+        gameState.policyTrackLiberal = [false]
+        gameState.players = [{},{},{},{},{}];
 
         t.equals(gsManager.update(undefined,gameState).gamePhase, "power", "Policy Passes - power activated")
+
+        ts.end()
+    })
+
+    t.test("Fascist passed - check which powers activated", (ts)=>{
+        ts.test("5 players 3 fascist policies - should be top-3-cards", (tss)=>{
+            let gsManager = GameStateManager();
+
+            let gameState = {
+                gamePhase: 'legislative',
+                powerActive: undefined,
+                policyHand: ['fascist'],
+                players:[ {},{},{},{},{} ],
+                policyTrackFascist: [true ,true, false, false, false, false],
+                policyTrackLiberal: [false]
+            }
+
+            let result = gsManager.update(undefined, gameState)
+
+            tss.equals(result.gamePhase,'power', "A power has been identified")
+            tss.equals(result.activePower, 'top-3-cards', "5 players 3 policies - Top 3 card power ")
+            tss.end()
+        })
 
         ts.end()
     })
@@ -1395,3 +1422,4 @@ test("Testing getPower",(t)=>{
 
     t.end()
 })
+

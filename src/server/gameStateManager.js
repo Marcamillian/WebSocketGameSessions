@@ -134,23 +134,47 @@ const gameStateManager = function(){
 
                 if(gameState.policyHand.length == 1 ){
 
+                    // policy played
+                    let policyPlayed = gameState.policyHand[0];
+                    
                     // enact the policy
                     gameState = enactPolicy({gameState:gameState})
 
+                    console.log()
+
                     // count the policy tracks
-                    let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
-                    let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
+                    let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
+                    let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
 
                     // change the state dependant on the policies that are out
-                    if(fPolicy >= 6 || lPolicy >= 5){
+                    if(fPolicy >= 6 || lPolicy >= 5){   // if there have been enough policies
                         gameState.gamePhase = "endGame"
-                    }else{
+                    }else if(policyPlayed == "liberal"){ // if the policy played was a liberal
+                        gameState.gamePhase = "proposal";
+                    }else if(policyPlayed == "fascist"){ // if it was fascist 
 
-                        if(fPolicy > 2){
-                            gameState.gamePhase = "power"
-                        }else{
-                            gameState.gamePhase = "proposal"
+                        let power = undefined;
+
+                        // check if there is a power
+                        try{
+                            power = getPower({
+                                numberOfPlayers: gameState.players.length,
+                                fascistPolicyCount: fPolicy
+                            })
+                        }catch(err){
+                            if(/not enough policies for a power/i.test(err.message)) power = 'no-power';
+                            else throw(e); 
                         }
+
+                        if(power == "no-power"){
+                            gameState.gamePhase = "proposal"
+                        }else{
+                            gameState.gamePhase = 'power';
+                            gameState.activePower = power
+                        }
+                        
+                    }else{
+                        throw new Error("Unhandled legislative state")
                     }
                 
                 }else{
@@ -537,12 +561,14 @@ const gameStateManager = function(){
 
     }
 
+    // !! TODO: write the functions for each power
     const enactPower = ( {gameRef, gameState = gameStates[gameRef], player, target, powerName } )=>{
 
         switch (powerName){
             case `no-power`:
             break;
             case `top-3-cards`:
+
                 // return a copy of the top 3 cards?
                 // do this through private-info?
             break;
