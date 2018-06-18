@@ -5,14 +5,14 @@ const powerObject = {
     fiveOrSix:[
         "no-power",
         "no-power",
-        "top-3 cards",
+        "top-3-cards",
         "kill",
         "kill",
         "end"
     ],
     sevenOrEight:[
         "no-power",
-        "inspect",
+        "investigate",
         "special-election",
         "kill",
         "kill",
@@ -529,13 +529,38 @@ const gameStateManager = function(){
                 numberOfPlayers: gameState.players.length,
                 fascistPolicyCount: fascistPolicyCount
             })
-            // enact power
-
+            enactPower({gameState, selectedPlayer, player, target, powerName});
 
         }else{ throw new Error("phase doesn't allow selecting") }
 
         return gameState;
 
+    }
+
+    const enactPower = ( {gameRef, gameState = gameStates[gameRef], player, target, powerName } )=>{
+
+        switch (powerName){
+            case `no-power`:
+            break;
+            case `top-3-cards`:
+                // return a copy of the top 3 cards?
+                // do this through private-info?
+            break;
+            case `kill`:
+                // set something in a player to dead
+                // announce hitler or not
+            break;
+            case `investigation`:
+                // send back the alignment of the target player
+            break;
+            case `special-election`:
+                // set a returntoPlayer index
+                // set the chosen player to president
+                // == further down the line return the president to the returnToPlayer
+            break;
+        }
+
+        return gameState;
     }
 
     const getPower = ( { numberOfPlayers, fascistPolicyCount } )=>{
@@ -554,8 +579,6 @@ const gameStateManager = function(){
         }else{
             throw new Error(`Too many players in the game : ${numberOfPlayers} players`)
         }
-
-
     }
 
     const genPolicyDeck = ()=>{
