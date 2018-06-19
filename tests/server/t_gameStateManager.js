@@ -355,10 +355,10 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
     })
 
     t.test("Fascist passed - check which powers activated", (ts)=>{
-        ts.test("5 players 3 fascist policies - should be top-3-cards", (tss)=>{
+        ts.test("update with 5 players 3 fascist policies", (tss)=>{
             let gsManager = GameStateManager();
 
-            let gameState = {
+            let testState = {
                 gamePhase: 'legislative',
                 powerActive: undefined,
                 policyHand: ['fascist'],
@@ -367,17 +367,17 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
                 policyTrackLiberal: [false]
             }
 
-            let result = gsManager.update(undefined, gameState)
+            let result = gsManager.update(undefined, testState)
 
             tss.equals(result.gamePhase,'power', "A power has been identified")
             tss.equals(result.activePower, 'top-3-cards', "5 players 3 policies - Top 3 card power ")
             tss.end()
         })
 
-        ts.test("7 players 2 fascist - should be investigate", (tss)=>{
+        ts.test("udpate with 7 players 2 fascist", (tss)=>{
             let gsManager = GameStateManager();
 
-            let gameState = {
+            let testState = {
                 gamePhase: 'legislative',
                 powerActive:undefined,
                 policyHand:['fascist'],
@@ -386,10 +386,48 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
                 policyTrackLiberal:[false]
             }
 
-            let result = gsManager.update(undefined, gameState);
+            let result = gsManager.update(undefined, testState);
 
             tss.equals(result.gamePhase, 'power', "A power has been identified")
             tss.equals(result.activePower, 'investigate', "7 players 2 fascist - investigate happens")
+            tss.end()
+        })
+
+        ts.test("update with 10 players 3 fascist polices ",(tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{},{},{},{},{}],
+                policyTrackFascist:[true, true, false, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, testState)
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified");
+            tss.equals(result.activePower, 'special-election',"10 players 3 fascist - special election power")
+            tss.end()
+        })
+
+        ts.test("udpate with 6 players 4 fascist policies",(tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{}],
+                policyTrackFascist:[true, true, true, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, testState)
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified");
+            tss.equals(result.activePower, 'kill',"6 players 4 fascist - kill power")
             tss.end()
         })
 
