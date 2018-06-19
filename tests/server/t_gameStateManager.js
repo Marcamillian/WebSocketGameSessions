@@ -374,6 +374,25 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
             tss.end()
         })
 
+        ts.test("7 players 2 fascist - should be investigate", (tss)=>{
+            let gsManager = GameStateManager();
+
+            let gameState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{},{}],
+                policyTrackFascist:[true, false, false, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, gameState);
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified")
+            tss.equals(result.activePower, 'investigate', "7 players 2 fascist - investigate happens")
+            tss.end()
+        })
+
         ts.end()
     })
 
