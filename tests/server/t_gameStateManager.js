@@ -930,6 +930,90 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.end()
     })
 
+    t.test("PlayerInfo when in power phase", (ts)=>{
+      ts.test("top-3-cards power", (tss)=>{
+
+        let gsManager = GameStateManager();
+
+        let testState = {
+          gamePhase: 'power',
+          powerActive: 'top-3-cards',
+          players:[
+            { playerName:'player1',
+              playerRef:'one',
+              alignment:'liberal',
+              character:'liberal',
+              president:true
+            },
+            { playerName:'player2',
+              playerRef:'two',
+              alignment:'liberal',
+              character:'liberal',
+              chancellor:true
+            },
+            { playerName:'player3',
+              playerRef:'three',
+              character: 'fascist',
+              alignment: 'fascist',
+            }
+          ],
+          policyDeck:['liberal','liberal','fascist', 'liberal']  
+        }
+
+        let result1 = gsManager.getPrivatePlayerInfo(undefined, 'one', testState);
+        tss.equals(result1.topPolicyCards.join(), "liberal,liberal,fascist", "President can see top 3 cards")
+        tss.equals(testState.policyDeck.join(), "liberal,liberal,fascist,liberal", "PolicyDeck on the gameState unchanged")
+
+        let result2 = gsManager.getPrivatePlayerInfo(undefined, 'two', testState);
+        tss.equals(result2.topPolicyCards, undefined, "No top cards for chancellor");
+
+        let result3 = gsManager.getPrivatePlayerInfo(undefined, 'three', testState);
+        tss.equals(result3.topPolicyCards, undefined, "No top cards for non-government");
+
+        // TODO: how does this work if/when there are two cards in the deck - should it always check to see if there are 2 in deck and reshuffle deck then
+
+        tss.end()
+
+      })
+      
+      ts.test("investion power", (tss)=>{
+        let gsManager = GameStateManager();
+
+        // after the president has selected a player to investigate
+        let testState = {
+          gamePhase:'power',
+          powerActive: 'investigate',
+          players:[
+            { playerName:'player1',
+              playerRef:'one',
+              alignment:'liberal',
+              character:'liberal',
+              president:true,
+            },
+            {
+              playerName:'player2',
+              playerRef:'two',
+              alignment:'fascist',
+              character:'hitler'
+            }
+          ],
+          powerTarget: 'two'
+        }
+
+        let result1 = gsManager.getPrivatePlayerInfo(undefined, 'one', testState);
+        tss.equals(result1.investigationResult.playerName, "player2", "investigationResult present for president");
+        tss.equals(result1.investigationResult.alignment, "fascist", "investigationResult present for president");
+
+        let result2 = gsManager.getPrivatePlayerInfo(undefined, 'two', testState);
+        tss.equals(result2.investigationResult, undefined, "no investigationResult for non-president")
+
+        tss.end()
+
+      })
+      
+      ts.end()
+    })
+
     t.end()
 })
 
@@ -1375,23 +1459,23 @@ test("Test selectPlayer function", (t)=>{
     // next president power
     // kill power
 
-test.skip("Testing power : Investigate", (t)=>{
+test.skip("Test function: enactPower", (t)=>{
     
-    t.test("Counting the fascist poicies passed", (ts)=>{
+    t.test("top-3-cards active - check power complete", (ts)=>{
         const stateManager = GameStateManager();
 
         const testState = {
             gamePhase: 'power',
+            powerActive: 'top-3-cards',
             players:[
                 {playerRef: 'p1', playerName: 'player1', president:true},
                 {playerRef: 'p2', playerName: 'player2'}
             ],
-            policyTrackFascist: [true, false, false, false, false, false]
+            policyTrackFascist: [true, true, true, false, false, false]
         }
         
-        result = stateManager.selectPlayer({gameState:testState, selectedPlayer: 'p2', actingPlayer: 'p1'})
-
-        //ts.equal(result, 6, "No policies")
+        // TODO: close power is president confirming they have seen
+        result = stateManager.enactPower({gameState:testState, actingPlayer: 'p1'})
 
         // 
         ts.end()
@@ -1400,7 +1484,6 @@ test.skip("Testing power : Investigate", (t)=>{
     t.end()
 })
 
-// !! TODO: Write tests for the policy numbers
 test("Testing getPower",(t)=>{
     
     const stateManager = GameStateManager();

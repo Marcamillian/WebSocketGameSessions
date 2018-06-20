@@ -375,7 +375,8 @@ const gameStateManager = function(){
             privateInfo["teamMates"] = teamMates;
         }
 
-        if(gameState.gamePhase == 'legislative'){   // if in the legislative phase
+        // if in the legislative phase - give president/chancellor policyHands
+        if(gameState.gamePhase == 'legislative'){   
 
             if(player.president && gameState.policyHand.length == 3){  // if the president && 3 cards in hand
                 privateInfo["policyHand"] = gameState.policyHand; 
@@ -384,6 +385,28 @@ const gameStateManager = function(){
             }
         }
 
+        // if in the power phase and the player is the president
+        if(gameState.gamePhase == 'power' && player.president == true){
+            // if in the top 2 cards power - show the president these cards
+            if(gameState.powerActive == 'top-3-cards'){
+                privateInfo["topPolicyCards"] = gameState.policyDeck.slice(0,3)
+            }else if(gameState.powerActive == 'investigate'){
+                // get the targetPlayer
+                let targetPlayer = gameState.players.filter((player)=>{
+                    return player.playerRef == gameState.powerTarget;
+                })[0]
+                // populate the privateInfo with the targetData
+                privateInfo.investigationResult = {
+                    playerName: targetPlayer.playerName,
+                    alignment: targetPlayer.alignment
+                }
+            }else{
+                throw new Error(`getPrivatePlayerInfo - unknown power: ${gameState.powerActive}`)
+            }
+
+        }
+
+        // show the player which way they voted
         if(player.voteCast != undefined){
             privateInfo["voteCast"] = player.voteCast;
         }

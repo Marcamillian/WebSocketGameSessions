@@ -9,7 +9,7 @@ const StateTemplate = ()=>{
         voteFailTrack:[false, false, false],  // prevent repeated failed elections
         policyTrackFascist:[false, false, false, false, false, false], // 6 long - policies played
         policyTrackLiberal:[false, false, false, false, false],  // 5 long - policies played
-        powerTarget: undefined,  // target of the power
+        powerTarget: undefined,  // target of the power - playerRef
         powerActive: undefined
     }
 }
