@@ -1429,7 +1429,6 @@ test("Test function: removeSpectator", (t)=>{
     t.end()
 })
 
-// TODO : Test select player
 test("Test selectPlayer function", (t)=>{
     t.test("Select player for chancellor proposal", (ts)=>{
 
@@ -1448,6 +1447,146 @@ test("Test selectPlayer function", (t)=>{
 
         ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
 
+        ts.end()
+    })
+
+    t.test("Select player in powers phase",(ts)=>{
+        ts.test("kill power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "kill",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two'
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("investigate power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "investigate",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two'
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("special-election power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "special-election",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two'
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("top-3-cards power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "top-3-cards",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two'
+                    }
+                ]
+            }
+
+            tss.throws(()=>{gsManager.selectPlayer({
+                        gameState:testState,
+                        selectedPlayer: 'two',
+                        actingPlayer:'one'
+                    });
+                },
+                /power doesn't require selection/i,
+                "top-3-cards errors when selecting"
+            )
+            
+
+            tss.end()
+        })
+
+        ts.end()
+    })
+
+    t.test("Select players if inappropriate phase", (ts)=>{
+
+        ts.test("election", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: 'election',
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two'
+                    }
+                ]
+            }
+
+            tss.throws(()=>{
+                gsManager.selectPlayer({
+                    gameState:testState,
+                    selectedPlayer: 'two',
+                    actingPlayer: 'one'
+                }),
+                /phase doesn't allow selecting/i
+            })
+
+            tss.end()
+        })
         ts.end()
     })
 

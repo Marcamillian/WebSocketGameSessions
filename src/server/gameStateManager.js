@@ -566,17 +566,15 @@ const gameStateManager = function(){
                 }else{ throw new Error("Selected player in previous govornment")}
             }else{ throw new Error("Selecting player not president")}
         }else if(gameState.gamePhase == "power"){
-            // do we need to check that a facist card was played? - should be handeled with
-            const fascistPolicyCount = gameState.policyTrackFascist.reduce((acc,policy )=>{
-                return (policy) ? acc+1 : acc
-            },0)
-            
-            // decide on power
-            const powerName = getPower({
-                numberOfPlayers: gameState.players.length,
-                fascistPolicyCount: fascistPolicyCount
-            })
-            enactPower({gameState, selectedPlayer, player, target, powerName});
+            let powerActive = gameState.powerActive;
+            // all we need to do is set the target player - update will handle enacting the power
+            if(player.president == true){
+                if(powerActive == 'kill' || powerActive == 'investigate' || powerActive == 'special-election' ){
+                    gameState.powerTarget = target.playerRef;
+                }else{
+                    throw new Error(`selectPlayer - power doesn't require selection`);
+                }
+            }
 
         }else{ throw new Error("phase doesn't allow selecting") }
 
