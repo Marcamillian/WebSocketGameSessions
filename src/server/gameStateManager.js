@@ -36,7 +36,7 @@ const gameStateManager = function(){
 
         var gameState = (testState) ? testState : gameStates[gameRef]
 
-        // updating game
+        // updating game - state machine
         switch(gameState.gamePhase){
             case "lobby":
 
@@ -182,8 +182,10 @@ const gameStateManager = function(){
                 }
             break;
             case "power":
-                // if power target selected
-                    // ==> proposal
+                if(powerComplete({gameState}) == true){
+                    // if hitler
+                    gameState.gamePhase = 'proposal';
+                }
             break
             case "endgame":
 
@@ -582,22 +584,24 @@ const gameStateManager = function(){
 
     }
 
-    // !! TODO: write the functions for each power
-    const enactPower = ( {gameRef, gameState = gameStates[gameRef], player, target, powerName } )=>{
+    // !! TODO: write the functions for each power - contained in the update state machine
+    const powerComplete = ( {gameRef, gameState = gameStates[gameRef] } )=>{
 
         switch (powerName){
             case `no-power`:
+                return true;
             break;
             case `top-3-cards`:
-
-                // return a copy of the top 3 cards?
-                // do this through private-info?
+                // all sent through private info
+                // if president has said OK - return true
             break;
             case `kill`:
+            // TODO
                 // set something in a player to dead
                 // announce hitler or not
             break;
             case `investigation`:
+                // done through privateInfo
                 // send back the alignment of the target player
             break;
             case `special-election`:
@@ -726,7 +730,23 @@ const gameStateManager = function(){
         return gameState
     }
 
-    
+    const searchPlayers = ( {gameState, searchPairs, singleResponseExpected = false } = {} )=>{
+        
+        let searchKeys = Object.keys(searchPairs);
+        let matchedPlayers = undefined;
+        
+        searchKeys.forEach((searchKey)=>{
+            matchedPlayers = gameState.players.filter((player)=>{
+                return (player[searchKey] == searchPairs[searchKey])
+            })
+        })
+        
+        if(singleResponseExpected == true && matchedPlayers.length > 1){
+            throw new Error(`Single player expected: ${matchedPlayers.length} players found`)
+        }
+
+        return matchedPlayers;
+    }
     
     // utility functions
     const shuffleArraysTogether = (arrays)=>{
@@ -775,6 +795,7 @@ const gameStateManager = function(){
         getGameForPlayer,
         getPrivatePlayerInfo,
         getPlayer,
+        searchPlayers,
 
         update,
         readyPlayer,

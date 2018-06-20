@@ -1613,7 +1613,7 @@ test.skip("Test function: enactPower", (t)=>{
             policyTrackFascist: [true, true, true, false, false, false]
         }
         
-        // TODO: close power is president confirming they have seen
+        // TODO: move on from power phase is president confirming they have seen
         result = stateManager.enactPower({gameState:testState, actingPlayer: 'p1'})
 
         // 
@@ -1700,5 +1700,52 @@ test("Testing getPower",(t)=>{
     );
 
     t.end()
+})
+
+test("Testing searchPlayers", (t)=>{
+  t.test("Normal returns from search", (ts)=>{
+    let gsManager = GameStateManager();
+    let testState = {
+      players:[
+        {
+          playerName: 'player1',
+          playerRef: 'one',
+          character: 'hitler',
+          president: true
+        },
+        {
+          playerName: 'player2',
+          playerRef: 'two',
+          alignment:'liberal',
+          character: 'liberal'
+        },
+        {
+          playerName: 'player3',
+          playerRef: 'three',
+          chancellor: true,
+          alignment:'liberal'
+        }
+      ]
+    }
+
+    let result1 = gsManager.searchPlayers({ gameState:testState, searchPairs:{ playerName:'player1' } })
+    ts.equals(result1.length, 1, "Only one player in result")
+    ts.equals(result1[0].playerName, 'player1', "Right player passed back")
+    
+    let result2 = gsManager.searchPlayers({gameState:testState, searchPairs:{ character: 'hitler' } })
+    ts.equals(result2.length, 1, "One player is hitler");
+    ts.equals(result2[0].playerRef, 'one', "Correct hitler player returned");
+
+    let result3 = gsManager.searchPlayers( {gameState:testState, searchPairs:{alignment:'liberal'} } );
+    ts.equals(result3.length, 2, "Two liberal players in the game");
+    ts.equals(result3[0].playerRef, 'two', "One liberal is correct")
+    ts.equals(result3[1].playerRef, 'three', "Both liberal players are right");
+
+    let result4 = gsManager.searchPlayers( {gameState: testState, searchPairs: {playerName:'player99'} })
+    ts.equals(result4.length, 0, "Empty array returned when no matches")
+
+    ts.end()
+  })
+  t.end()
 })
 
