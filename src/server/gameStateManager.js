@@ -282,6 +282,7 @@ const gameStateManager = function(){
         filteredState['voteFailTrack'] = gameState.voteFailTrack;
         filteredState['policyTrackFascist'] = gameState.policyTrackFascist;
         filteredState['policyTrackLiberal'] = gameState.policyTrackLiberal;
+        filteredState['activePower'] = gameState.activePower;
 
         return filteredState;
     }
