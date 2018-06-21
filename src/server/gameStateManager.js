@@ -282,7 +282,7 @@ const gameStateManager = function(){
         filteredState['voteFailTrack'] = gameState.voteFailTrack;
         filteredState['policyTrackFascist'] = gameState.policyTrackFascist;
         filteredState['policyTrackLiberal'] = gameState.policyTrackLiberal;
-        filteredState['activePower'] = gameState.activePower;
+        filteredState['powerActive'] = gameState.powerActive;
 
         return filteredState;
     }
@@ -401,10 +401,12 @@ const gameStateManager = function(){
 
         // if in the power phase and the player is the president
         if(gameState.gamePhase == 'power' && player.president == true){
+
+            let powerActive = gameState.powerActive;
             // if in the top 2 cards power - show the president these cards
-            if(gameState.powerActive == 'top-3-cards'){
+            if(powerActive == 'top-3-cards'){
                 privateInfo["topPolicyCards"] = gameState.policyDeck.slice(0,3)
-            }else if(gameState.powerActive == 'investigate'){
+            }else if(powerActive == 'investigate'){
                 // get the targetPlayer
                 let targetPlayer = gameState.players.filter((player)=>{
                     return player.playerRef == gameState.powerTarget;
@@ -414,8 +416,10 @@ const gameStateManager = function(){
                     playerName: targetPlayer.playerName,
                     alignment: targetPlayer.alignment
                 }
+            }else if(powerActive == undefined || powerActive == 'kill' || powerActive == 'special-election'){
+                // do nothing
             }else{
-                throw new Error(`getPrivatePlayerInfo - unknown power: ${gameState.powerActive}`)
+                throw new Error(`getPrivatePlayerInfo - unknown power: ${powerActive}`)
             }
 
         }
@@ -596,9 +600,8 @@ const gameStateManager = function(){
 
     }
 
-    // !! TODO: write the functions for each power - contained in the update state machine
     const enactPower = ( {gameRef, gameState = gameStates[gameRef] } )=>{
-        // TODO: test this
+        
         let president;
 
         switch (gameState.powerActive){

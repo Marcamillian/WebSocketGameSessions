@@ -1623,11 +1623,6 @@ test("Test selectPlayer function", (t)=>{
     t.end()
 })
 
-// TODO: Test powers
-    // investigate power
-    // next president power
-    // kill power
-
 test("Test function: enactPower", (t)=>{
     
     t.test("top-3-cards active - check power complete", (ts)=>{
@@ -1643,7 +1638,6 @@ test("Test function: enactPower", (t)=>{
             policyTrackFascist: [true, true, true, false, false, false]
         }
         
-        // TODO: move on from power phase is president confirming they have seen
         let result = stateManager.enactPower({gameState:testState})
         ts.equals(result.powerComplete, true, "3 top cards power complete")
         let president = gsManager.searchPlayers({ gameState:result, searchPairs:{'president':true}, singleResponseExpected:true})[0]
@@ -1712,7 +1706,6 @@ test("Test function: enactPower", (t)=>{
 
         ts.end()
     })
-    // !! TODO : test the special election
 
     t.end()
 })

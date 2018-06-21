@@ -202,8 +202,9 @@ let exposedFunctions = (()=>{
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players,gameState.gamePhase, thisPlayerObject) // show al of the players
-            showCards(privateInfo.policyHand, gameState.gamePhase, thisPlayerObject, privateInfo.voteCast);
+            powerDisplay({gameState});
+            showPlayers(gameState.players,gameState, thisPlayerObject) // show all of the players
+            showCards(privateInfo.policyHand, gameState, thisPlayerObject, privateInfo.voteCast);
             showPrivateInfo(privateInfo)
         })
 
@@ -213,8 +214,8 @@ let exposedFunctions = (()=>{
             if(!currentGameRef) currentGameRef = gameRef
             showGameRef(gameRef)
             gameStateDisplay(gameState.gamePhase)
-            showPlayers(gameState.players, gameState.gamePhase, {president:false})
-            showCards(undefined, gameState.gamePhase, {president:false}, undefined)
+            showPlayers(gameState.players, gameState, {president:false})
+            showCards(undefined, gameState, {president:false}, undefined)
             
             console.log("updated the spectator");
         })
@@ -283,10 +284,11 @@ let exposedFunctions = (()=>{
         return document.querySelector('.player-card.selected p').innerText;
     }
 
-    const showPlayers = (playerArray, gamePhase, thisPlayerObject)=>{
+    const showPlayers = (playerArray, gameState, thisPlayerObject)=>{
         
         let callback  = undefined;
         let isPresident = thisPlayerObject.president;
+        let gamePhase = gameState.gamePhase
 
         // 1-  remove the elements from the list
         playerDisplay = displayModule.emptyElement(playerDisplay)
@@ -313,7 +315,8 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray= [], gamePhase, thisPlayerObject, voteCast)=>{
+    const showCards = (cardArray= [], gameState, thisPlayerObject, voteCast)=>{
+        let gamePhase = gameState.gamePhase
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
@@ -427,6 +430,37 @@ let exposedFunctions = (()=>{
 
     const toggleClass = (element, tag)=>{
         element.classList.toggle(tag);
+    }
+
+    const gamePhaseDisplay = ({gameState})=>{
+        switch(gameState.gamePhase){
+            case 'power':
+                powerDisplay({gameState})
+        }
+    }
+
+    // !!TODO : Implement the elements required to allow powers to be used
+    const powerDisplay = ({gameState})=>{
+        console.log(gameState.powerActive)
+        switch(gameState.powerActive){
+            case undefined:
+                break;
+            case 'top-3-cards':
+                console.log("Show the president the cards")
+                break;
+            case 'kill':
+                console.log("Let the president pick someone to kill")
+                break;
+            case 'investigate':
+                console.log("Let the president pick someone to investigate")
+                break;
+            case 'special-election':
+                console.log("Let the president pick someone to special-elect")
+                break;
+            default:
+                console.error(`Unknown power: ${gameState.power}`)
+                break;
+        }
     }
 
     // BUTTON CLICK FUNCTIONS

@@ -302,7 +302,7 @@ const getProgressTrackData = ()=>{
 const getPowerData = ()=>{
     const stateForm = document.querySelector('form.state-form');
 
-    let activePowerSetting = stateForm.elements['active-power'].value;
+    let activePowerSetting = stateForm.elements['power-active'].value;
     let powerTargetSetting = stateForm.elements['power-target'].value;
     let powerCompleteSetting = stateForm.elements['power-complete'].value;
     let specialPresidentSetting = stateForm.elements['special-president'].value;
@@ -313,7 +313,7 @@ const getPowerData = ()=>{
     specialPresidentSetting = (specialPresidentSetting == '') ? undefined : specialPresidentSetting;
 
     return{
-        activePower: activePowerSetting,
+        powerActive: activePowerSetting,
         powerTarget: powerTargetSetting,
         powerComplete: powerCompleteSetting,
         specialPresident: specialPresidentSetting
@@ -385,7 +385,23 @@ const sendGameState = ()=>{
     })
     // TODO: If gameRef not defined - error
     return fetch(`/gameinstance/${gameRef}/stateTest`, {method:'PUT', credentials:'same-origin', headers: myHeaders})
+        .then(handleResponse)
+        .then(checkMessage)
         .then(()=>{console.log("sent the gameState")})
+        .catch((err)=>{ throw new Error("Game State could not be sent")})
+}
+
+const handleResponse = (response)=>{
+    return response.ok
+        ? response.json()
+        : Promise.reject(new Error('Unexpected Response'))
+}
+
+const checkMessage = (message)=>{
+    if (message.result != 'OK'){
+        console.error(message)
+        throw new Error()
+    }
 }
 
 /* ==== SET UP EVENT LISTENERS */
