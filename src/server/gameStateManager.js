@@ -55,6 +55,7 @@ const gameStateManager = function(){
 
                         
                 }else{
+                    gameState.players.forEach((player)=>{ player.ready = false})
                     assignRoles(gameState.players)
                     gameState.gamePhase = 'proposal'    // go to the next step
 
@@ -182,9 +183,19 @@ const gameStateManager = function(){
                 }
             break;
             case "power":
-                if(powerComplete({gameState}) == true){
-                    // if hitler
-                    gameState.gamePhase = 'proposal';
+                // apply the effects of the interaction
+                enactPower({gameState});
+
+                // change the state if the power resolved
+                if(gameState.powerComplete == true){
+                    let hitler = searchPlayers({gameState, searchPairs:{'character':'hitler'}, singleResponseExpected: true })[0];
+
+                    if(hitler.alive == false){
+                        gameState.gamePhase = 'endgame'
+                    }else{
+                        gameState.gamePhase = 'proposal';
+                    }
+                    
                 }
             break
             case "endgame":
@@ -585,29 +596,56 @@ const gameStateManager = function(){
     }
 
     // !! TODO: write the functions for each power - contained in the update state machine
-    const powerComplete = ( {gameRef, gameState = gameStates[gameRef] } )=>{
+    const enactPower = ( {gameRef, gameState = gameStates[gameRef] } )=>{
+        // TODO: test this
+        let president;
 
-        switch (powerName){
+        switch (gameState.powerActive){
             case `no-power`:
-                return true;
+                // do nothing
             break;
             case `top-3-cards`:
                 // all sent through private info
-                // if president has said OK - return true
+                president = searchPlayers({gameState, searchPairs:{'president':true}, singleResponseExpected:true})[0]
+                if(president.ready == true){
+                    president.ready = false;
+                    gameState.powerComplete = true;
+                }
             break;
             case `kill`:
-            // TODO
-                // set something in a player to dead
-                // announce hitler or not
+                // if there is a targetted player
+                if(gameState.targetPlayer != undefined)
+                    // kill the target
+                    gameState = killPlayer({gameState});
+                    // remove the target
+                    gameState.targetPlayer = undefined;
+                    // resolve the power
+                    gameState.powerComplete = true;
             break;
-            case `investigation`:
-                // done through privateInfo
-                // send back the alignment of the target player
+            case `investigate`:
+                president = searchPlayers({gameState, searchPairs:{'president':true}, singleResponseExpected:true})[0];
+                
+                // if the president is ready
+                if(president.ready == true){
+                  // set president to not ready
+                  president.ready = false;
+                  // resolve the power
+                  gameState.powerComplete = true;
+                }
             break;
             case `special-election`:
-                // set a returntoPlayer index
-                // set the chosen player to president
-                // == further down the line return the president to the returnToPlayer
+                // has the president selected a player
+                if(gameState.targetPlayer != undefined){
+                    // set a flag to check in next rotateGovernment
+                    gameState.specialPresident = gameState.targetPlayer;
+                    // reset the targetPlayer
+                    gameState.targetPlayer = undefined;
+                    // resolve the power
+                    gameState.powerComplete = true;
+                }
+            break;
+            default:
+                // do nothing
             break;
         }
 
@@ -747,6 +785,13 @@ const gameStateManager = function(){
 
         return matchedPlayers;
     }
+
+    const killPlayer = ({ gameRef, gameState = gameStates[gameRef] })=>{
+        let playerToKill = searchPlayers({gameState, searchPairs:{'playerRef':gameState.targetPlayer}, singleResponseExpected: true})[0];
+        
+        playerToKill.alive = false;
+        return gameState;
+    }
     
     // utility functions
     const shuffleArraysTogether = (arrays)=>{
@@ -796,6 +841,7 @@ const gameStateManager = function(){
         getPrivatePlayerInfo,
         getPlayer,
         searchPlayers,
+        killPlayer,
 
         update,
         readyPlayer,
@@ -811,7 +857,8 @@ const gameStateManager = function(){
         rotateGovernment,
         enactPolicy,
         clearVotes,
-        getPower
+        getPower,
+        enactPower
     })
 
 }

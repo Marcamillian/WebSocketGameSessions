@@ -10,7 +10,9 @@ const StateTemplate = ()=>{
         policyTrackFascist:[false, false, false, false, false, false], // 6 long - policies played
         policyTrackLiberal:[false, false, false, false, false],  // 5 long - policies played
         powerTarget: undefined,  // target of the power - playerRef
-        powerActive: undefined
+        powerActive: undefined, // string naming the active power
+        powerComplete: false, // boolean for if the power is complete
+        specialPresident: undefined // playerRef of specially elected president
     }
 }
 
