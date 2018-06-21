@@ -245,6 +245,14 @@ const setDeckNumbers = ()=>{
     document.querySelector('.policy-deck.liberal').innerHTML = deck.liberal;
 }
 
+const createFilledArray = (fillNumber, arrayLength, baseOption = false, fillOption = true)=>{
+    if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
+
+    let fillArray = Array(arrayLength).fill(baseOption);
+
+    return fillArray.map((value, index)=>{return (index < fillNumber) ? fillOption : baseOption})
+}
+
 const getCardData = ()=>{
     let policyHand = {
         fascist: Number(document.querySelector('.card-info .policy-hand.fascist').value),
@@ -268,16 +276,15 @@ const getCardData = ()=>{
     }
 }
 
-const createFilledArray = (fillNumber, arrayLength, baseOption = false, fillOption = true)=>{
-    if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
-
-    let fillArray = Array(arrayLength).fill(baseOption);
-
-    return fillArray.map((value, index)=>{return (index < fillNumber) ? fillOption : baseOption})
-}
-
 
 // track information
+
+const createBooleanTrack = (fillNumber, trackLength)=>{
+    if(fillNumber > trackLength) throw new Error(`number higher than track length fillNumber:${fillNumber} > trackLength:${trackLength}`)
+    let track = Array(trackLength).fill(false);
+    
+    return track.map((value, index)=>{ return (index < fillNumber) ? true : false})
+}
 
 const getProgressTrackData = ()=>{
     const voteFailSetting = document.querySelector('input[name=fail-track]:checked').value;
@@ -291,11 +298,26 @@ const getProgressTrackData = ()=>{
     }
 }
 
-const createBooleanTrack = (fillNumber, trackLength)=>{
-    if(fillNumber > trackLength) throw new Error(`number higher than track length fillNumber:${fillNumber} > trackLength:${trackLength}`)
-    let track = Array(trackLength).fill(false);
-    
-    return track.map((value, index)=>{ return (index < fillNumber) ? true : false})
+// power information
+const getPowerData = ()=>{
+    const stateForm = document.querySelector('form.state-form');
+
+    let activePowerSetting = stateForm.elements['active-power'].value;
+    let powerTargetSetting = stateForm.elements['power-target'].value;
+    let powerCompleteSetting = stateForm.elements['power-complete'].value;
+    let specialPresidentSetting = stateForm.elements['special-president'].value;
+
+    activePowerSetting = (activePowerSetting == 'undefined') ? undefined: activePowerSetting;
+    powerTargetSetting = (powerTargetSetting == '') ? undefined: powerTargetSetting;
+    powerCompleteSetting = stringToBool(powerCompleteSetting);
+    specialPresidentSetting = (specialPresidentSetting == '') ? undefined : specialPresidentSetting;
+
+    return{
+        activePower: activePowerSetting,
+        powerTarget: powerTargetSetting,
+        powerComplete: powerCompleteSetting,
+        specialPresident: specialPresidentSetting
+    }
 }
 
 
@@ -315,6 +337,7 @@ const getCreatedGameState = ()=>{
     let gameState = Object.assign({},gameStateTemplate);
     let cardData = getCardData();
     let progressTrackData = getProgressTrackData();
+    let powerData = getPowerData()
 
     // game phase
     gameState.gamePhase = getGamePhase()
@@ -342,6 +365,12 @@ const getCreatedGameState = ()=>{
     gameState.voteFailTrack = createBooleanTrack(progressTrackData.voteFailTrack, gameStateTemplate.voteFailTrack.length);
     gameState.policyTrackLiberal = createBooleanTrack(progressTrackData.policyTrackLiberal, gameStateTemplate.policyTrackLiberal.length);
     gameState.policyTrackFascist = createBooleanTrack(progressTrackData.policyTrackFascist, gameStateTemplate.policyTrackFascist.length);
+
+    // power information
+    gameState.powerTarget = powerData.powerTarget;
+    gameState.powerActive = powerData.powerActive;
+    gameState.powerComplete = powerData.powerComplete;
+    gameState.specialPresident = powerData.specialPresident;
 
     return gameState;
 }
