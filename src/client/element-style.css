@@ -143,6 +143,20 @@ button{
         top:-100px;
     }
 
+/* POWER RELATED THINGS*/
+    #power-display{
+        display:flex;
+        flex-direction:column;
+        text-align:center;
+    }
+    #power-display h1{
+        font-size: 1em;
+        display:inline-block;
+    }
+    #power-display .power-name{
+        font-weight:bold;
+    }
+
 /* CARD FLIP */
     .flip-container{
         perspective:800px;

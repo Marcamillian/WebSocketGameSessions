@@ -11,7 +11,6 @@ let exposedFunctions = (()=>{
     const urlJoinGame = document.querySelector('#url-join');
     const spectatorJoin = document.querySelector('#spectator-join')
 
-
     const playerNameInput = document.querySelector('#player-name');
     const gameRefInput = document.querySelector('#game-ref');
     let playerDisplay = document.querySelector('.player-list');
@@ -143,7 +142,7 @@ let exposedFunctions = (()=>{
 
     const gameStateDisplay = ( gamePhase ) =>{
 
-        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative")
+        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative", "power")
 
         console.log(`GAME PHASE: ${gamePhase}`)
 
@@ -169,6 +168,9 @@ let exposedFunctions = (()=>{
                 displayBody.classList.add("legislative")
                 displayBody.classList.add("in-game")
             break
+            case "power":
+                displayBody.classList.add('power', 'in-game');
+            break;
             default:
                 throw new Error(`gamePhase not recognised: ${gamePhase}`)
             break
@@ -303,6 +305,8 @@ let exposedFunctions = (()=>{
                 }else{
                     playerCard.classList.add('not-selectable');
                 }
+            }else if(gamePhase == 'power' && isPresident){// if there are powers to display to the president
+                console.log("Doing some powers stuff on the president")
             }
             
             playerDisplay.appendChild(playerCard);
@@ -375,56 +379,7 @@ let exposedFunctions = (()=>{
         envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment));
 
         return 
-        /*
-        let teamTitle, teamEl,
-         alignmentEl, characterEl,
-         policyPickTitle, policyButtons;
 
-        clearElement(privateInfoDisplay)
-        clearElement(policyPickDisplay)
-
-        alignmentEl = document.createElement('p')
-        alignmentEl.innerText = `alignment: ${privateInfo.alignment}`;
-
-        characterEl = document.createElement('p')
-        characterEl.innerText = `Character: ${privateInfo.character}`;
-
-        if(privateInfo.teamMates){
-            teamEl = document.createElement('ul')
-            teamTitle = document.createElement('p')
-            teamTitle.innerText = "Team mates"
-
-            privateInfo.teamMates.forEach((teamMateName)=>{
-                teamMateEl = document.createElement('li')
-                teamMateEl.innerText = teamMateName;
-                teamEl.appendChild(teamMateEl)
-            })
-        }
-
-        // -- policy display handling
-        if(privateInfo.policyHand){
-            console.log(privateInfo.policyHand)
-
-            policyPickTitle = document.createElement('p')
-            policyPickTitle.innerHTML = `<b> Discard a policy </b>`
-
-            policyButtons = document.createElement('div');
-            privateInfo.policyHand.forEach((policy)=>{
-                let policyButton = document.createElement('button')
-                policyButton.innerText = `${policy}`;
-                policyButton.addEventListener('click', ()=>{discardPolicy(policy)})
-
-                policyButtons.appendChild(policyButton)
-            })
-        }
-
-
-        privateInfoDisplay.appendChild(alignmentEl)
-        privateInfoDisplay.appendChild(characterEl)
-        if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
-        if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
-
-        */
     }
 
     const clearElement = (element)=>{

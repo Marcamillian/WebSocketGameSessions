@@ -36,7 +36,8 @@ p,div{
     div.envelope,
     div.connect-items,
     div.join-controls,
-    button#ready-button{
+    button#ready-button,
+    #power-display{
         visibility:hidden;
     }
 
@@ -70,6 +71,10 @@ p,div{
 
     .legislative .card-area{
         visibility: visible;
+    }
+
+    .power #power-display{
+        visibility:visible;
     }
 
 
@@ -191,3 +196,8 @@ p,div{
     font-size:2em;
 }
 
+/* POWER ITEMS */
+#power-display{
+    grid-column:5/7;
+    grid-row:2/3;
+}
