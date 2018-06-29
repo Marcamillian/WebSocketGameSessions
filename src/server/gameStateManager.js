@@ -410,12 +410,15 @@ const gameStateManager = function(){
                 // get the targetPlayer
                 let targetPlayer = gameState.players.filter((player)=>{
                     return player.playerRef == gameState.powerTarget;
-                })[0]
+                })[0];
+
+
                 // populate the privateInfo with the targetData
-                privateInfo.investigationResult = {
+                privateInfo['investigationResult'] = (targetPlayer != undefined) ? {
                     playerName: targetPlayer.playerName,
                     alignment: targetPlayer.alignment
-                }
+                } : undefined;
+                
             }else if(powerActive == undefined || powerActive == 'kill' || powerActive == 'special-election'){
                 // do nothing
             }else{

@@ -73,7 +73,8 @@ p,div{
         visibility: visible;
     }
 
-    .power #power-display{
+    .power #power-display,
+    .power .card-area{
         visibility:visible;
     }
 
@@ -201,3 +202,4 @@ p,div{
     grid-column:5/7;
     grid-row:2/3;
 }
+
