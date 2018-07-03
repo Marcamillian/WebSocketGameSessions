@@ -336,7 +336,7 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
         gameState.gamePhase = 'legislative'
         gameState.policyHand = ['liberal']
         gameState.players = [{},{},{},{},{}]
-        // !! TODO: this is thowing an error that there arn't enough fascist policies - shouldn't be checking for a power when liberal passed
+        
         t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
         ts.end()
@@ -1225,7 +1225,7 @@ test("Test function: drawpolicyHand",(t)=>{
 test("Test function: rotateGovernment",(t)=>{
     let stateManager = GameStateManager();
 
-    test('successful govornment pass policy', (ts)=>{
+    t.test('successful govornment pass policy', (ts)=>{
         
         let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
         let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true}
@@ -1249,7 +1249,7 @@ test("Test function: rotateGovernment",(t)=>{
         ts.end()
     })
 
-    test('failed govornment lose vote', (ts)=>{
+    t.test('failed govornment lose vote', (ts)=>{
         let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
         let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true}
         let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
@@ -1270,6 +1270,65 @@ test("Test function: rotateGovernment",(t)=>{
         ts.equals(chancellorCount, 0, "No chancellors in the result")
 
         ts.end()
+    })
+
+    // !! write the tests for this
+    t.test('special president defined', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let gameState = {
+            players:[
+                {playerRef:'p1', playerName: 'player1', president:true },
+                {playerRef:'p2', playerName: 'player2', chancellor:true },
+                {playerRef:'p3', playerName: 'player3' },
+                {playerRef:'p4', playerName: 'player4' },
+                {playerRef:'p5', playerName: 'player5' }
+            ],
+            specialPresident: 'p3'
+        }
+
+        let result = stateManager.rotateGovernment({gameState});
+        let presidents = result.players.filter( (player) => {return player.president == true })
+        let chancellorCount = result.players.reduce( (count, player)=>{ return (player.chancellor == true) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce( (count, player)=>{ return (player.proposedChancellor == true) ? 1: count},0 )
+
+        ts.equals(presidents.length, 1, "Only one president set");
+        ts.equals(presidents[0].playerRef, 'p3', "The right special president assigned");
+        // Do we need to reset the special president indicator here?
+        //ts.equals(result.specialPresident, undefined, "Special president flag removed")
+        ts.equals(result.postSpecialPresident, 'p2', "The correct player is set to take over next");
+        ts.equals(chancellorCount, 0, "Chancellor cleared");
+        ts.equals(proposedChancellorCount, 0, "No proposedCancellors in result");
+        ts.end()
+    })
+
+    t.test('postSpecialPresident Defined',(ts)=>{
+        const stateManager = GameStateManager();
+
+        let gameState = {
+            players:[
+                {playerRef:'p1', playerName: 'player1'},
+                {playerRef:'p2', playerName: 'player2', chancellor:true },
+                {playerRef:'p3', playerName: 'player3' },
+                {playerRef:'p4', playerName: 'player4', president: true },
+                {playerRef:'p5', playerName: 'player5' }
+            ],
+            postSpecialPresident: 'p2',
+            specialPresident:'p4'
+        }
+
+        let result = stateManager.rotateGovernment({gameState});
+        let presidents = result.players.filter( (player) =>{ return player.president == true } );
+        let chancellorCount = result.players.reduce( (count, player)=>{ return (player.chancellor == true) ? 1: count },0 );
+        
+        ts.equals(presidents.length, 1, "Only one president assigned");
+        ts.equals(presidents[0].playerRef, 'p2', "Predidency returned to the right player")
+        ts.equals(gameState.specialPresident, undefined, "Special president removed")
+        ts.equals(gameState.postSpecialPresident, undefined, "postSpecial President removed")
+        ts.equals(chancellorCount, 0, "No chancellors in the rotated government")
+
+        ts.end()
+
     })
 
     t.end()

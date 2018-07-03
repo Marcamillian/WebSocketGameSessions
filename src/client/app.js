@@ -321,7 +321,7 @@ let exposedFunctions = (()=>{
                                 playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
                             break;
                             case "investigate":
-                                // TODO - remove the select click function BUT retain th highlighting of the investigated user
+                                // !! TODO - remove the select click function BUT retain th highlighting of the investigated user
                                 // if the investigation hasn't already gone through (if not in privateInfo)
                                 // add a click event to mark players as selected
                                 playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
@@ -375,7 +375,7 @@ let exposedFunctions = (()=>{
                 })
             break;
             case 'legislative':
-                cardArray.forEach((cardName)=>{
+                policyHand.forEach((cardName)=>{
                     let policyCard = displayModule.generateVoteCard(cardName);
                     policyCard.addEventListener('click',()=>{
                         discardPolicy(cardName);

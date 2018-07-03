@@ -18,7 +18,8 @@ const StateTemplate = ()=>{
         powerTarget: undefined,  // target of the power - playerRef
         powerActive: undefined, // string naming the active power
         powerComplete: false, // boolean for if the power is complete
-        specialPresident: undefined // playerRef of specially elected president
+        specialPresident: undefined, // playerRef of specially elected president
+        postSpecialPresident: undefined // playerRef of president to return to after special election
     }
 }
 

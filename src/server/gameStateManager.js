@@ -141,8 +141,6 @@ const gameStateManager = function(){
                     // enact the policy
                     gameState = enactPolicy({gameState:gameState})
 
-                    console.log()
-
                     // count the policy tracks
                     let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
                     let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
@@ -151,6 +149,7 @@ const gameStateManager = function(){
                     if(fPolicy >= 6 || lPolicy >= 5){   // if there have been enough policies
                         gameState.gamePhase = "endGame"
                     }else if(policyPlayed == "liberal"){ // if the policy played was a liberal
+                        gameState = rotateGovernment({gameState});
                         gameState.gamePhase = "proposal";
                     }else if(policyPlayed == "fascist"){ // if it was fascist 
 
@@ -168,6 +167,7 @@ const gameStateManager = function(){
                         }
 
                         if(power == "no-power"){
+                            gameState = rotateGovernment({gameState})
                             gameState.gamePhase = "proposal"
                         }else{
                             gameState.gamePhase = 'power';
@@ -193,6 +193,7 @@ const gameStateManager = function(){
                     if(hitler.alive == false){
                         gameState.gamePhase = 'endgame'
                     }else{
+                        gameState = rotateGovernment({gameState});
                         gameState.gamePhase = 'proposal';
                     }
                     
@@ -263,7 +264,7 @@ const gameStateManager = function(){
 
     }
 
-    // TODO: Write test for this
+    // !! TODO: Write test for this
     const filterGameState = (gameState)=>{
         let filteredState = {};
 
@@ -709,9 +710,10 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const rotateGovernment = (args)=>{ // args {gameRef: gameState: }
-        const gameState = (args.gameRef) ? gameStates[args.gameRef] : args.gameState;
-        
+    // !! Test the new elements of this
+    const rotateGovernment = ( { gameRef, gameState = gameStates[gameRef] } )=>{ // args {gameRef: gameState: }
+    
+        // make an array of the roles of the players
         const playerRoles = gameState.players.map((player)=>{
             if(player.president) return 'president'
             else if(player.chancellor) return 'chancellor'
@@ -719,20 +721,50 @@ const gameStateManager = function(){
             else return 'nonGov'
         })
 
-        // get the index of the next president
+        
+        // == deal with assigning the next president
         const presIndex = playerRoles.indexOf('president')
-        
-        const nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
-        const chancellorIndex = playerRoles.indexOf('chancellor')
-        const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
-        
-        gameState.players[presIndex].president = false; // unassign old president
-        gameState.players[nextPresIndex].president = true // assign new president
+        let nextPresIndex;
 
+        // find out the index of the next president
+        if ( gameState.postSpecialPresident != undefined){ // if there is a president to return to after special election
+            // get the index of the plaer to return to after the 
+            let postSpecialElectionPlayerObject = getPlayer({gameState, playerRef: gameState.postSpecialPresident});
+            nextPresIndex = gameState.players.indexOf(postSpecialElectionPlayerObject);
+            gameState.postSpecialPresident = undefined;
+            gameState.specialPresident = undefined;
+
+        }else if( gameState.specialPresident != undefined ){ // if there is a special president
+            // == get the index of the nominated special president
+            // get tthe player object
+            let specialPresidentPlayerObject = getPlayer({gameState, playerRef: gameState.specialPresident})
+            // get the index of the player object in the game
+            nextPresIndex = gameState.players.indexOf(specialPresidentPlayerObject);
+
+            // set the president to return to afterwards
+            let playerReturnIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1; 
+            gameState.postSpecialPresident = gameState.players[playerReturnIndex].playerRef;
+
+            // !!TODO - DO we need to know if the president is special - remove the special president setting
+
+        }else{
+            // move to the next player in the list
+            nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
+        }
+        
+
+        if(presIndex != -1) gameState.players[presIndex].president = false; // unassign old president
+        if(presIndex != -1) gameState.players[nextPresIndex].president = true // assign new president
+
+
+        // deal with removing the chancellor
+        const chancellorIndex = playerRoles.indexOf('chancellor');
         if(chancellorIndex !=-1){ // if there is a chancellor
             gameState.players[chancellorIndex].chancellor = false; // reset the chancellor 
         }
 
+        // remove a proposed chancellor
+        const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
         if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
             gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
         }
