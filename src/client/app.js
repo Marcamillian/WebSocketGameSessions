@@ -62,7 +62,7 @@ let exposedFunctions = (()=>{
                 if (president) divPlayerCard.classList.add('president');
                 if (chancellor) divPlayerCard.classList.add('chancellor');
                 if (ready) divPlayerCard.classList.add('ready');
-                if (prevGov) divPlayerCard.classList.add('prev-gov');
+                if (prevGov && president != true && chancellor != true) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
                 if (voteCast != undefined) divPlayerCard.classList.add('vote-cast');
 
