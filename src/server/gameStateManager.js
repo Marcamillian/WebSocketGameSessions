@@ -124,7 +124,6 @@ const gameStateManager = function(){
                     
                 }else{  // vote fails
 
-                    gameState = rotateGovernment({gameState:gameState});
                     gameState.gamePhase = 'proposal';
                 }
 
@@ -149,7 +148,6 @@ const gameStateManager = function(){
                     if(fPolicy >= 6 || lPolicy >= 5){   // if there have been enough policies
                         gameState.gamePhase = "endGame"
                     }else if(policyPlayed == "liberal"){ // if the policy played was a liberal
-                        gameState = rotateGovernment({gameState});
                         gameState.gamePhase = "proposal";
                     }else if(policyPlayed == "fascist"){ // if it was fascist 
 
@@ -161,20 +159,16 @@ const gameStateManager = function(){
                                 numberOfPlayers: gameState.players.length,
                                 fascistPolicyCount: fPolicy
                             })
-                            // !!TODO: see which power is in play
-                            console.log(`power in play : ${power}`)
                         }catch(err){
                             if(/not enough policies for a power/i.test(err.message)) power = 'no-power';
                             else throw(e); 
                         }
 
                         if(power == "no-power"){
-                            gameState = rotateGovernment({gameState})
                             gameState.gamePhase = "proposal"
                         }else{
                             gameState.gamePhase = 'power';
                             gameState.powerActive = power;
-                            console.log(`legislative power in power phase: ${power}`)
                         }
                         
                     }else{
@@ -196,7 +190,6 @@ const gameStateManager = function(){
                     if(hitler.alive == false){
                         gameState.gamePhase = 'endgame'
                     }else{
-                        gameState = rotateGovernment({gameState});
                         gameState.gamePhase = 'proposal';
                     }
                     
@@ -250,7 +243,7 @@ const gameStateManager = function(){
 
     }
 
-    // !! TODO: Write test for this
+    //  TODO: Write test for this
     const filterGameState = (gameState)=>{
         let filteredState = {};
 
@@ -731,7 +724,7 @@ const gameStateManager = function(){
             let playerReturnIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1; 
             gameState.postSpecialPresident = gameState.players[playerReturnIndex].playerRef;
 
-            // !!TODO - DO we need to know if the president is special - remove the special president setting
+            // TODO - DO we need to know if the president is special - remove the special president setting
 
         }else{
             // move to the next player in the list

@@ -382,7 +382,7 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
             let result = gsManager.update(undefined, testState)
 
             tss.equals(result.gamePhase,'power', "A power has been identified")
-            tss.equals(result.activePower, 'top-3-cards', "5 players 3 policies - Top 3 card power ")
+            tss.equals(result.powerActive, 'top-3-cards', "5 players 3 policies - Top 3 card power ")
             tss.end()
         })
 
@@ -401,7 +401,7 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
             let result = gsManager.update(undefined, testState);
 
             tss.equals(result.gamePhase, 'power', "A power has been identified")
-            tss.equals(result.activePower, 'investigate', "7 players 2 fascist - investigate happens")
+            tss.equals(result.powerActive, 'investigate', "7 players 2 fascist - investigate happens")
             tss.end()
         })
 
@@ -420,7 +420,7 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
             let result = gsManager.update(undefined, testState)
 
             tss.equals(result.gamePhase, 'power', "A power has been identified");
-            tss.equals(result.activePower, 'special-election',"10 players 3 fascist - special election power")
+            tss.equals(result.powerActive, 'special-election',"10 players 3 fascist - special election power")
             tss.end()
         })
 
@@ -439,7 +439,7 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
             let result = gsManager.update(undefined, testState)
 
             tss.equals(result.gamePhase, 'power', "A power has been identified");
-            tss.equals(result.activePower, 'kill',"6 players 4 fascist - kill power")
+            tss.equals(result.powerActive, 'kill',"6 players 4 fascist - kill power")
             tss.end()
         })
 
@@ -1236,8 +1236,8 @@ test("Test function: rotateGovernment",(t)=>{
     t.test('successful govornment pass policy', (ts)=>{
         
         let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
-        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true}
-        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true, prevGov:true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, prevGov:true}
         let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
 
 
