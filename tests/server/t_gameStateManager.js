@@ -317,13 +317,21 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
 
         gameState.gamePhase = 'legislative'
         gameState.policyHand = ['fascist'];
-        gameState.players = [{},{},{},{},{}]
+        gameState.players = [{playerName: 'player1', playerRef:'p1', president:true},
+            { playerName: 'player2', playerRef:'p2', chancellor:true },
+            { playerName: 'player3', playerRef:'p3' },
+            { playerName: 'player4', playerRef:'p4' },
+            { playerName: 'player5', playerRef:'p5' }
+        ]
         
-        let result = gsManager.update(undefined,gameState)
+        let result = gsManager.update(undefined,gameState);
+        let presidents = result.players.filter((player)=>{ return player.president == true })
+        let prevGov = result.players.filter((player)=>{ return player.prevGov == true })
 
-        t.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
-        // TODO: check that the players were set to previous govornment
-        // TODO: check that president is updated
+        ts.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
+        ts.equals(result.activePower, undefined, "No power active")
+        ts.equals(presidents.length, 1, "only one president");
+        ts.equals(presidents[0].playerRef, 'p2', "The president is the next in the list")
 
         ts.end()
     })

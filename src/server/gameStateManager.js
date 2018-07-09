@@ -161,6 +161,8 @@ const gameStateManager = function(){
                                 numberOfPlayers: gameState.players.length,
                                 fascistPolicyCount: fPolicy
                             })
+                            // !!TODO: see which power is in play
+                            console.log(`power in play : ${power}`)
                         }catch(err){
                             if(/not enough policies for a power/i.test(err.message)) power = 'no-power';
                             else throw(e); 
@@ -171,7 +173,8 @@ const gameStateManager = function(){
                             gameState.gamePhase = "proposal"
                         }else{
                             gameState.gamePhase = 'power';
-                            gameState.activePower = power
+                            gameState.powerActive = power;
+                            console.log(`legislative power in power phase: ${power}`)
                         }
                         
                     }else{
@@ -239,24 +242,7 @@ const gameStateManager = function(){
     const getGameState = (gameRef)=>{
 
         if(gameStates[gameRef]){
-
-            let returnState = {};
-
-            let targetState = gameStates[gameRef];
-            returnState['players'] = targetState.players.map( (playerInfo)=>{ return {playerName: playerInfo.playerName,
-                                                                                      president: playerInfo.president,
-                                                                                      chancellor: playerInfo.chancellor,
-                                                                                      ready: playerInfo.ready,
-                                                                                      prevGov: playerInfo.prevGov,
-                                                                                      proposedChancellor: playerInfo.proposedChancellor,
-                                                                                      voteCast: playerInfo.voteCast }
-                                                                            })
-            returnState['gamePhase'] = targetState.gamePhase;
-            returnState['voteFailTrack'] = targetState.voteFailTrack;
-            returnState['policyTrackFascist'] = targetState.policyTrackFascist;
-            returnState['policyTrackLiberal'] = targetState.policyTrackLiberal;
-
-            return returnState
+            return filterGameState(gameStates[gameRef]);
         }else{
             throw new Error(`No game with the key ${gameRef}`)
         }
