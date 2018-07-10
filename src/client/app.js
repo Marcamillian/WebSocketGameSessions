@@ -375,6 +375,7 @@ let exposedFunctions = (()=>{
                 })
             break;
             case 'legislative':
+                if (policyHand == undefined) return
                 policyHand.forEach((cardName)=>{
                     let policyCard = displayModule.generateVoteCard(cardName);
                     policyCard.addEventListener('click',()=>{
