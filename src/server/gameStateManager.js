@@ -687,10 +687,6 @@ const gameStateManager = function(){
         for(var i=0; i<3 ; i++) {policyHand.push(gameState.policyDeck.shift());}
 
         gameState.policyHand = policyHand
-
-        console.log(`Policy deck: ${gameState.policyDeck}`)
-        console.log(`Policy discard: ${gameState.policyDiscardPile}`)
-        console.log(`Policy hand: ${gameState.policyHand}`)
         return gameState
     }
 
