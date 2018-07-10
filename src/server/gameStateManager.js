@@ -492,12 +492,13 @@ const gameStateManager = function(){
         let policyIndex = policyHand.indexOf(policyType)
 
         if(policyIndex != -1){ //if there is a policy of that hand
+            // split the policy hand in to with the discarded policy at the front of the "tail" array
             var head = policyHand.slice(0, policyIndex)
             var tail = policyHand.slice(policyIndex)
-            var card = tail.shift()
+            var card = tail.shift() // remove the discarded card
             
-            gameState.policyHand = head.concat(tail)
-            gameState.policyDiscardPile.push(card)
+            gameState.policyHand = head.concat(tail) // join the hand together again
+            gameState.policyDiscardPile.push(card)  // put the card on the discard pile
 
         }else {
             
@@ -678,14 +679,18 @@ const gameStateManager = function(){
         // can we draw 3 cards
         if(gameState.policyDeck.length < 3){
 
-            gameState.policyDeck = shuffleArraysTogether([gameState.policyDiscard, gameState.policyDeck])
-            gameState.policyDiscard = []
+            gameState.policyDeck = shuffleArraysTogether([gameState.policyDiscardPile, gameState.policyDeck])
+            gameState.policyDiscardPile = []
         }
 
         // draw the three cards
         for(var i=0; i<3 ; i++) {policyHand.push(gameState.policyDeck.shift());}
 
         gameState.policyHand = policyHand
+
+        console.log(`Policy deck: ${gameState.policyDeck}`)
+        console.log(`Policy discard: ${gameState.policyDiscardPile}`)
+        console.log(`Policy hand: ${gameState.policyHand}`)
         return gameState
     }
 

@@ -325,13 +325,9 @@ test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
         ]
         
         let result = gsManager.update(undefined,gameState);
-        let presidents = result.players.filter((player)=>{ return player.president == true })
-        let prevGov = result.players.filter((player)=>{ return player.prevGov == true })
 
         ts.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
         ts.equals(result.activePower, undefined, "No power active")
-        ts.equals(presidents.length, 1, "only one president");
-        ts.equals(presidents[0].playerRef, 'p2', "The president is the next in the list")
 
         ts.end()
     })
@@ -1216,12 +1212,12 @@ test("Test function: drawpolicyHand",(t)=>{
     t.test("Less than 3 cards in deck", (ts)=>{
         let gameState = StateTemplate();
         gameState.policyDeck = ['liberal']
-        gameState.policyDiscard = ['fascist', 'fascist', 'liberal']
+        gameState.policyDiscardPile = ['fascist', 'fascist', 'liberal']
 
         let result = stateManager.drawPolicyHand({gameState: gameState})
 
         ts.equals(result.policyHand.length, 3, "Drew three cards")
-        ts.equals(result.policyDiscard.length, 0, "Empty discard")
+        ts.equals(result.policyDiscardPile.length, 0, "Empty discard")
         ts.equals(result.policyDeck.length, 1, "Right number of cards left in deck")
 
         ts.end()
