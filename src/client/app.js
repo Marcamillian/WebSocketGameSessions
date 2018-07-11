@@ -51,7 +51,8 @@ let exposedFunctions = (()=>{
             ready = false,
             prevGov = false,
             proposedChancellor = false,
-            voteCast = undefined} = {} )=>{
+            voteCast = undefined,
+            alive = true} = {} )=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -65,6 +66,8 @@ let exposedFunctions = (()=>{
                 if (prevGov && president != true && chancellor != true) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
                 if (voteCast != undefined) divPlayerCard.classList.add('vote-cast');
+                if (alive == true) divPlayerCard.classList.add('alive');
+                else divPlayerCard.classList.add('dead'); 
 
                 paraPlayerName.innerText = playerName;
 
@@ -304,7 +307,7 @@ let exposedFunctions = (()=>{
             if( isPresident){
                 switch(gamePhase){
                     case "proposal":
-                        if( !playerObject.prevGov && !playerObject.president){ //if this specific player in the array is clickable
+                        if( !playerObject.prevGov && !playerObject.president && playerObject.alive){ //if this specific player in the array is clickable
                             playerCard.addEventListener('click', ()=>{
                                 document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
                                 toggleClass(playerCard, 'selected');
@@ -318,17 +321,17 @@ let exposedFunctions = (()=>{
                         switch(gameState.powerActive){
                             case "kill":
                                 // add a click event to mark players as selected
-                                playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                                if (playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
                             break;
                             case "investigate":
                                 // TODO - remove the select click function BUT retain th highlighting of the investigated user
                                 // if the investigation hasn't already gone through (if not in privateInfo)
                                 // add a click event to mark players as selected
-                                playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                                if(playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
                             break;
                             case "special-election":
                                 // add a click event to mark players as selected
-                                playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                                if(playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
                             break;
                         }
                     break;

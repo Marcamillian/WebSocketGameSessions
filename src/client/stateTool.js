@@ -10,7 +10,8 @@ const optionDefault =  {
   ready : {value:'true', formName:'ready'},
   prevGov : {value:'false', formName:'prev-gov'},
   proposedChancellor : {value:'false', formName:'proposed-chancellor'},
-  voteCast : {value:'undefined', formName:'vote-cast'}
+  voteCast : {value:'undefined', formName:'vote-cast'},
+  alive: {value: 'true', formName:'alive'}
 }
 
 const gameStateTemplate = {
@@ -40,7 +41,9 @@ const playerTemplate = {
   prevGov: false,       // if they were in the last successful gov
   proposedChancellor: false,
   // vote phase
-  voteCast: undefined
+  voteCast: undefined,
+  // power phase
+  alive: true
 }
 
 const policyDeckNumbers = {fascist: 11, liberal:6}
@@ -80,6 +83,9 @@ const genPlayerFormEl = (playerNumber)=>{
 
     playerContainer.appendChild(createLabel('voteCast'));
     playerContainer.appendChild(createRadiogroup(`p${playerNumber}_vote-cast`, ['true', 'false', 'undefined'],'undefined'));
+
+    playerContainer.appendChild(createLabel('alive'));
+    playerContainer.appendChild(createRadiogroup(`p${playerNumber}_alive`, ['true', 'false'], 'false' ))
  
     return playerContainer;
 }
@@ -192,7 +198,7 @@ const getAllPlayerSettings = ()=>{
         player['prevGov'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_prev-gov]:checked`).value);
         player['proposedChancellor'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_proposed-chancellor]:checked`).value);
         player['voteCast'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_vote-cast]:checked`).value);
-        if(typeof player.voteCast )
+        player['alive'] = stringToBool( playerOptionsEl.querySelector(`input[name=p${index}_alive]:checked`).value);
 
         playerSettings.push(player);
     })

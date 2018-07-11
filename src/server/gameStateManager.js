@@ -255,7 +255,8 @@ const gameStateManager = function(){
                 ready: playerInfo.ready,
                 prevGov: playerInfo.prevGov,
                 proposedChancellor: playerInfo.proposedChancellor,
-                voteCast: playerInfo.voteCast
+                voteCast: playerInfo.voteCast,
+                alive: playerInfo.alive
             }
         })
         filteredState['gamePhase'] = gameState.gamePhase;
