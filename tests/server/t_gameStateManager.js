@@ -1231,10 +1231,10 @@ test("Test function: rotateGovernment",(t)=>{
 
     t.test('successful govornment pass policy', (ts)=>{
         
-        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
-        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true, prevGov:true}
-        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, prevGov:true}
-        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false, alive: true}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true, prevGov:true, alive: true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, prevGov:true, alive: true}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false, alive: true}
 
 
         let gameState = {
@@ -1245,19 +1245,46 @@ test("Test function: rotateGovernment",(t)=>{
         let result = stateManager.rotateGovernment({gameState:gameState})
         let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
         
-        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player1.president, undefined, "prev pres removed")
         ts.equals(player2.president, true, "Next player assigned president")
-        ts.equals(player2.chancellor, false, "Prev chancellor removed");
+        ts.equals(player2.chancellor, undefined, "Prev chancellor removed");
         ts.equals(chancellorCount, 0, "No chancellors in the result")
         
         ts.end()
     })
 
+    t.test('successful government pass - next player dead', (ts)=>{
+        
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', president:true, alive: true },
+                {playerRef:'p2', playerName: 'player2', chancellor:true, alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ]
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1 : count},0)
+
+        ts.equals(result.players[0].president, undefined, "previous president removed");
+        ts.equals(result.players[1].president, undefined, "Dead player skipped");
+        ts.equals(result.players[2].president, true, "Next live player assigned president");
+        ts.equals(result.players[1].chancellor, undefined, "Prev chancellor removed")
+        ts.equals(chancellorCount, 0, "All chancellors removed")
+        ts.end()
+    })
+
     t.test('failed govornment lose vote', (ts)=>{
-        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
-        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true}
-        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
-        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false, alive: true}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true, alive: true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, alive: true}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false, alive: true}
 
         let gameState = {
             gamePhase: 'election',
@@ -1268,7 +1295,7 @@ test("Test function: rotateGovernment",(t)=>{
         let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
         let proposedChancellorCount = result.players.reduce((count, player)=>{ return (player.proposedChancellor) ? 1 : count},0)
 
-        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player1.president, undefined, "prev pres removed")
         ts.equals(player2.president, true, "Next player assigned president")
         ts.equals(proposedChancellorCount, 0, "No proposed chancellors");
         ts.equals(chancellorCount, 0, "No chancellors in the result")
@@ -1276,17 +1303,44 @@ test("Test function: rotateGovernment",(t)=>{
         ts.end()
     })
 
-    // !! write the tests for this
+    t.test('failed government lose vote - next pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, proposedChancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ]
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
+
     t.test('special president defined', (ts)=>{
         const stateManager = GameStateManager();
 
         let gameState = {
             players:[
-                {playerRef:'p1', playerName: 'player1', president:true },
-                {playerRef:'p2', playerName: 'player2', chancellor:true },
-                {playerRef:'p3', playerName: 'player3' },
-                {playerRef:'p4', playerName: 'player4' },
-                {playerRef:'p5', playerName: 'player5' }
+                {playerRef:'p1', playerName: 'player1', president:true, alive: true },
+                {playerRef:'p2', playerName: 'player2', chancellor:true, alive: true },
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
             ],
             specialPresident: 'p3'
         }
@@ -1306,16 +1360,87 @@ test("Test function: rotateGovernment",(t)=>{
         ts.end()
     })
 
+    t.test('special president defined - special pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, chancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            specialPresident: 'p2'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(result.postSpecialPresident, 'p3', "The correct player is set to take over next")
+
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
+    t.test('special president defined - special pres dead', (ts)=>{
+        /*
+            The special president is dead (needs to move to the next player)
+            Also! The player the presidency woudl return to is dead
+
+            result should be that p1 is the special president
+            AND
+            p1 is the president after the special president
+
+        */
+
+
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true },
+                {playerRef:'p2', playerName: 'player2', alive: true },
+                {playerRef:'p3', playerName: 'player3', alive: true, chancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true, president: true },
+                {playerRef:'p5', playerName: 'player5', alive: false }
+            ],
+            specialPresident: 'p5'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[3].president, undefined, "prev pres removed");
+        ts.equals(result.players[4].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[0].president, true, "next living player is assigned")
+        ts.equals(result.postSpecialPresident, 'p1', "The correct player is set to take over next")
+
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
     t.test('postSpecialPresident Defined',(ts)=>{
         const stateManager = GameStateManager();
 
         let gameState = {
             players:[
-                {playerRef:'p1', playerName: 'player1'},
-                {playerRef:'p2', playerName: 'player2', chancellor:true },
-                {playerRef:'p3', playerName: 'player3' },
-                {playerRef:'p4', playerName: 'player4', president: true },
-                {playerRef:'p5', playerName: 'player5' }
+                {playerRef:'p1', playerName: 'player1', alive: true},
+                {playerRef:'p2', playerName: 'player2', chancellor:true , alive: true},
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', president: true, alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
             ],
             postSpecialPresident: 'p2',
             specialPresident:'p4'
@@ -1333,6 +1458,35 @@ test("Test function: rotateGovernment",(t)=>{
 
         ts.end()
 
+    })
+
+    t.test('postSpecialPresident defined - next pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, proposedChancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            specialPresident: 'p1',
+            postSpecialPresident: 'p2'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
     })
 
     t.end()
@@ -1530,8 +1684,8 @@ test("Test selectPlayer function", (t)=>{
         const testState = {
             gamePhase: "proposal",
             players:[
-                {playerRef: 'p1', playerName: 'player1', president: true},
-                {playerRef: 'p2', playerName: 'player2'}
+                {playerRef: 'p1', playerName: 'player1', president: true, alive: true},
+                {playerRef: 'p2', playerName: 'player2', alive: true}
             ]
         }
         
@@ -1554,10 +1708,12 @@ test("Test selectPlayer function", (t)=>{
                 players:[
                     { playerName:'player1',
                       playerRef: 'one',
-                      president:true
+                      president:true,
+                      alive: true
                     },
                     { playerName: 'player2',
-                      playerRef: 'two'
+                      playerRef: 'two',
+                      alive: true
                     }
                 ]
             }
@@ -1578,10 +1734,12 @@ test("Test selectPlayer function", (t)=>{
                 players:[
                     { playerName:'player1',
                       playerRef: 'one',
-                      president:true
+                      president:true,
+                      alive: true
                     },
                     { playerName: 'player2',
-                      playerRef: 'two'
+                      playerRef: 'two',
+                      alive:true
                     }
                 ]
             }
@@ -1602,10 +1760,12 @@ test("Test selectPlayer function", (t)=>{
                 players:[
                     { playerName:'player1',
                       playerRef: 'one',
-                      president:true
+                      president:true,
+                      alive: true
                     },
                     { playerName: 'player2',
-                      playerRef: 'two'
+                      playerRef: 'two',
+                      alive:true
                     }
                 ]
             }
@@ -1626,10 +1786,12 @@ test("Test selectPlayer function", (t)=>{
                 players:[
                     { playerName:'player1',
                       playerRef: 'one',
-                      president:true
+                      president:true,
+                      alive: true
                     },
                     { playerName: 'player2',
-                      playerRef: 'two'
+                      playerRef: 'two',
+                      alive:true
                     }
                 ]
             }
@@ -1661,10 +1823,12 @@ test("Test selectPlayer function", (t)=>{
                 players:[
                     { playerName:'player1',
                       playerRef: 'one',
-                      president:true
+                      president:true,
+                      alive:true
                     },
                     { playerName: 'player2',
-                      playerRef: 'two'
+                      playerRef: 'two',
+                      alive:true
                     }
                 ]
             }
@@ -1680,6 +1844,23 @@ test("Test selectPlayer function", (t)=>{
 
             tss.end()
         })
+        ts.end()
+    })
+
+    t.test("Select a dead player", (ts)=>{
+        
+        let stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'proposal',
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president:true, alive:true},
+                {playerRef: 'p2', playerName: 'player2', alive:false}
+            ]
+        }
+
+        ts.throws(()=>{stateManager.selectPlayer({gameState: testState, selectedPlayer:'p2', actingPlayer: 'p1'}), /Can't select a dead player/i, "Dead player can't be selected" })
+        
         ts.end()
     })
 
@@ -1918,3 +2099,84 @@ test("Testing killPlayer", (t)=>{
     t.end()
 })
 
+test("Testing nextAlivePlayerByIndex", (t)=>{
+
+    stateManager = GameStateManager();
+
+    t.test("Single Alive player, alive false on others", (ts)=>{
+        let playerArray = [
+            {alive: false},
+            {alive: true},
+            {alive:false},
+            {alive:false},
+        ]
+
+       ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 }), 1, "Next alive player from index 0 is in index 1")
+       ts.equals(stateManager.nextAlivePlayerByIndex({playerArray, currentTargetIndex:1 }), 1, "Next alive player from index 1 is index 1")
+       ts.equals(stateManager.nextAlivePlayerByIndex({playerArray, currentTargetIndex:2 }), 1, "Next alive player from index 2 is index 1")
+
+       ts.end()
+
+    })
+
+    t.test("Multiple alive players, alive false on others", (ts)=>{
+        let playerArray = [
+            {alive: true},
+            {alive: false},
+            {alive: true},
+            {alive: true},
+            {alive: false},
+            {alive: false},
+        ]
+
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 0 }), 2, "Next alive player from [0] is [2]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 2 }), 3, "Next alive player from [2] is [3]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 4 }), 0, "Next alive player from [4] is [0]");
+
+        ts.end()
+    })
+
+    t.test("Multiple alive players, alive undefined on others", (ts)=>{
+        let playerArray = [
+            {alive: true},
+            {alive: undefined},
+            {alive: true},
+            {alive: true},
+            {},
+            {},
+        ]
+
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 0 }), 2, "Next alive player from [0] is [2]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 2 }), 3, "Next alive player from [2] is [3]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 4 }), 0, "Next alive player from [4] is [0]");
+
+        ts.end()
+    })
+
+    t.test("No Players alive", (ts)=>{
+        let playerArray = [
+            {alive:false},
+            {alive:false},
+            {alive:false},
+        ]
+
+        ts.throws(()=>{ stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 })}, /Searched whole list/i, "Checking exit condition on recursive loop");
+
+        ts.end()
+    })
+
+    t.test("No Players alive - alive undefined", (ts)=>{
+        let playerArray = [
+            {},
+            {},
+            {},
+        ]
+
+        ts.throws(()=>{ stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 })}, /Searched whole list/i, "Checking exit condition on recursive loop");
+
+        ts.end()
+    })
+
+    t.end()
+
+})

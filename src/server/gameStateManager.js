@@ -563,6 +563,10 @@ const gameStateManager = function(){
         let player = getPlayer({gameState: gameState, playerRef: actingPlayer})
         let target = getPlayer({gameState: gameState, playerRef: selectedPlayer})
 
+        if(target.alive != true){
+            throw new Error(`Can't select a dead player`);
+        }
+
         if(gameState.gamePhase == "proposal"){
             if(player.president) { // if proposer and target are valid
                 if(!target.prevGov){ proposeChancellor({gameState: gameState, playerRef: selectedPlayer})
@@ -711,7 +715,14 @@ const gameStateManager = function(){
         if ( gameState.postSpecialPresident != undefined){ // if there is a president to return to after special election
             // get the index of the plaer to return to after the 
             let postSpecialElectionPlayerObject = getPlayer({gameState, playerRef: gameState.postSpecialPresident});
+            
             nextPresIndex = gameState.players.indexOf(postSpecialElectionPlayerObject);
+            
+            // check if the postSpecialPresident is alive
+            if(postSpecialElectionPlayerObject.alive != true){ // if the proposed post special election is dead
+                nextPresIndex = nextAlivePlayerByIndex({playerArray:gameState.players, currentTargetIndex:nextPresIndex})
+            }
+            
             gameState.postSpecialPresident = undefined;
             gameState.specialPresident = undefined;
 
@@ -719,35 +730,43 @@ const gameStateManager = function(){
             // == get the index of the nominated special president
             // get tthe player object
             let specialPresidentPlayerObject = getPlayer({gameState, playerRef: gameState.specialPresident})
+
             // get the index of the player object in the game
             nextPresIndex = gameState.players.indexOf(specialPresidentPlayerObject);
 
+            // check that the special president is alive
+            if(specialPresidentPlayerObject.alive != true){
+                // if not get the next alive player
+                nextPresIndex = nextAlivePlayerByIndex({playerArray:gameState.players, currentTargetIndex: nextPresIndex })
+            }
+
             // set the president to return to afterwards
-            let playerReturnIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1; 
+            let playerReturnIndex = nextAlivePlayerByIndex({playerArray: gameState.players, currentTargetIndex: presIndex})
+
             gameState.postSpecialPresident = gameState.players[playerReturnIndex].playerRef;
 
             // TODO - DO we need to know if the president is special - remove the special president setting
 
         }else{
             // move to the next player in the list
-            nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
+            nextPresIndex = nextAlivePlayerByIndex({playerArray: gameState.players, currentTargetIndex: presIndex})
+            //(presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
         }
         
-
-        if(presIndex != -1) gameState.players[presIndex].president = false; // unassign old president
-        if(presIndex != -1) gameState.players[nextPresIndex].president = true // assign new president
-
-
-        // deal with removing the chancellor
-        const chancellorIndex = playerRoles.indexOf('chancellor');
-        if(chancellorIndex !=-1){ // if there is a chancellor
-            gameState.players[chancellorIndex].chancellor = false; // reset the chancellor 
+        // deal with president things
+        if(presIndex != -1) {
+            gameState.players[presIndex].president = undefined; // unassign old president
+            gameState.players[nextPresIndex].president = true // assign new president
         }
 
-        // remove a proposed chancellor
+        // deal with chancellor things
+        const chancellorIndex = playerRoles.indexOf('chancellor');
+        if(chancellorIndex !=-1){ // if there is a chancellor
+            gameState.players[chancellorIndex].chancellor = undefined; // reset the chancellor 
+        }
         const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
         if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
-            gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
+            gameState.players[proposedChancellorIndex].proposedChancellor = undefined   // unassign proposed
         }
         
         return gameState;
@@ -843,6 +862,22 @@ const gameStateManager = function(){
         return array
     }
 
+    const nextAlivePlayerByIndex = ({playerArray, currentTargetIndex, itterationCount = 0} = {})=>{
+
+        if(itterationCount >= playerArray.length){ // escape if itterated through whole list
+            throw new Error("Searched whole list - none alive");
+        }
+
+        // get the next player in the list (loop the end if necessary)
+        let nextPlayerIndex = (currentTargetIndex+1 < playerArray.length) ? currentTargetIndex +1 : 0;
+
+        // recursive loop till you get an alive player
+        return (playerArray[nextPlayerIndex].alive == true)
+          ? nextPlayerIndex
+          : nextAlivePlayerByIndex({playerArray, currentTargetIndex: nextPlayerIndex, itterationCount: itterationCount+1})
+
+    }
+
     // function to search for playerRef
 
     return Object.create({
@@ -878,7 +913,9 @@ const gameStateManager = function(){
         enactPolicy,
         clearVotes,
         getPower,
-        enactPower
+        enactPower,
+
+        nextAlivePlayerByIndex
     })
 
 }
