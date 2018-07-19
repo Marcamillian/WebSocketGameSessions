@@ -304,6 +304,59 @@ test("Testing the update stateMachine - vote to legislative/proposal/endGame", (
         ts.end()
     })
 
+    t.test("Voting with dead players - pass vote",(ts)=>{
+        let stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'election',
+            players:[
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal', president: true},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal', proposedChancellor: true},
+                {voteCast: undefined, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+            ],
+            policyTrackFascist: [false, false, false, false, false, false],
+            policyTrackLiberal: [false, false, false, false, false, false],
+            policyHand:[],
+            policyDeck:['liberal','liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist','fascist','fascist']
+        }
+
+        let result = stateManager.update(undefined, testState);
+        
+        ts.equals(result.gamePhase, 'legislative', "Successful vote - choose policy")
+
+        ts.end()
+
+    })
+
+    t.test("Voting with dead players",(ts)=>{
+        let stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'election',
+            players:[
+                {alive: true, voteCast: false, character: 'liberal', alignment:'liberal', president: true},
+                {alive: true, voteCast: false, character: 'liberal', alignment:'liberal', proposedChancellor: true},
+                {voteCast: undefined, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+            ],
+            policyTrackFascist: [false, false, false, false, false, false],
+            policyTrackLiberal: [false, false, false, false, false, false],
+            policyHand:[],
+            policyDeck:['liberal','liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist','fascist','fascist'],
+            voteFailTrack:[false, false, false]
+        }
+
+        let result = stateManager.update(undefined, testState);
+        
+        ts.equals(result.gamePhase, 'proposal', "Failed vote - choose new chancellor")
+
+        ts.end()
+
+    })
+
     t.end()
 })
 

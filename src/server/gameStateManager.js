@@ -77,7 +77,9 @@ const gameStateManager = function(){
             break;
             case "election":
 
-                let voteResult = gameState.players.map((player)=>{
+                let livingVoters = gameState.players.filter((player)=>{ return player.alive == true })
+
+                let voteResult = livingVoters.map((player)=>{
                     return player.voteCast
                 })
 
@@ -88,7 +90,6 @@ const gameStateManager = function(){
                 // if all the votes cast
                 let positiveVotes = voteResult.reduce((sum, vote)=>{ return (vote) ? sum+1 : sum },0)
                 let negativeVotes = voteResult.reduce((sum, vote)=>{ return (!vote) ? sum+1 : sum },0)
-                //console.log(`JA: ${positiveVotes} | Nein: ${negativeVotes}`)
 
                 if(positiveVotes > negativeVotes){ // vote passes
                     
