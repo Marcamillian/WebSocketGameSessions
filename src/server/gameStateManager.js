@@ -608,12 +608,12 @@ const gameStateManager = function(){
                 }
             break;
             case `kill`:
-                // if there is a targetted player
-                if(gameState.targetPlayer != undefined)
+                // if there is a powerTarget
+                if(gameState.powerTarget != undefined)
                     // kill the target
                     gameState = killPlayer({gameState});
                     // remove the target
-                    gameState.targetPlayer = undefined;
+                    gameState.powerTarget = undefined;
                     // resolve the power
                     gameState.powerComplete = true;
             break;
@@ -828,7 +828,7 @@ const gameStateManager = function(){
     }
 
     const killPlayer = ({ gameRef, gameState = gameStates[gameRef] })=>{
-        let playerToKill = searchPlayers({gameState, searchPairs:{'playerRef':gameState.targetPlayer}, singleResponseExpected: true})[0];
+        let playerToKill = searchPlayers({gameState, searchPairs:{'playerRef':gameState.powerTarget}, singleResponseExpected: true})[0];
         
         playerToKill.alive = false;
         return gameState;

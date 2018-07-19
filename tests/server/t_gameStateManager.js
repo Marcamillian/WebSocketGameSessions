@@ -1953,7 +1953,7 @@ test("Test function: enactPower", (t)=>{
             players:[
                 {playerRef:'p1', playerName:'player1', alive:true}
             ],
-            targetPlayer: 'p1',
+            powerTarget: 'p1',
             powerComplete: false
         }
 
@@ -2143,7 +2143,7 @@ test("Testing killPlayer", (t)=>{
                 alive: true
             }
         ],
-        targetPlayer:'one'
+        powerTarget:'one'
     }
 
     let result = gsManager.killPlayer({gameState:testState})
