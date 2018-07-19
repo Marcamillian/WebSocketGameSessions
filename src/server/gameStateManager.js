@@ -264,6 +264,7 @@ const gameStateManager = function(){
         filteredState['policyTrackFascist'] = gameState.policyTrackFascist;
         filteredState['policyTrackLiberal'] = gameState.policyTrackLiberal;
         filteredState['powerActive'] = gameState.powerActive;
+        filteredState['postSpecialPresident'] = gameState.specialPresident;
 
         return filteredState;
     }
