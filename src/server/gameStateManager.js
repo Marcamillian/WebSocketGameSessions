@@ -124,8 +124,8 @@ const gameStateManager = function(){
                     gameState.gamePhase = 'legislative'
                     
                 }else{  // vote fails
-
                     gameState.gamePhase = 'proposal';
+                    gameState = rotateGovernment({gameState})
                 }
 
                 gameState.players = resetPlayerVotes(gameState.players);
@@ -150,6 +150,7 @@ const gameStateManager = function(){
                         gameState.gamePhase = "endGame"
                     }else if(policyPlayed == "liberal"){ // if the policy played was a liberal
                         gameState.gamePhase = "proposal";
+                        gameState = rotateGovernment({gameState});
                     }else if(policyPlayed == "fascist"){ // if it was fascist 
 
                         let power = undefined;
@@ -167,6 +168,7 @@ const gameStateManager = function(){
 
                         if(power == "no-power"){
                             gameState.gamePhase = "proposal"
+                            gameState = rotateGovernment({gameState})
                         }else{
                             gameState.gamePhase = 'power';
                             gameState.powerActive = power;
@@ -192,6 +194,7 @@ const gameStateManager = function(){
                         gameState.gamePhase = 'endgame'
                     }else{
                         gameState.gamePhase = 'proposal';
+                        gameState = rotateGovernment({gameState})
                     }
                     
                 }
