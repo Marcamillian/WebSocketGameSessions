@@ -14,7 +14,9 @@ const PlayerTemplate = ()=>{
         prevGov: false,       // if they were in the last successful gov
         proposedChancellor: false,
         // vote phase
-        voteCast: undefined
+        voteCast: undefined,
+        // power phase
+        alive: true
     }
 }
 

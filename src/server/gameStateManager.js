@@ -1,6 +1,34 @@
 StateTemplate = require('./stateTemplate.js')
 PlayerTemplate = require('./playerTemplate.js')
 
+const powerObject = {
+    fiveOrSix:[
+        "no-power",
+        "no-power",
+        "top-3-cards",
+        "kill",
+        "kill",
+        "end"
+    ],
+    sevenOrEight:[
+        "no-power",
+        "investigate",
+        "special-election",
+        "kill",
+        "kill",
+        "end"
+    ],
+    nineOrTen:[
+        "investigate",
+        "investigate",
+        "special-election",
+        "kill",
+        "kill",
+        "end"
+    ]
+
+}
+
 const gameStateManager = function(){
     let gameStates = {}; // array of all the game states
 
@@ -8,7 +36,7 @@ const gameStateManager = function(){
 
         var gameState = (testState) ? testState : gameStates[gameRef]
 
-        // updating game
+        // updating game - state machine
         switch(gameState.gamePhase){
             case "lobby":
 
@@ -27,6 +55,7 @@ const gameStateManager = function(){
 
                         
                 }else{
+                    gameState.players.forEach((player)=>{ player.ready = false})
                     assignRoles(gameState.players)
                     gameState.gamePhase = 'proposal'    // go to the next step
 
@@ -48,7 +77,9 @@ const gameStateManager = function(){
             break;
             case "election":
 
-                let voteResult = gameState.players.map((player)=>{
+                let livingVoters = gameState.players.filter((player)=>{ return player.alive == true })
+
+                let voteResult = livingVoters.map((player)=>{
                     return player.voteCast
                 })
 
@@ -59,7 +90,6 @@ const gameStateManager = function(){
                 // if all the votes cast
                 let positiveVotes = voteResult.reduce((sum, vote)=>{ return (vote) ? sum+1 : sum },0)
                 let negativeVotes = voteResult.reduce((sum, vote)=>{ return (!vote) ? sum+1 : sum },0)
-                //console.log(`JA: ${positiveVotes} | Nein: ${negativeVotes}`)
 
                 if(positiveVotes > negativeVotes){ // vote passes
                     
@@ -94,9 +124,8 @@ const gameStateManager = function(){
                     gameState.gamePhase = 'legislative'
                     
                 }else{  // vote fails
-
-                    gameState = rotateGovernment({gameState:gameState});
                     gameState.gamePhase = 'proposal';
+                    gameState = rotateGovernment({gameState})
                 }
 
                 gameState.players = resetPlayerVotes(gameState.players);
@@ -106,23 +135,47 @@ const gameStateManager = function(){
 
                 if(gameState.policyHand.length == 1 ){
 
+                    // policy played
+                    let policyPlayed = gameState.policyHand[0];
+                    
                     // enact the policy
                     gameState = enactPolicy({gameState:gameState})
 
                     // count the policy tracks
-                    let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum })
-                    let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum })
+                    let fPolicy = gameState.policyTrackFascist.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
+                    let lPolicy = gameState.policyTrackLiberal.reduce((sum, value)=>{return (value) ? sum+1: sum },0)
 
                     // change the state dependant on the policies that are out
-                    if(fPolicy >= 6 || lPolicy >= 5){
+                    if(fPolicy >= 6 || lPolicy >= 5){   // if there have been enough policies
                         gameState.gamePhase = "endGame"
-                    }else{
+                    }else if(policyPlayed == "liberal"){ // if the policy played was a liberal
+                        gameState.gamePhase = "proposal";
+                        gameState = rotateGovernment({gameState});
+                    }else if(policyPlayed == "fascist"){ // if it was fascist 
 
-                        if(fPolicy > 2){
-                            gameState.gamePhase = "power"
-                        }else{
-                            gameState.gamePhase = "proposal"
+                        let power = undefined;
+
+                        // check if there is a power
+                        try{
+                            power = getPower({
+                                numberOfPlayers: gameState.players.length,
+                                fascistPolicyCount: fPolicy
+                            })
+                        }catch(err){
+                            if(/not enough policies for a power/i.test(err.message)) power = 'no-power';
+                            else throw(e); 
                         }
+
+                        if(power == "no-power"){
+                            gameState.gamePhase = "proposal"
+                            gameState = rotateGovernment({gameState})
+                        }else{
+                            gameState.gamePhase = 'power';
+                            gameState.powerActive = power;
+                        }
+                        
+                    }else{
+                        throw new Error("Unhandled legislative state")
                     }
                 
                 }else{
@@ -130,8 +183,21 @@ const gameStateManager = function(){
                 }
             break;
             case "power":
-                // if power target selected
-                    // ==> proposal
+                // apply the effects of the interaction
+                enactPower({gameState});
+
+                // change the state if the power resolved
+                if(gameState.powerComplete == true){
+                    let hitler = searchPlayers({gameState, searchPairs:{'character':'hitler'}, singleResponseExpected: true })[0];
+
+                    if(hitler.alive == false){
+                        gameState.gamePhase = 'endgame'
+                    }else{
+                        gameState.gamePhase = 'proposal';
+                        gameState = rotateGovernment({gameState})
+                    }
+                    
+                }
             break
             case "endgame":
 
@@ -173,24 +239,7 @@ const gameStateManager = function(){
     const getGameState = (gameRef)=>{
 
         if(gameStates[gameRef]){
-
-            let returnState = {};
-
-            let targetState = gameStates[gameRef];
-            returnState['players'] = targetState.players.map( (playerInfo)=>{ return {playerName: playerInfo.playerName,
-                                                                                      president: playerInfo.president,
-                                                                                      chancellor: playerInfo.chancellor,
-                                                                                      ready: playerInfo.ready,
-                                                                                      prevGov: playerInfo.prevGov,
-                                                                                      proposedChancellor: playerInfo.proposedChancellor,
-                                                                                      voteCast: playerInfo.voteCast }
-                                                                            })
-            returnState['gamePhase'] = targetState.gamePhase;
-            returnState['voteFailTrack'] = targetState.voteFailTrack;
-            returnState['policyTrackFascist'] = targetState.policyTrackFascist;
-            returnState['policyTrackLiberal'] = targetState.policyTrackLiberal;
-
-            return returnState
+            return filterGameState(gameStates[gameRef]);
         }else{
             throw new Error(`No game with the key ${gameRef}`)
         }
@@ -198,7 +247,7 @@ const gameStateManager = function(){
 
     }
 
-    // TODO: Write test for this
+    //  TODO: Write test for this
     const filterGameState = (gameState)=>{
         let filteredState = {};
 
@@ -210,13 +259,16 @@ const gameStateManager = function(){
                 ready: playerInfo.ready,
                 prevGov: playerInfo.prevGov,
                 proposedChancellor: playerInfo.proposedChancellor,
-                voteCast: playerInfo.voteCast
+                voteCast: playerInfo.voteCast,
+                alive: playerInfo.alive
             }
         })
         filteredState['gamePhase'] = gameState.gamePhase;
         filteredState['voteFailTrack'] = gameState.voteFailTrack;
         filteredState['policyTrackFascist'] = gameState.policyTrackFascist;
         filteredState['policyTrackLiberal'] = gameState.policyTrackLiberal;
+        filteredState['powerActive'] = gameState.powerActive;
+        filteredState['postSpecialPresident'] = gameState.specialPresident;
 
         return filteredState;
     }
@@ -323,7 +375,8 @@ const gameStateManager = function(){
             privateInfo["teamMates"] = teamMates;
         }
 
-        if(gameState.gamePhase == 'legislative'){   // if in the legislative phase
+        // if in the legislative phase - give president/chancellor policyHands
+        if(gameState.gamePhase == 'legislative'){   
 
             if(player.president && gameState.policyHand.length == 3){  // if the president && 3 cards in hand
                 privateInfo["policyHand"] = gameState.policyHand; 
@@ -332,6 +385,35 @@ const gameStateManager = function(){
             }
         }
 
+        // if in the power phase and the player is the president
+        if(gameState.gamePhase == 'power' && player.president == true){
+
+            let powerActive = gameState.powerActive;
+            // if in the top 2 cards power - show the president these cards
+            if(powerActive == 'top-3-cards'){
+                privateInfo["topPolicyCards"] = gameState.policyDeck.slice(0,3)
+            }else if(powerActive == 'investigate'){
+                // get the targetPlayer
+                let targetPlayer = gameState.players.filter((player)=>{
+                    return player.playerRef == gameState.powerTarget;
+                })[0];
+
+
+                // populate the privateInfo with the targetData
+                privateInfo['investigationResult'] = (targetPlayer != undefined) ? {
+                    playerName: targetPlayer.playerName,
+                    alignment: targetPlayer.alignment
+                } : undefined;
+                
+            }else if(powerActive == undefined || powerActive == 'kill' || powerActive == 'special-election'){
+                // do nothing
+            }else{
+                throw new Error(`getPrivatePlayerInfo - unknown power: ${powerActive}`)
+            }
+
+        }
+
+        // show the player which way they voted
         if(player.voteCast != undefined){
             privateInfo["voteCast"] = player.voteCast;
         }
@@ -339,13 +421,13 @@ const gameStateManager = function(){
         return privateInfo
     }
 
-    const getPlayer = (args)=>{ // args { gameRef ; testState ; targetPlayer}
-        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
-        let player = gameState.players.filter((player)=>{ return player.playerRef == args.playerRef })
+    const getPlayer = ( {gameRef , gameState = gameStates[gameRef], playerRef} )=>{ // args { gameRef ; testState ; targetPlayer}
+    
+        let player = gameState.players.filter((player)=>{ return player.playerRef == playerRef })
 
         if(player.length == 1) return player[0]
-        else if(player.length < 1) throw new Error(`PlayerRef ${args.targetPlayer} not in game`)
-        else throw new Error(`PlayerRef ${args.targetPlayer} has multiple entries`)
+        else if(player.length < 1) throw new Error(`PlayerRef ${playerRef} not in game`)
+        else throw new Error(`PlayerRef ${playerRef} has multiple entries`)
     }
 
     
@@ -377,9 +459,7 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const proposeChancellor = (gameRef, playerRef, testState)=>{
-
-        let gameState = (testState) ? testState : gameStates[gameRef]
+    const proposeChancellor = ({gameRef, gameState = gameStates[gameRef], playerRef})=>{
 
         let matchedPlayers = gameState.players.filter((player)=>{return player.playerRef == playerRef})
         
@@ -418,12 +498,13 @@ const gameStateManager = function(){
         let policyIndex = policyHand.indexOf(policyType)
 
         if(policyIndex != -1){ //if there is a policy of that hand
+            // split the policy hand in to with the discarded policy at the front of the "tail" array
             var head = policyHand.slice(0, policyIndex)
             var tail = policyHand.slice(policyIndex)
-            var card = tail.shift()
+            var card = tail.shift() // remove the discarded card
             
-            gameState.policyHand = head.concat(tail)
-            gameState.policyDiscardPile.push(card)
+            gameState.policyHand = head.concat(tail) // join the hand together again
+            gameState.policyDiscardPile.push(card)  // put the card on the discard pile
 
         }else {
             
@@ -482,19 +563,109 @@ const gameStateManager = function(){
         else throw new Error("player not in game")
     }
 
-    const selectPlayer = (args)=>{
-        // aruments = {gameRef || testState || selectedPlayer || actingPlayer }
-        let gameState = (args.testState != undefined) ? args.testState : gameStates[args.gameRef];
-        let player = getPlayer({gameRef: args.gameRef, playerRef: args.actingPlayer})
-        let target = getPlayer({gameRef: args.gameRef, playerRef: args.selectedPlayer})
+    const selectPlayer = ( { gameRef, gameState = gameStates[gameRef] , selectedPlayer, actingPlayer } = {} )=>{
+        
+        let player = getPlayer({gameState: gameState, playerRef: actingPlayer})
+        let target = getPlayer({gameState: gameState, playerRef: selectedPlayer})
+
+        if(target.alive != true){
+            throw new Error(`Can't select a dead player`);
+        }
 
         if(gameState.gamePhase == "proposal"){
             if(player.president) { // if proposer and target are valid
-                if(!target.prevGov){ proposeChancellor(args.gameRef, args.selectedPlayer)
+                if(!target.prevGov){ proposeChancellor({gameState: gameState, playerRef: selectedPlayer})
                 }else{ throw new Error("Selected player in previous govornment")}
             }else{ throw new Error("Selecting player not president")}
-        }else {throw new Error("phase doesn't allow selecting")}
+        }else if(gameState.gamePhase == "power"){
+            let powerActive = gameState.powerActive;
+            // all we need to do is set the target player - update will handle enacting the power
+            if(player.president == true){
+                if(powerActive == 'kill' || powerActive == 'investigate' || powerActive == 'special-election' ){
+                    gameState.powerTarget = target.playerRef;
+                }else{
+                    throw new Error(`selectPlayer - power doesn't require selection`);
+                }
+            }
 
+        }else{ throw new Error("phase doesn't allow selecting") }
+
+        return gameState;
+
+    }
+
+    const enactPower = ( {gameRef, gameState = gameStates[gameRef] } )=>{
+        
+        let president;
+
+        switch (gameState.powerActive){
+            case `no-power`:
+                // do nothing
+            break;
+            case `top-3-cards`:
+                // all sent through private info
+                president = searchPlayers({gameState, searchPairs:{'president':true}, singleResponseExpected:true})[0]
+                if(president.ready == true){
+                    president.ready = false;
+                    gameState.powerComplete = true;
+                }
+            break;
+            case `kill`:
+                // if there is a powerTarget
+                if(gameState.powerTarget != undefined)
+                    // kill the target
+                    gameState = killPlayer({gameState});
+                    // remove the target
+                    gameState.powerTarget = undefined;
+                    // resolve the power
+                    gameState.powerComplete = true;
+            break;
+            case `investigate`:
+                president = searchPlayers({gameState, searchPairs:{'president':true}, singleResponseExpected:true})[0];
+                
+                // if the president is ready
+                if(president.ready == true){
+                  // set president to not ready
+                  president.ready = false;
+                  // resolve the power
+                  gameState.powerComplete = true;
+                }
+            break;
+            case `special-election`:
+                // has the president selected a player
+                if(gameState.targetPlayer != undefined){
+                    // set a flag to check in next rotateGovernment
+                    gameState.specialPresident = gameState.targetPlayer;
+                    // reset the targetPlayer
+                    gameState.targetPlayer = undefined;
+                    // resolve the power
+                    gameState.powerComplete = true;
+                }
+            break;
+            default:
+                // do nothing
+            break;
+        }
+
+        return gameState;
+    }
+
+    const getPower = ( { numberOfPlayers, fascistPolicyCount } )=>{
+
+        if(fascistPolicyCount < 1) throw new Error(`Not enough policies for a power : ${fascistPolicyCount} policies`)
+        else if(fascistPolicyCount >= 6) throw new Error(`Game should have ended : ${fascistPolicyCount} policies`)
+
+        // check how many players there are
+        if (numberOfPlayers < 5) throw new Error(`Not enough players for a game: ${numberOfPlayers} players`);
+        else if( numberOfPlayers <= 6 ){
+            return powerObject.fiveOrSix[fascistPolicyCount - 1]
+        }else if( numberOfPlayers <= 8 ){
+            return powerObject.sevenOrEight[fascistPolicyCount - 1]
+        }else if( numberOfPlayers <= 10){
+            return powerObject.nineOrTen[fascistPolicyCount - 1]
+        }else{
+            throw new Error(`Too many players in the game : ${numberOfPlayers} players`)
+        }
     }
 
     const genPolicyDeck = ()=>{
@@ -518,8 +689,8 @@ const gameStateManager = function(){
         // can we draw 3 cards
         if(gameState.policyDeck.length < 3){
 
-            gameState.policyDeck = shuffleArraysTogether([gameState.policyDiscard, gameState.policyDeck])
-            gameState.policyDiscard = []
+            gameState.policyDeck = shuffleArraysTogether([gameState.policyDiscardPile, gameState.policyDeck])
+            gameState.policyDiscardPile = []
         }
 
         // draw the three cards
@@ -529,9 +700,10 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const rotateGovernment = (args)=>{ // args {gameRef: gameState: }
-        const gameState = (args.gameRef) ? gameStates[args.gameRef] : args.gameState;
-        
+    // !! Test the new elements of this
+    const rotateGovernment = ( { gameRef, gameState = gameStates[gameRef] } )=>{ // args {gameRef: gameState: }
+    
+        // make an array of the roles of the players
         const playerRoles = gameState.players.map((player)=>{
             if(player.president) return 'president'
             else if(player.chancellor) return 'chancellor'
@@ -539,22 +711,67 @@ const gameStateManager = function(){
             else return 'nonGov'
         })
 
-        // get the index of the next president
+        
+        // == deal with assigning the next president
         const presIndex = playerRoles.indexOf('president')
-        
-        const nextPresIndex = (presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
-        const chancellorIndex = playerRoles.indexOf('chancellor')
-        const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
-        
-        gameState.players[presIndex].president = false; // unassign old president
-        gameState.players[nextPresIndex].president = true // assign new president
+        let nextPresIndex;
 
-        if(chancellorIndex !=-1){ // if there is a chancellor
-            gameState.players[chancellorIndex].chancellor = false; // reset the chancellor 
+        // find out the index of the next president
+        if ( gameState.postSpecialPresident != undefined){ // if there is a president to return to after special election
+            // get the index of the plaer to return to after the 
+            let postSpecialElectionPlayerObject = getPlayer({gameState, playerRef: gameState.postSpecialPresident});
+            
+            nextPresIndex = gameState.players.indexOf(postSpecialElectionPlayerObject);
+            
+            // check if the postSpecialPresident is alive
+            if(postSpecialElectionPlayerObject.alive != true){ // if the proposed post special election is dead
+                nextPresIndex = nextAlivePlayerByIndex({playerArray:gameState.players, currentTargetIndex:nextPresIndex})
+            }
+            
+            gameState.postSpecialPresident = undefined;
+            gameState.specialPresident = undefined;
+
+        }else if( gameState.specialPresident != undefined ){ // if there is a special president
+            // == get the index of the nominated special president
+            // get tthe player object
+            let specialPresidentPlayerObject = getPlayer({gameState, playerRef: gameState.specialPresident})
+
+            // get the index of the player object in the game
+            nextPresIndex = gameState.players.indexOf(specialPresidentPlayerObject);
+
+            // check that the special president is alive
+            if(specialPresidentPlayerObject.alive != true){
+                // if not get the next alive player
+                nextPresIndex = nextAlivePlayerByIndex({playerArray:gameState.players, currentTargetIndex: nextPresIndex })
+            }
+
+            // set the president to return to afterwards
+            let playerReturnIndex = nextAlivePlayerByIndex({playerArray: gameState.players, currentTargetIndex: presIndex})
+
+            gameState.postSpecialPresident = gameState.players[playerReturnIndex].playerRef;
+
+            // TODO - DO we need to know if the president is special - remove the special president setting
+
+        }else{
+            // move to the next player in the list
+            nextPresIndex = nextAlivePlayerByIndex({playerArray: gameState.players, currentTargetIndex: presIndex})
+            //(presIndex >= gameState.players.length-1) ? 0 : presIndex+1;
+        }
+        
+        // deal with president things
+        if(presIndex != -1) {
+            gameState.players[presIndex].president = undefined; // unassign old president
+            gameState.players[nextPresIndex].president = true // assign new president
         }
 
+        // deal with chancellor things
+        const chancellorIndex = playerRoles.indexOf('chancellor');
+        if(chancellorIndex !=-1){ // if there is a chancellor
+            gameState.players[chancellorIndex].chancellor = undefined; // reset the chancellor 
+        }
+        const proposedChancellorIndex = playerRoles.indexOf('proposedChancellor')
         if(proposedChancellorIndex != -1){  // if there is a proposed chancellor
-            gameState.players[proposedChancellorIndex].proposedChancellor = false   // unassign proposed
+            gameState.players[proposedChancellorIndex].proposedChancellor = undefined   // unassign proposed
         }
         
         return gameState;
@@ -595,7 +812,30 @@ const gameStateManager = function(){
         return gameState
     }
 
-    
+    const searchPlayers = ( {gameState, searchPairs, singleResponseExpected = false } = {} )=>{
+        
+        let searchKeys = Object.keys(searchPairs);
+        let matchedPlayers = undefined;
+        
+        searchKeys.forEach((searchKey)=>{
+            matchedPlayers = gameState.players.filter((player)=>{
+                return (player[searchKey] == searchPairs[searchKey])
+            })
+        })
+        
+        if(singleResponseExpected == true && matchedPlayers.length > 1){
+            throw new Error(`Single player expected: ${matchedPlayers.length} players found`)
+        }
+
+        return matchedPlayers;
+    }
+
+    const killPlayer = ({ gameRef, gameState = gameStates[gameRef] })=>{
+        let playerToKill = searchPlayers({gameState, searchPairs:{'playerRef':gameState.powerTarget}, singleResponseExpected: true})[0];
+        
+        playerToKill.alive = false;
+        return gameState;
+    }
     
     // utility functions
     const shuffleArraysTogether = (arrays)=>{
@@ -627,6 +867,22 @@ const gameStateManager = function(){
         return array
     }
 
+    const nextAlivePlayerByIndex = ({playerArray, currentTargetIndex, itterationCount = 0} = {})=>{
+
+        if(itterationCount >= playerArray.length){ // escape if itterated through whole list
+            throw new Error("Searched whole list - none alive");
+        }
+
+        // get the next player in the list (loop the end if necessary)
+        let nextPlayerIndex = (currentTargetIndex+1 < playerArray.length) ? currentTargetIndex +1 : 0;
+
+        // recursive loop till you get an alive player
+        return (playerArray[nextPlayerIndex].alive == true)
+          ? nextPlayerIndex
+          : nextAlivePlayerByIndex({playerArray, currentTargetIndex: nextPlayerIndex, itterationCount: itterationCount+1})
+
+    }
+
     // function to search for playerRef
 
     return Object.create({
@@ -644,6 +900,8 @@ const gameStateManager = function(){
         getGameForPlayer,
         getPrivatePlayerInfo,
         getPlayer,
+        searchPlayers,
+        killPlayer,
 
         update,
         readyPlayer,
@@ -658,7 +916,11 @@ const gameStateManager = function(){
         drawPolicyHand,
         rotateGovernment,
         enactPolicy,
-        clearVotes
+        clearVotes,
+        getPower,
+        enactPower,
+
+        nextAlivePlayerByIndex
     })
 
 }

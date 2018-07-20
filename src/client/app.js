@@ -11,7 +11,6 @@ let exposedFunctions = (()=>{
     const urlJoinGame = document.querySelector('#url-join');
     const spectatorJoin = document.querySelector('#spectator-join')
 
-
     const playerNameInput = document.querySelector('#player-name');
     const gameRefInput = document.querySelector('#game-ref');
     let playerDisplay = document.querySelector('.player-list');
@@ -28,7 +27,9 @@ let exposedFunctions = (()=>{
     let envelope = document.querySelector('.envelope');
     let envelopeFlap = document.querySelector('.envelope .flap');
     let envelopeContents = document.querySelector(".envelope .env-contents");
-    
+
+    let powerNameDisplay = document.querySelector('.power-name');
+    let powerInstructionDisplay = document.querySelector('.power-instruction');
     
     let ws;
 
@@ -50,7 +51,8 @@ let exposedFunctions = (()=>{
             ready = false,
             prevGov = false,
             proposedChancellor = false,
-            voteCast = undefined} = {} )=>{
+            voteCast = undefined,
+            alive = true} = {} )=>{
                 
                 let divPlayerCard = document.createElement('div');
                 let paraPlayerName = document.createElement('p')
@@ -61,9 +63,11 @@ let exposedFunctions = (()=>{
                 if (president) divPlayerCard.classList.add('president');
                 if (chancellor) divPlayerCard.classList.add('chancellor');
                 if (ready) divPlayerCard.classList.add('ready');
-                if (prevGov) divPlayerCard.classList.add('prev-gov');
+                if (prevGov && president != true && chancellor != true) divPlayerCard.classList.add('prev-gov');
                 if (proposedChancellor) divPlayerCard.classList.add('proposed-chancellor');
                 if (voteCast != undefined) divPlayerCard.classList.add('vote-cast');
+                if (alive == true) divPlayerCard.classList.add('alive');
+                else divPlayerCard.classList.add('dead'); 
 
                 paraPlayerName.innerText = playerName;
 
@@ -143,7 +147,7 @@ let exposedFunctions = (()=>{
 
     const gameStateDisplay = ( gamePhase ) =>{
 
-        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative")
+        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative", "power")
 
         console.log(`GAME PHASE: ${gamePhase}`)
 
@@ -169,6 +173,9 @@ let exposedFunctions = (()=>{
                 displayBody.classList.add("legislative")
                 displayBody.classList.add("in-game")
             break
+            case "power":
+                displayBody.classList.add('power', 'in-game');
+            break;
             default:
                 throw new Error(`gamePhase not recognised: ${gamePhase}`)
             break
@@ -200,8 +207,9 @@ let exposedFunctions = (()=>{
             if(!currentGameRef) currentGameRef = gameRef; // set the gameRef if not already set
             showGameRef(gameRef); // update the code in the game ref block
             gameStateDisplay(gameState.gamePhase) // change the class on the body element to show phase elements
-            showPlayers(gameState.players,gameState.gamePhase, thisPlayerObject) // show al of the players
-            showCards(privateInfo.policyHand, gameState.gamePhase, thisPlayerObject, privateInfo.voteCast);
+            showPlayers(gameState.players,gameState, thisPlayerObject) // show all of the players
+            powerDisplay({gameState, playerObject: thisPlayerObject, privateInfo});
+            showCards(gameState, thisPlayerObject, privateInfo);
             showPrivateInfo(privateInfo)
         })
 
@@ -211,8 +219,8 @@ let exposedFunctions = (()=>{
             if(!currentGameRef) currentGameRef = gameRef
             showGameRef(gameRef)
             gameStateDisplay(gameState.gamePhase)
-            showPlayers(gameState.players, gameState.gamePhase, {president:false})
-            showCards(undefined, gameState.gamePhase, {president:false}, undefined)
+            showPlayers(gameState.players, gameState, {president:false})
+            showCards(gameState, {president:false}, undefined)
             
             console.log("updated the spectator");
         })
@@ -281,10 +289,11 @@ let exposedFunctions = (()=>{
         return document.querySelector('.player-card.selected p').innerText;
     }
 
-    const showPlayers = (playerArray, gamePhase, thisPlayerObject)=>{
+    const showPlayers = (playerArray, gameState, thisPlayerObject)=>{
         
         let callback  = undefined;
         let isPresident = thisPlayerObject.president;
+        let gamePhase = gameState.gamePhase
 
         // 1-  remove the elements from the list
         playerDisplay = displayModule.emptyElement(playerDisplay)
@@ -294,14 +303,38 @@ let exposedFunctions = (()=>{
 
             let playerCard = displayModule.generatePlayerCard(playerObject);
 
-            if( gamePhase == 'proposal' && isPresident){ // if anything is supposed to be clickable
-                if( !playerObject.prevGov && !playerObject.president){ //if this specific player in the array is clickable
-                    playerCard.addEventListener('click', ()=>{
-                        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
-                        toggleClass(playerCard, 'selected');
-                    })
-                }else{
-                    playerCard.classList.add('not-selectable');
+
+            if( isPresident){
+                switch(gamePhase){
+                    case "proposal":
+                        if( !playerObject.prevGov && !playerObject.president && playerObject.alive){ //if this specific player in the array is clickable
+                            playerCard.addEventListener('click', ()=>{
+                                document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
+                                toggleClass(playerCard, 'selected');
+                            })
+                        }else{
+                            playerCard.classList.add('not-selectable');
+                        }
+                    break;
+                    case "power":
+
+                        switch(gameState.powerActive){
+                            case "kill":
+                                // add a click event to mark players as selected
+                                if (playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                            break;
+                            case "investigate":
+                                // TODO - remove the select click function BUT retain th highlighting of the investigated user
+                                // if the investigation hasn't already gone through (if not in privateInfo)
+                                // add a click event to mark players as selected
+                                if(playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                            break;
+                            case "special-election":
+                                // add a click event to mark players as selected
+                                if(playerObject.alive)playerCard.addEventListener('click',()=>{ markPlayerCardAsSelected(playerCard) })
+                            break;
+                        }
+                    break;
                 }
             }
             
@@ -309,7 +342,11 @@ let exposedFunctions = (()=>{
         }) 
     }
 
-    const showCards = (cardArray= [], gamePhase, thisPlayerObject, voteCast)=>{
+    const showCards = ( gameState, thisPlayerObject, privateInfo)=>{
+        
+        let gamePhase = gameState.gamePhase;
+        let {topPolicyCards, investigationResult, policyHand, voteCast} = privateInfo;
+
         // 1- remove the cards from the list
         cardAreaDisplay = displayModule.emptyElement(cardAreaDisplay);
 
@@ -341,7 +378,8 @@ let exposedFunctions = (()=>{
                 })
             break;
             case 'legislative':
-                cardArray.forEach((cardName)=>{
+                if (policyHand == undefined) return
+                policyHand.forEach((cardName)=>{
                     let policyCard = displayModule.generateVoteCard(cardName);
                     policyCard.addEventListener('click',()=>{
                         discardPolicy(cardName);
@@ -349,7 +387,68 @@ let exposedFunctions = (()=>{
                     cardAreaDisplay.appendChild(policyCard);
                 })
             break;
+            case 'power':
+                if(thisPlayerObject.president == true){
+                    switch (gameState.powerActive){
+                        case "top-3-cards":
+                            // show top 3 cards
+                            privateInfo.topPolicyCards.forEach((policyType)=>{
+                                cardAreaDisplay.appendChild(displayModule.generateVoteCard(policyType))
+                            })
+                            // show ready button
+                            let confirmButton = document.createElement('button');
+                            confirmButton.innerText = 'Confirm'
+                            confirmButton.addEventListener('click', ()=>{
+                                ws.emit('readyUp')
+                            })
+                            cardAreaDisplay.appendChild(confirmButton);
+                        break;
+                        case "kill":
+                            // show confirm kill button
+                            let confirmKillButton = document.createElement('button');
+                            confirmKillButton.innerText = "Confirm Kill";
+                            confirmKillButton.addEventListener('click',()=>{
+                                playerSelect(getSelectedPlayer());
+                            })
+                            cardAreaDisplay.appendChild(confirmKillButton);
+                        break;
+                        case "investigate":
+                            let confirmInvestigationTargetButton = document.createElement('button');
+                            
+                            if(privateInfo.investigationResult == undefined){ // targetting the player for investigation
+                                confirmInvestigationTargetButton.innerText = 'Confirm target';
+                                confirmInvestigationTargetButton.addEventListener('click', ()=>{
+                                    playerSelect(getSelectedPlayer());
+                                })
+                            }else{ // confirm that you have seen the alignment
+
+                                // show the result as a card
+                                cardAreaDisplay.appendChild(displayModule.generateVoteCard(privateInfo.investigationResult.alignment));
+
+                                confirmInvestigationTargetButton.innerText = 'Confirm';
+                                confirmInvestigationTargetButton.addEventListener('click',()=>{
+                                    ws.emit('readyUp');
+                                })
+                            }
+
+                            cardAreaDisplay.appendChild(confirmInvestigationTargetButton);
+                        break;
+                        case "special-election":
+                            // show confirm pesident selection button
+                            let confirmTargetButton = document.createElement('button');
+                            confirmTargetButton.innerText = "Confirm Special President";
+                            confirmTargetButton.addEventListener('click', ()=>{
+                                playerSelect(getSelectedPlayer());
+                            })
+                            cardAreaDisplay.appendChild(confirmTargetButton);
+                        break;
+                    }
+                
+                }
+            break;
         }
+
+        return true;
     }
 
     const getPlayerNameInput =()=>{
@@ -375,56 +474,7 @@ let exposedFunctions = (()=>{
         envelopeContents.appendChild(displayModule.generateEnvelopeContents(character, alignment));
 
         return 
-        /*
-        let teamTitle, teamEl,
-         alignmentEl, characterEl,
-         policyPickTitle, policyButtons;
 
-        clearElement(privateInfoDisplay)
-        clearElement(policyPickDisplay)
-
-        alignmentEl = document.createElement('p')
-        alignmentEl.innerText = `alignment: ${privateInfo.alignment}`;
-
-        characterEl = document.createElement('p')
-        characterEl.innerText = `Character: ${privateInfo.character}`;
-
-        if(privateInfo.teamMates){
-            teamEl = document.createElement('ul')
-            teamTitle = document.createElement('p')
-            teamTitle.innerText = "Team mates"
-
-            privateInfo.teamMates.forEach((teamMateName)=>{
-                teamMateEl = document.createElement('li')
-                teamMateEl.innerText = teamMateName;
-                teamEl.appendChild(teamMateEl)
-            })
-        }
-
-        // -- policy display handling
-        if(privateInfo.policyHand){
-            console.log(privateInfo.policyHand)
-
-            policyPickTitle = document.createElement('p')
-            policyPickTitle.innerHTML = `<b> Discard a policy </b>`
-
-            policyButtons = document.createElement('div');
-            privateInfo.policyHand.forEach((policy)=>{
-                let policyButton = document.createElement('button')
-                policyButton.innerText = `${policy}`;
-                policyButton.addEventListener('click', ()=>{discardPolicy(policy)})
-
-                policyButtons.appendChild(policyButton)
-            })
-        }
-
-
-        privateInfoDisplay.appendChild(alignmentEl)
-        privateInfoDisplay.appendChild(characterEl)
-        if (teamTitle) {privateInfoDisplay.appendChild(teamTitle); privateInfoDisplay.appendChild(teamEl)}
-        if (policyButtons) { policyPickDisplay.appendChild(policyPickTitle); policyPickDisplay.appendChild(policyButtons)}
-
-        */
     }
 
     const clearElement = (element)=>{
@@ -474,6 +524,64 @@ let exposedFunctions = (()=>{
         element.classList.toggle(tag);
     }
 
+    const gamePhaseDisplay = ({gameState})=>{
+        switch(gameState.gamePhase){
+            case 'power':
+                powerDisplay({gameState})
+        }
+    }
+
+    // upate the power heading block
+    const powerDisplay = ({gameState, playerObject, privateInfo})=>{
+
+        switch(gameState.powerActive){
+            case undefined:
+                break;
+            case 'top-3-cards':
+                powerNameDisplay.innerText = "Top 3 Cards";
+                if (playerObject.president == true){
+                    powerInstructionDisplay.innerText = "Look at the cards and confirm when ready";
+                }else{
+                    powerInstructionDisplay.innerText = "Wait for president";
+                } 
+                
+                break;
+            case 'kill':
+                powerNameDisplay.innerText = "Assasination";
+
+                if(playerObject.president == true){
+                    powerInstructionDisplay.innerText = "Select a player to kill and confirm"
+                }else{
+                    powerInstructionDisplay.innerText = "Wait for president"
+                }
+                
+                break;
+            case 'investigate':
+                powerNameDisplay.innerText = "Alignment Investigation";
+
+                if (playerObject.president == true){
+                    powerInstructionDisplay.innerText = "Select a player to investigate and confirm when done"
+                }else{
+                    powerInstructionDisplay.innerText = "Wait for president";
+                }
+                // highlight the player that is investigated
+                break;
+            case 'special-election':
+                powerNameDisplay.innerText = "Special Election";
+
+                if(playerObject.president == true){
+                    powerInstructionDisplay.innerText = "Select a player to be president next and confirm"
+                }else{
+                    powerInstructionDisplay.innerText = "Wait for president";
+                }
+                // add a select click event to the players (not yourself)
+                break;
+            default:
+                console.error(`Unknown power: ${gameState.power}`)
+                break;
+        }
+    }
+
     // BUTTON CLICK FUNCTIONS
  
     wsButton.onclick = ()=>{
@@ -514,6 +622,14 @@ let exposedFunctions = (()=>{
         toggleEnvelopeOpen()
     })
 
+    // UTILITY FUNCTIONS
+    const markPlayerCardAsSelected = (playerCard)=>{
+        // remove all other selected playerCards
+        document.querySelectorAll('.player-card').forEach((el)=>{el.classList.remove('selected')});
+        // add the selected class to playerCard
+        toggleClass(playerCard, 'selected');
+
+    }
 
     return{
         displayModule,
