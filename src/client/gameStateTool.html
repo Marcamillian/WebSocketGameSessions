@@ -57,6 +57,36 @@
                 </select>
             </div>
 
+            <fieldset class="power-info">
+                <legend> Power information </legend>
+                <div>
+                    <h3>powerActive</h3>
+                    <select name="power-active">
+                        <option> undefined</option>
+                        <option> top-3-cards</option>
+                        <option> investigate</option>
+                        <option> kill</option>
+                        <option> special-election</option>
+                    </select>
+                </div>
+
+                <div>
+                    <h3> power target</h3>
+                    <input type="text" name="power-target" placeholder="playerRef"></input>
+                </div>
+
+                <div>
+                    <h3> powerComplete</h3>
+                    <input type="radio" name="power-complete" value="true">true</input>
+                    <input type="radio" name="power-complete" value="false" checked="checked">false</input>
+                </div>
+                <div>
+                    <h3>specialPresident</h3>
+                    <input type="text" name="special-president">
+                </div>
+            </fieldset> 
+
+
             <fieldset class="card-info">
                 <legend>Cards</legend>
                 <div>
@@ -116,9 +146,6 @@
                     <input type="radio" name="policy-track-liberal" value=5>5</input>
                 </div>
 
-                <div>
-                    <h3> power target</h3>
-                </div>
             </fieldset>
             
         </fieldset>

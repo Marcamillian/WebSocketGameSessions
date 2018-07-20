@@ -10,7 +10,8 @@ const optionDefault =  {
   ready : {value:'true', formName:'ready'},
   prevGov : {value:'false', formName:'prev-gov'},
   proposedChancellor : {value:'false', formName:'proposed-chancellor'},
-  voteCast : {value:'undefined', formName:'vote-cast'}
+  voteCast : {value:'undefined', formName:'vote-cast'},
+  alive: {value: 'true', formName:'alive'}
 }
 
 const gameStateTemplate = {
@@ -40,7 +41,9 @@ const playerTemplate = {
   prevGov: false,       // if they were in the last successful gov
   proposedChancellor: false,
   // vote phase
-  voteCast: undefined
+  voteCast: undefined,
+  // power phase
+  alive: true
 }
 
 const policyDeckNumbers = {fascist: 11, liberal:6}
@@ -80,6 +83,9 @@ const genPlayerFormEl = (playerNumber)=>{
 
     playerContainer.appendChild(createLabel('voteCast'));
     playerContainer.appendChild(createRadiogroup(`p${playerNumber}_vote-cast`, ['true', 'false', 'undefined'],'undefined'));
+
+    playerContainer.appendChild(createLabel('alive'));
+    playerContainer.appendChild(createRadiogroup(`p${playerNumber}_alive`, ['true', 'false'], 'false' ))
  
     return playerContainer;
 }
@@ -192,7 +198,7 @@ const getAllPlayerSettings = ()=>{
         player['prevGov'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_prev-gov]:checked`).value);
         player['proposedChancellor'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_proposed-chancellor]:checked`).value);
         player['voteCast'] = stringToBool(playerOptionsEl.querySelector(`input[name=p${index}_vote-cast]:checked`).value);
-        if(typeof player.voteCast )
+        player['alive'] = stringToBool( playerOptionsEl.querySelector(`input[name=p${index}_alive]:checked`).value);
 
         playerSettings.push(player);
     })
@@ -245,6 +251,14 @@ const setDeckNumbers = ()=>{
     document.querySelector('.policy-deck.liberal').innerHTML = deck.liberal;
 }
 
+const createFilledArray = (fillNumber, arrayLength, baseOption = false, fillOption = true)=>{
+    if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
+
+    let fillArray = Array(arrayLength).fill(baseOption);
+
+    return fillArray.map((value, index)=>{return (index < fillNumber) ? fillOption : baseOption})
+}
+
 const getCardData = ()=>{
     let policyHand = {
         fascist: Number(document.querySelector('.card-info .policy-hand.fascist').value),
@@ -268,16 +282,15 @@ const getCardData = ()=>{
     }
 }
 
-const createFilledArray = (fillNumber, arrayLength, baseOption = false, fillOption = true)=>{
-    if(fillNumber > arrayLength) throw new Error (`fill length bigger than arrayLength | fillNumber: ${fillNumber} arrayLength: ${arrayLength}`);
-
-    let fillArray = Array(arrayLength).fill(baseOption);
-
-    return fillArray.map((value, index)=>{return (index < fillNumber) ? fillOption : baseOption})
-}
-
 
 // track information
+
+const createBooleanTrack = (fillNumber, trackLength)=>{
+    if(fillNumber > trackLength) throw new Error(`number higher than track length fillNumber:${fillNumber} > trackLength:${trackLength}`)
+    let track = Array(trackLength).fill(false);
+    
+    return track.map((value, index)=>{ return (index < fillNumber) ? true : false})
+}
 
 const getProgressTrackData = ()=>{
     const voteFailSetting = document.querySelector('input[name=fail-track]:checked').value;
@@ -291,11 +304,26 @@ const getProgressTrackData = ()=>{
     }
 }
 
-const createBooleanTrack = (fillNumber, trackLength)=>{
-    if(fillNumber > trackLength) throw new Error(`number higher than track length fillNumber:${fillNumber} > trackLength:${trackLength}`)
-    let track = Array(trackLength).fill(false);
-    
-    return track.map((value, index)=>{ return (index < fillNumber) ? true : false})
+// power information
+const getPowerData = ()=>{
+    const stateForm = document.querySelector('form.state-form');
+
+    let activePowerSetting = stateForm.elements['power-active'].value;
+    let powerTargetSetting = stateForm.elements['power-target'].value;
+    let powerCompleteSetting = stateForm.elements['power-complete'].value;
+    let specialPresidentSetting = stateForm.elements['special-president'].value;
+
+    activePowerSetting = (activePowerSetting == 'undefined') ? undefined: activePowerSetting;
+    powerTargetSetting = (powerTargetSetting == '') ? undefined: powerTargetSetting;
+    powerCompleteSetting = stringToBool(powerCompleteSetting);
+    specialPresidentSetting = (specialPresidentSetting == '') ? undefined : specialPresidentSetting;
+
+    return{
+        powerActive: activePowerSetting,
+        powerTarget: powerTargetSetting,
+        powerComplete: powerCompleteSetting,
+        specialPresident: specialPresidentSetting
+    }
 }
 
 
@@ -315,6 +343,7 @@ const getCreatedGameState = ()=>{
     let gameState = Object.assign({},gameStateTemplate);
     let cardData = getCardData();
     let progressTrackData = getProgressTrackData();
+    let powerData = getPowerData()
 
     // game phase
     gameState.gamePhase = getGamePhase()
@@ -343,6 +372,12 @@ const getCreatedGameState = ()=>{
     gameState.policyTrackLiberal = createBooleanTrack(progressTrackData.policyTrackLiberal, gameStateTemplate.policyTrackLiberal.length);
     gameState.policyTrackFascist = createBooleanTrack(progressTrackData.policyTrackFascist, gameStateTemplate.policyTrackFascist.length);
 
+    // power information
+    gameState.powerTarget = powerData.powerTarget;
+    gameState.powerActive = powerData.powerActive;
+    gameState.powerComplete = powerData.powerComplete;
+    gameState.specialPresident = powerData.specialPresident;
+
     return gameState;
 }
 //sendGameState
@@ -356,7 +391,23 @@ const sendGameState = ()=>{
     })
     // TODO: If gameRef not defined - error
     return fetch(`/gameinstance/${gameRef}/stateTest`, {method:'PUT', credentials:'same-origin', headers: myHeaders})
+        .then(handleResponse)
+        .then(checkMessage)
         .then(()=>{console.log("sent the gameState")})
+        .catch((err)=>{ throw new Error("Game State could not be sent")})
+}
+
+const handleResponse = (response)=>{
+    return response.ok
+        ? response.json()
+        : Promise.reject(new Error('Unexpected Response'))
+}
+
+const checkMessage = (message)=>{
+    if (message.result != 'OK'){
+        console.error(message)
+        throw new Error()
+    }
 }
 
 /* ==== SET UP EVENT LISTENERS */

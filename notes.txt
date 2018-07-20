@@ -1,3 +1,5 @@
+|| 08/07/2018 - [ BUG ] - Legislative Session - the president is not shown
+
 websocket express example - https://www.npmjs.com/package/ws#installing
 
 

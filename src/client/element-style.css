@@ -51,6 +51,13 @@ button{
     .in-game .player-card.chancellor .player-state {
         background-image:url('./assets/Chancellor.svg')
     }
+    .in-game .proposed-chancellor{
+        color:greenyellow;
+    }
+    .in-game .dead{
+        text-decoration:line-through;
+        color:#BDBDBD;
+    }
     
     .election .player-card .player-action{
         background-image:url('./assets/VotePending.svg')
@@ -141,6 +148,20 @@ button{
     }
     .envelope.open.show-card .env-contents{
         top:-100px;
+    }
+
+/* POWER RELATED THINGS*/
+    #power-display{
+        display:flex;
+        flex-direction:column;
+        text-align:center;
+    }
+    #power-display h1{
+        font-size: 1em;
+        display:inline-block;
+    }
+    #power-display .power-name{
+        font-weight:bold;
     }
 
 /* CARD FLIP */

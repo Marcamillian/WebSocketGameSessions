@@ -50,7 +50,7 @@ test("Testing the getPlayerRefs method", (t)=>{
     t.end()
 })
 
-test("Testing the stateMachine - lobby to proposal transition", (t)=>{
+test("Testing the update stateMachine - lobby to proposal transition", (t)=>{
 
     let gsManager = GameStateManager();
 
@@ -59,7 +59,11 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
         let state = {players:[], gamePhase: 'lobby'}
         for(var i=0; i<5; i++){ state.players.push({ready:true}) }
 
-        ts.equals(gsManager.update(undefined, state).gamePhase, 'proposal', "gameState should move on")
+        let result = gsManager.update(undefined, state);
+        let playersReady = result.players.map((player)=>{ return player.ready })
+        ts.equals(result.gamePhase, 'proposal', "gameState should move on")
+        ts.equals(playersReady.join(), "false,false,false,false,false", "Ready gets reset");
+        
         ts.end()
     })
 
@@ -94,7 +98,7 @@ test("Testing the stateMachine - lobby to proposal transition", (t)=>{
     t.end()
 })
 
-test("Testing the stateMachine - proposal to vote transition", (t)=>{
+test("Testing the update stateMachine - proposal to vote transition", (t)=>{
     let gsManager = GameStateManager()
 
     let gameState1 = StateTemplate();
@@ -114,7 +118,7 @@ test("Testing the stateMachine - proposal to vote transition", (t)=>{
     t.end()
 })
 
-test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
+test("Testing the update stateMachine - vote to legislative/proposal/endGame", (t)=>{
 
     t.test("No votes", (ts)=>{
         let gsManager = GameStateManager()
@@ -300,10 +304,63 @@ test("Testing the stateMachine - vote to legislative/proposal/endGame", (t)=>{
         ts.end()
     })
 
+    t.test("Voting with dead players - pass vote",(ts)=>{
+        let stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'election',
+            players:[
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal', president: true},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal', proposedChancellor: true},
+                {voteCast: undefined, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+            ],
+            policyTrackFascist: [false, false, false, false, false, false],
+            policyTrackLiberal: [false, false, false, false, false, false],
+            policyHand:[],
+            policyDeck:['liberal','liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist','fascist','fascist']
+        }
+
+        let result = stateManager.update(undefined, testState);
+        
+        ts.equals(result.gamePhase, 'legislative', "Successful vote - choose policy")
+
+        ts.end()
+
+    })
+
+    t.test("Voting with dead players",(ts)=>{
+        let stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'election',
+            players:[
+                {alive: true, voteCast: false, character: 'liberal', alignment:'liberal', president: true},
+                {alive: true, voteCast: false, character: 'liberal', alignment:'liberal', proposedChancellor: true},
+                {voteCast: undefined, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+                {alive: true, voteCast: true, character: 'liberal', alignment:'liberal'},
+            ],
+            policyTrackFascist: [false, false, false, false, false, false],
+            policyTrackLiberal: [false, false, false, false, false, false],
+            policyHand:[],
+            policyDeck:['liberal','liberal','liberal','liberal','liberal','fascist','fascist','fascist','fascist','fascist','fascist'],
+            voteFailTrack:[false, false, false]
+        }
+
+        let result = stateManager.update(undefined, testState);
+        
+        ts.equals(result.gamePhase, 'proposal', "Failed vote - choose new chancellor")
+
+        ts.end()
+
+    })
+
     t.end()
 })
 
-test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
+test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
     
     
     t.test("Fascist passed - no power", (ts)=>{
@@ -312,13 +369,18 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
         let gameState = StateTemplate();
 
         gameState.gamePhase = 'legislative'
-        gameState.policyHand = ['fascist']
+        gameState.policyHand = ['fascist'];
+        gameState.players = [{playerName: 'player1', playerRef:'p1', president:true},
+            { playerName: 'player2', playerRef:'p2', chancellor:true },
+            { playerName: 'player3', playerRef:'p3' },
+            { playerName: 'player4', playerRef:'p4' },
+            { playerName: 'player5', playerRef:'p5' }
+        ]
         
-        let result = gsManager.update(undefined,gameState)
+        let result = gsManager.update(undefined,gameState);
 
-        t.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
-        // TODO: check that the players were set to previous govornment
-        // TODO: check that president is updated
+        ts.equals(result.gamePhase, "proposal", "Policy Passes - next proposal")
+        ts.equals(result.activePower, undefined, "No power active")
 
         ts.end()
     })
@@ -330,7 +392,8 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         gameState.gamePhase = 'legislative'
         gameState.policyHand = ['liberal']
-
+        gameState.players = [{},{},{},{},{}]
+        
         t.equals(gsManager.update(undefined,gameState).gamePhase, "proposal", "Policy Passes - next proposal")
 
         ts.end()
@@ -341,11 +404,93 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         let gameState = StateTemplate();
 
-        gameState.gamePhase = 'legislative'
-        gameState.policyHand = ['fascist']
-        gameState.policyTrackFascist = [true, true, true, false, false, false]
+        gameState.gamePhase = 'legislative';
+        gameState.policyHand = ['fascist'];
+        gameState.policyTrackFascist = [true, true, true, false, false, false];
+        gameState.policyTrackLiberal = [false]
+        gameState.players = [{},{},{},{},{}];
 
         t.equals(gsManager.update(undefined,gameState).gamePhase, "power", "Policy Passes - power activated")
+
+        ts.end()
+    })
+
+    t.test("Fascist passed - check which powers activated", (ts)=>{
+        ts.test("update with 5 players 3 fascist policies", (tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive: undefined,
+                policyHand: ['fascist'],
+                players:[ {},{},{},{},{} ],
+                policyTrackFascist: [true ,true, false, false, false, false],
+                policyTrackLiberal: [false]
+            }
+
+            let result = gsManager.update(undefined, testState)
+
+            tss.equals(result.gamePhase,'power', "A power has been identified")
+            tss.equals(result.powerActive, 'top-3-cards', "5 players 3 policies - Top 3 card power ")
+            tss.end()
+        })
+
+        ts.test("udpate with 7 players 2 fascist", (tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{},{}],
+                policyTrackFascist:[true, false, false, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, testState);
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified")
+            tss.equals(result.powerActive, 'investigate', "7 players 2 fascist - investigate happens")
+            tss.end()
+        })
+
+        ts.test("update with 10 players 3 fascist polices ",(tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{},{},{},{},{}],
+                policyTrackFascist:[true, true, false, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, testState)
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified");
+            tss.equals(result.powerActive, 'special-election',"10 players 3 fascist - special election power")
+            tss.end()
+        })
+
+        ts.test("udpate with 6 players 4 fascist policies",(tss)=>{
+            let gsManager = GameStateManager();
+
+            let testState = {
+                gamePhase: 'legislative',
+                powerActive:undefined,
+                policyHand:['fascist'],
+                players:[{},{},{},{},{},{}],
+                policyTrackFascist:[true, true, true, false, false,false],
+                policyTrackLiberal:[false]
+            }
+
+            let result = gsManager.update(undefined, testState)
+
+            tss.equals(result.gamePhase, 'power', "A power has been identified");
+            tss.equals(result.powerActive, 'kill',"6 players 4 fascist - kill power")
+            tss.end()
+        })
 
         ts.end()
     })
@@ -375,6 +520,32 @@ test("Testing the stateMachine - legeslative to endgame/power", (t)=>{
 
         ts.equals(gsManager.update(undefined,gameState).gamePhase, "endGame", "Liberals win")
 
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Testing the update stateMachine - power to endgame", (t)=>{
+    t.test("hitler was killed", (ts)=>{
+        gsManager = GameStateManager();
+
+        let testState = {
+            gamePhase:'power',
+            powerActive: 'kill',
+            powerComplete: true,
+            players:[
+                {
+                    playerName: 'player1',
+                    playerRef: 'one',
+                    character: 'hitler',
+                    alive:false
+                }
+            ]
+        }
+
+        let result1 = gsManager.update(undefined, testState);
+        ts.equals(result1.gamePhase, 'endgame', "If hitler is killed game ends")
         ts.end()
     })
 
@@ -465,7 +636,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        let result = base.gsManager.proposeChancellor(undefined, "player1", base.gs)
+        let result = base.gsManager.proposeChancellor({playerRef: "player1", gameState:base.gs})
 
         let targetPlayer = result.players.filter((player)=>{return player.playerRef == 'player1'})[0]
         ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
@@ -479,7 +650,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.gs.gamePhase = 'proposal';
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player3", base.gs)}, /No players with that playerRef/i, "Proposed chancellor not in game")
+        ts.throws(()=>{base.gsManager.proposeChancellor({ playerRef:"player3", gameState:base.gs} )}, /No players with that playerRef/i, "Proposed chancellor not in game")
         ts.end()
     })
 
@@ -491,7 +662,7 @@ test("Testing interaction functions: chancellor proposal", (t)=>{
         base.player2.playerRef = "player1"
         base.gs.players.push(base.player1, base.player2)
 
-        ts.throws(()=>{base.gsManager.proposeChancellor(undefined, "player1", base.gs), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
+        ts.throws(()=>{base.gsManager.proposeChancellor({playerRef:"player1", gameState:base.gs}), /Multiple players with this playerRef/i, "Proposed chancellor playerRef matches mutliple players"})
 
         ts.end()
     })
@@ -846,7 +1017,89 @@ test("Testing function: getPrivatePlayerInfo",(t)=>{
         ts.end()
     })
 
+    t.test("PlayerInfo when in power phase", (ts)=>{
+      ts.test("top-3-cards power", (tss)=>{
 
+        let gsManager = GameStateManager();
+
+        let testState = {
+          gamePhase: 'power',
+          powerActive: 'top-3-cards',
+          players:[
+            { playerName:'player1',
+              playerRef:'one',
+              alignment:'liberal',
+              character:'liberal',
+              president:true
+            },
+            { playerName:'player2',
+              playerRef:'two',
+              alignment:'liberal',
+              character:'liberal',
+              chancellor:true
+            },
+            { playerName:'player3',
+              playerRef:'three',
+              character: 'fascist',
+              alignment: 'fascist',
+            }
+          ],
+          policyDeck:['liberal','liberal','fascist', 'liberal']  
+        }
+
+        let result1 = gsManager.getPrivatePlayerInfo(undefined, 'one', testState);
+        tss.equals(result1.topPolicyCards.join(), "liberal,liberal,fascist", "President can see top 3 cards")
+        tss.equals(testState.policyDeck.join(), "liberal,liberal,fascist,liberal", "PolicyDeck on the gameState unchanged")
+
+        let result2 = gsManager.getPrivatePlayerInfo(undefined, 'two', testState);
+        tss.equals(result2.topPolicyCards, undefined, "No top cards for chancellor");
+
+        let result3 = gsManager.getPrivatePlayerInfo(undefined, 'three', testState);
+        tss.equals(result3.topPolicyCards, undefined, "No top cards for non-government");
+
+        // TODO: how does this work if/when there are two cards in the deck - should it always check to see if there are 2 in deck and reshuffle deck then
+
+        tss.end()
+
+      })
+      
+      ts.test("investion power", (tss)=>{
+        let gsManager = GameStateManager();
+
+        // after the president has selected a player to investigate
+        let testState = {
+          gamePhase:'power',
+          powerActive: 'investigate',
+          players:[
+            { playerName:'player1',
+              playerRef:'one',
+              alignment:'liberal',
+              character:'liberal',
+              president:true,
+            },
+            {
+              playerName:'player2',
+              playerRef:'two',
+              alignment:'fascist',
+              character:'hitler'
+            }
+          ],
+          powerTarget: 'two'
+        }
+
+        let result1 = gsManager.getPrivatePlayerInfo(undefined, 'one', testState);
+        tss.equals(result1.investigationResult.playerName, "player2", "investigationResult present for president");
+        tss.equals(result1.investigationResult.alignment, "fascist", "investigationResult present for president");
+
+        let result2 = gsManager.getPrivatePlayerInfo(undefined, 'two', testState);
+        tss.equals(result2.investigationResult, undefined, "no investigationResult for non-president")
+
+        tss.end()
+
+      })
+      
+      ts.end()
+    })
 
     t.end()
 })
@@ -897,7 +1150,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player2", playerName:"two"}]
         }
 
-        ts.equals(stateManager.getPlayer({testState:gameState, playerRef:"player1"}).playerName, "one", "Checking getting a player")
+        ts.equals(stateManager.getPlayer({gameState:gameState, playerRef:"player1"}).playerName, "one", "Checking getting a player")
         ts.end()
     })
 
@@ -908,7 +1161,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player2", playerName:"two"}]
         }
 
-        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player3"})}, /not in game/i, "Searching for player not there")
+        ts.throws(()=>{stateManager.getPlayer({gameState:gameState, playerRef:"player3"})}, /not in game/i, "Searching for player not there")
         ts.end()
     })
 
@@ -919,7 +1172,7 @@ test("Test function: getPlayer",(t)=>{
                     {   playerRef:"player1", playerName:"two"}]
         }
 
-        ts.throws(()=>{stateManager.getPlayer({testState:gameState, playerRef:"player1"})}, /has multiple entries/i, "Searching for player represented twice")
+        ts.throws(()=>{stateManager.getPlayer({gameState:gameState, playerRef:"player1"})}, /has multiple entries/i, "Searching for player represented twice")
         ts.end()
     })
 
@@ -1012,12 +1265,12 @@ test("Test function: drawpolicyHand",(t)=>{
     t.test("Less than 3 cards in deck", (ts)=>{
         let gameState = StateTemplate();
         gameState.policyDeck = ['liberal']
-        gameState.policyDiscard = ['fascist', 'fascist', 'liberal']
+        gameState.policyDiscardPile = ['fascist', 'fascist', 'liberal']
 
         let result = stateManager.drawPolicyHand({gameState: gameState})
 
         ts.equals(result.policyHand.length, 3, "Drew three cards")
-        ts.equals(result.policyDiscard.length, 0, "Empty discard")
+        ts.equals(result.policyDiscardPile.length, 0, "Empty discard")
         ts.equals(result.policyDeck.length, 1, "Right number of cards left in deck")
 
         ts.end()
@@ -1029,12 +1282,12 @@ test("Test function: drawpolicyHand",(t)=>{
 test("Test function: rotateGovernment",(t)=>{
     let stateManager = GameStateManager();
 
-    test('successful govornment pass policy', (ts)=>{
+    t.test('successful govornment pass policy', (ts)=>{
         
-        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
-        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true}
-        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
-        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false, alive: true}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:true, prevGov:true, alive: true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, prevGov:true, alive: true}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false, alive: true}
 
 
         let gameState = {
@@ -1045,19 +1298,46 @@ test("Test function: rotateGovernment",(t)=>{
         let result = stateManager.rotateGovernment({gameState:gameState})
         let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
         
-        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player1.president, undefined, "prev pres removed")
         ts.equals(player2.president, true, "Next player assigned president")
-        ts.equals(player2.chancellor, false, "Prev chancellor removed");
+        ts.equals(player2.chancellor, undefined, "Prev chancellor removed");
         ts.equals(chancellorCount, 0, "No chancellors in the result")
         
         ts.end()
     })
 
-    test('failed govornment lose vote', (ts)=>{
-        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false}
-        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true}
-        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false}
-        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false}
+    t.test('successful government pass - next player dead', (ts)=>{
+        
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', president:true, alive: true },
+                {playerRef:'p2', playerName: 'player2', chancellor:true, alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ]
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1 : count},0)
+
+        ts.equals(result.players[0].president, undefined, "previous president removed");
+        ts.equals(result.players[1].president, undefined, "Dead player skipped");
+        ts.equals(result.players[2].president, true, "Next live player assigned president");
+        ts.equals(result.players[1].chancellor, undefined, "Prev chancellor removed")
+        ts.equals(chancellorCount, 0, "All chancellors removed")
+        ts.end()
+    })
+
+    t.test('failed govornment lose vote', (ts)=>{
+
+        let player1 = {playerRef: 'player1', playerName: 'p1', president: true, chancellor:false, alive: true}
+        let player2 = {playerRef: 'player2', playerName: 'p2', president: false, chancellor:false, proposedChancellor:true, alive: true}
+        let player3 = {playerRef: 'player3', playerName: 'p3', president: false, chancellor:false, alive: true}
+        let player4 = {playerRef: 'player4', playerName: 'p4', president: false, chancellor:false, alive: true}
 
         let gameState = {
             gamePhase: 'election',
@@ -1068,10 +1348,196 @@ test("Test function: rotateGovernment",(t)=>{
         let chancellorCount = result.players.reduce((count, player)=>{ return (player.chancellor) ? 1 : count},0)
         let proposedChancellorCount = result.players.reduce((count, player)=>{ return (player.proposedChancellor) ? 1 : count},0)
 
-        ts.equals(player1.president, false, "prev pres removed")
+        ts.equals(player1.president, undefined, "prev pres removed")
         ts.equals(player2.president, true, "Next player assigned president")
         ts.equals(proposedChancellorCount, 0, "No proposed chancellors");
         ts.equals(chancellorCount, 0, "No chancellors in the result")
+
+        ts.end()
+    })
+
+    t.test('failed government lose vote - next pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, proposedChancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ]
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
+
+    t.test('special president defined', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let gameState = {
+            players:[
+                {playerRef:'p1', playerName: 'player1', president:true, alive: true },
+                {playerRef:'p2', playerName: 'player2', chancellor:true, alive: true },
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            specialPresident: 'p3'
+        }
+
+        let result = stateManager.rotateGovernment({gameState});
+        let presidents = result.players.filter( (player) => {return player.president == true })
+        let chancellorCount = result.players.reduce( (count, player)=>{ return (player.chancellor == true) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce( (count, player)=>{ return (player.proposedChancellor == true) ? 1: count},0 )
+
+        ts.equals(presidents.length, 1, "Only one president set");
+        ts.equals(presidents[0].playerRef, 'p3', "The right special president assigned");
+        // Do we need to reset the special president indicator here?
+        //ts.equals(result.specialPresident, undefined, "Special president flag removed")
+        ts.equals(result.postSpecialPresident, 'p2', "The correct player is set to take over next");
+        ts.equals(chancellorCount, 0, "Chancellor cleared");
+        ts.equals(proposedChancellorCount, 0, "No proposedCancellors in result");
+        ts.end()
+    })
+
+    t.test('special president defined - special pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, chancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            specialPresident: 'p2'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(result.postSpecialPresident, 'p3', "The correct player is set to take over next")
+
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
+    t.test('special president defined - special pres dead', (ts)=>{
+        /*
+            The special president is dead (needs to move to the next player)
+            Also! The player the presidency woudl return to is dead
+
+            result should be that p1 is the special president
+            AND
+            p1 is the president after the special president
+
+        */
+
+
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true },
+                {playerRef:'p2', playerName: 'player2', alive: true },
+                {playerRef:'p3', playerName: 'player3', alive: true, chancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true, president: true },
+                {playerRef:'p5', playerName: 'player5', alive: false }
+            ],
+            specialPresident: 'p5'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[3].president, undefined, "prev pres removed");
+        ts.equals(result.players[4].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[0].president, true, "next living player is assigned")
+        ts.equals(result.postSpecialPresident, 'p1', "The correct player is set to take over next")
+
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
+
+        ts.end()
+    })
+
+    t.test('postSpecialPresident Defined',(ts)=>{
+        const stateManager = GameStateManager();
+
+        let gameState = {
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true},
+                {playerRef:'p2', playerName: 'player2', chancellor:true , alive: true},
+                {playerRef:'p3', playerName: 'player3', alive: true },
+                {playerRef:'p4', playerName: 'player4', president: true, alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            postSpecialPresident: 'p2',
+            specialPresident:'p4'
+        }
+
+        let result = stateManager.rotateGovernment({gameState});
+        let presidents = result.players.filter( (player) =>{ return player.president == true } );
+        let chancellorCount = result.players.reduce( (count, player)=>{ return (player.chancellor == true) ? 1: count },0 );
+        
+        ts.equals(presidents.length, 1, "Only one president assigned");
+        ts.equals(presidents[0].playerRef, 'p2', "Predidency returned to the right player")
+        ts.equals(gameState.specialPresident, undefined, "Special president removed")
+        ts.equals(gameState.postSpecialPresident, undefined, "postSpecial President removed")
+        ts.equals(chancellorCount, 0, "No chancellors in the rotated government")
+
+        ts.end()
+
+    })
+
+    t.test('postSpecialPresident defined - next pres dead', (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            gamePhase: 'legislative',
+            players:[
+                {playerRef:'p1', playerName: 'player1', alive: true, president:true,  },
+                {playerRef:'p2', playerName: 'player2', alive: false },
+                {playerRef:'p3', playerName: 'player3', alive: true, proposedChancellor: true },
+                {playerRef:'p4', playerName: 'player4', alive: true },
+                {playerRef:'p5', playerName: 'player5', alive: true }
+            ],
+            specialPresident: 'p1',
+            postSpecialPresident: 'p2'
+        }
+
+        let result = stateManager.rotateGovernment({gameState: testState});
+        let chancellorCount = result.players.reduce((count, player)=>{return (player.chancellor) ? 1: count },0);
+        let proposedChancellorCount = result.players.reduce((count, player)=>{return (player.proposedChancellor) ? 1: count },0);
+
+        ts.equals(result.players[0].president, undefined, "prev pres removed");
+        ts.equals(result.players[1].president, undefined, "next player can't be president becuase they are dead")
+        ts.equals(result.players[2].president, true, "next living player is assigned")
+        ts.equals(chancellorCount, 0, "Chancellor cleared")
+        ts.equals(proposedChancellorCount, 0, "proposedChancellors removed");
 
         ts.end()
     })
@@ -1090,7 +1556,7 @@ test("Test function: enactPolicy",(t)=>{
         }
         
         const result = stateManager.enactPolicy({gameState: gameState});
-        debugger;
+        
         ts.equals(result.policyTrackLiberal.indexOf(true), 0, "Liberal track has a policy"); 
         ts.equals(result.policyTrackFascist.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
@@ -1104,7 +1570,6 @@ test("Test function: enactPolicy",(t)=>{
             policyTrackLiberal:[true, false, false, false, false, false],
             policyTrackFascist:[false, false, false, false, false, false]
         }
-        debugger;
         const result = stateManager.enactPolicy({gameState: gameState});
         ts.equals(result.policyTrackLiberal[1], true, "second item is true in liberal track");
         ts.equals(result.policyTrackLiberal.filter(val => val == true).length, 2, "there are 2 true items in the liberal track");
@@ -1122,7 +1587,7 @@ test("Test function: enactPolicy",(t)=>{
         }
 
         const result = stateManager.enactPolicy({gameState: gameState});
-        debugger;
+        
         ts.equals(result.policyTrackFascist.indexOf(true), 0, "Fascist track has a policy");
         ts.equals(result.policyTrackLiberal.indexOf(true), -1, "Fascist track has no policies")
         ts.equals(result.policyHand.length, 0, "Policy hand is empty")
@@ -1159,3 +1624,612 @@ test("Test function: enactPolicy",(t)=>{
     t.end()
 })
 
+test("Test function: joinSpectator", (t)=>{
+    
+    t.test("joining a spectator ref", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        let result = stateManager.joinSpectator({gameState: testState, spectatorRef:'s1'})
+
+        ts.equal(result.spectators.length, 1, "Only one spectator added");
+        ts.equal(result.spectators[0], 's1', "Correct spectator")
+        ts.end()
+    })
+
+    t.test("Join without spectatorRef", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:[]
+        }
+
+        ts.throws(()=>{stateManager.joinSpectator({gameState:testState})}, /No spectator reference defined/i, "Throws error when no spectator reference given")
+        ts.end()
+    })
+
+    t.test("Join without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+        
+        ts.throws(()=>{stateManager.joinSpectator()}, /No gameState found for gameRef/i, "Error thrown when no gameState or sessionKey given")
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: getSpectatorRefs", (t)=>{
+    t.test("Normal get spectator refs", (ts)=>{
+        const stateManager = GameStateManager();
+
+        let testState = {
+            spectators:['s1']
+        }
+
+        let result = stateManager.getSpectatorRefs({gameState: testState});
+
+        ts.equal(result.length, 1, "Returns correct number of spectators");
+        ts.equal(result[0], 's1', "Returns correct spectatorRef value")
+
+        ts.end()
+
+    })
+
+    t.test("getSpectatorRefs without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+
+        ts.throws(()=>{stateManager.getSpectatorRefs()}, /No gameState found for gameRef:/i, "Throws error when no gameState defined")
+        ts.end()
+    })
+})
+
+test("Test function: removeSpectator", (t)=>{
+    t.test("Remove with player in game", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators:['s1']
+        }
+
+        let result = stateManager.removeSpectator({spectatorRef: 's1', gameState: testState});
+    
+        ts.equal(result.spectators.length, 0, "No spectators left");
+        ts.end()
+    })
+
+    t.test("Try to remove a spectator not spectating", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators: ['s1']
+        }
+
+        ts.throws(()=>{stateManager.removeSpectator( {spectatorRef: 's2', gameState: testState} )}, /spectatorRef is not spectating/i, "Error thrown removing player not spectating");
+        ts.end()
+    })
+
+    t.test("Call function without playerRef defined", (ts)=>{
+        const stateManager = GameStateManager();
+        let testState = {
+            spectators: ['s1']
+        }
+
+        ts.throws(()=>{stateManager.removeSpectator( {gameState:testState} )}, /No spectatorRef defined/i, "Error thrown if no playerRef defined")
+        ts.end()
+    })
+
+    t.test("Call function without gameState", (ts)=>{
+        const stateManager = GameStateManager();
+        
+        ts.throws(()=>{stateManager.removeSpectator( )}, /No gameState found for gameRef/i, "Error thrown if no gameState provided")
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test selectPlayer function", (t)=>{
+    t.test("Select player for chancellor proposal", (ts)=>{
+
+        const stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: "proposal",
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president: true, alive: true},
+                {playerRef: 'p2', playerName: 'player2', alive: true}
+            ]
+        }
+        
+        const result = stateManager.selectPlayer({gameState: testState, selectedPlayer:'p2', actingPlayer:'p1'});
+        const  targetPlayer = result.players.filter((player)=>{return player.playerRef == 'p2'})[0]
+
+        ts.equals(targetPlayer.proposedChancellor, true, "Correct chancellor proposed")
+
+        ts.end()
+    })
+
+    t.test("Select player in powers phase",(ts)=>{
+        ts.test("kill power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "kill",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true,
+                      alive: true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two',
+                      alive: true
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("investigate power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "investigate",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true,
+                      alive: true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two',
+                      alive:true
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("special-election power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "special-election",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true,
+                      alive: true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two',
+                      alive:true
+                    }
+                ]
+            }
+
+            let result = gsManager.selectPlayer({gameState:testState, selectedPlayer: 'two', actingPlayer:'one'});
+            tss.equals(result.powerTarget, 'two', "Target player to kill set");
+
+            tss.end()
+        })
+
+        ts.test("top-3-cards power", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: "power",
+                powerActive: "top-3-cards",
+                powerTarget: undefined,
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true,
+                      alive: true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two',
+                      alive:true
+                    }
+                ]
+            }
+
+            tss.throws(()=>{gsManager.selectPlayer({
+                        gameState:testState,
+                        selectedPlayer: 'two',
+                        actingPlayer:'one'
+                    });
+                },
+                /power doesn't require selection/i,
+                "top-3-cards errors when selecting"
+            )
+            
+
+            tss.end()
+        })
+
+        ts.end()
+    })
+
+    t.test("Select players if inappropriate phase", (ts)=>{
+
+        ts.test("election", (tss)=>{
+            const gsManager = GameStateManager();
+
+            const testState = {
+                gamePhase: 'election',
+                players:[
+                    { playerName:'player1',
+                      playerRef: 'one',
+                      president:true,
+                      alive:true
+                    },
+                    { playerName: 'player2',
+                      playerRef: 'two',
+                      alive:true
+                    }
+                ]
+            }
+
+            tss.throws(()=>{
+                gsManager.selectPlayer({
+                    gameState:testState,
+                    selectedPlayer: 'two',
+                    actingPlayer: 'one'
+                }),
+                /phase doesn't allow selecting/i
+            })
+
+            tss.end()
+        })
+        ts.end()
+    })
+
+    t.test("Select a dead player", (ts)=>{
+        
+        let stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'proposal',
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president:true, alive:true},
+                {playerRef: 'p2', playerName: 'player2', alive:false}
+            ]
+        }
+
+        ts.throws(()=>{stateManager.selectPlayer({gameState: testState, selectedPlayer:'p2', actingPlayer: 'p1'}), /Can't select a dead player/i, "Dead player can't be selected" })
+        
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Test function: enactPower", (t)=>{
+    
+    t.test("top-3-cards active - check power complete", (ts)=>{
+        const stateManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'power',
+            powerActive: 'top-3-cards',
+            players:[
+                {playerRef: 'p1', playerName: 'player1', president:true, ready:true},
+                {playerRef: 'p2', playerName: 'player2'}
+            ],
+            policyTrackFascist: [true, true, true, false, false, false]
+        }
+        
+        let result = stateManager.enactPower({gameState:testState})
+        ts.equals(result.powerComplete, true, "3 top cards power complete")
+        let president = gsManager.searchPlayers({ gameState:result, searchPairs:{'president':true}, singleResponseExpected:true})[0]
+        ts.equals(president.ready, false, "president ready has been set to false")
+        // 
+        ts.end()
+
+    })
+
+    t.test("kill power active - check power complete", (ts)=>{
+        const gsManager = GameStateManager();
+
+        const testState = {
+            gamePhase:'power',
+            powerActive: 'kill',
+            players:[
+                {playerRef:'p1', playerName:'player1', alive:true}
+            ],
+            powerTarget: 'p1',
+            powerComplete: false
+        }
+
+        let result = gsManager.enactPower({gameState: testState});
+        ts.equals(result.players[0].alive, false, "player is dead");
+        ts.equals(result.targetPlayer, undefined, "targetPlayer is cleared");
+        ts.equals(result.powerComplete, true, "kill power is resolved")
+        ts.end()
+    })
+
+    t.test("investigate power - check power complete", (ts)=>{
+        const gsManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'power',
+            powerActive: 'investigate',
+            players:[
+                { playerRef: 'p1', playerName:'player1', ready:true, president:true}
+            ],
+            powerComplete: false
+        }
+
+        let result = gsManager.enactPower({gameState:testState});
+        ts.equals(result.powerComplete, true, "investigate power is resolved");
+        ts.equals(result.players[0].ready, false, "president ready reset")
+        ts.end()
+
+    })
+
+    t.test("special-election - check the power completes",(ts)=>{
+        const gsManager = GameStateManager();
+
+        const testState = {
+            gamePhase: 'power',
+            powerActive:'special-election',
+            players:[
+                { playerRef: 'p1', playerName:'player1', president:true},
+                { playerRef: 'p2', playerName:'player2',}
+            ],
+            targetPlayer:'p1'
+        }
+
+        let result = gsManager.enactPower({gameState:testState});
+        ts.equals(result.powerComplete, true, "special-election power resolved");
+        ts.equals(result.specialPresident, 'p1', "special president is defined");
+        ts.equals(result.targetPlayer, undefined, "target player is cleared");
+
+        ts.end()
+    })
+
+    t.end()
+})
+
+test("Testing getPower",(t)=>{
+    
+    const stateManager = GameStateManager();
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:5, 
+        fascistPolicyCount: 1
+      }),
+      "no-power",
+      "No power with 5 people 1 fascist policys"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:7, 
+        fascistPolicyCount: 2
+      }),
+      "investigate",
+      "Investigate with 7 people 2 fascist policies"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:9, 
+        fascistPolicyCount: 1
+      }),
+      "investigate",
+      "No power with 9 people 1 fascist policy"
+    );
+
+    t.equals(stateManager.getPower({
+        numberOfPlayers:5, 
+        fascistPolicyCount: 5
+      }),
+      "kill",
+      "No power with 5 people 5 fascist policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:7, 
+          fascistPolicyCount: 0
+        })
+      },
+      /Not enough policies for a power/i,
+      "Too few policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:7, 
+          fascistPolicyCount: 6
+        })
+      },
+      /Game should have ended/i,
+      "Too many fascist policies"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:4, 
+          fascistPolicyCount: 1
+        })
+      },
+      /Not enough players for a game/i,
+      "Too few players for a game"
+    );
+
+    t.throws(()=>{
+        stateManager.getPower({
+          numberOfPlayers:11, 
+          fascistPolicyCount: 1
+        })
+      },
+      /Too many players in the game/i,
+      "Too many players for a game"
+    );
+
+    t.end()
+})
+
+test("Testing searchPlayers", (t)=>{
+  t.test("Normal returns from search", (ts)=>{
+    let gsManager = GameStateManager();
+    let testState = {
+      players:[
+        {
+          playerName: 'player1',
+          playerRef: 'one',
+          character: 'hitler',
+          president: true
+        },
+        {
+          playerName: 'player2',
+          playerRef: 'two',
+          alignment:'liberal',
+          character: 'liberal'
+        },
+        {
+          playerName: 'player3',
+          playerRef: 'three',
+          chancellor: true,
+          alignment:'liberal'
+        }
+      ]
+    }
+
+    let result1 = gsManager.searchPlayers({ gameState:testState, searchPairs:{ playerName:'player1' } })
+    ts.equals(result1.length, 1, "Only one player in result")
+    ts.equals(result1[0].playerName, 'player1', "Right player passed back")
+    
+    let result2 = gsManager.searchPlayers({gameState:testState, searchPairs:{ character: 'hitler' } })
+    ts.equals(result2.length, 1, "One player is hitler");
+    ts.equals(result2[0].playerRef, 'one', "Correct hitler player returned");
+
+    let result3 = gsManager.searchPlayers( {gameState:testState, searchPairs:{alignment:'liberal'} } );
+    ts.equals(result3.length, 2, "Two liberal players in the game");
+    ts.equals(result3[0].playerRef, 'two', "One liberal is correct")
+    ts.equals(result3[1].playerRef, 'three', "Both liberal players are right");
+
+    let result4 = gsManager.searchPlayers( {gameState: testState, searchPairs: {playerName:'player99'} })
+    ts.equals(result4.length, 0, "Empty array returned when no matches")
+
+    ts.end()
+  })
+  t.end()
+})
+
+test("Testing killPlayer", (t)=>{
+    let gsManager = GameStateManager();
+
+    let testState ={
+        players:[
+            {
+                playerRef:'one',
+                alive: true
+            }
+        ],
+        powerTarget:'one'
+    }
+
+    let result = gsManager.killPlayer({gameState:testState})
+    t.equals(result.players[0].alive, false, "Player is no longer alive")
+
+    t.end()
+})
+
+test("Testing nextAlivePlayerByIndex", (t)=>{
+
+    stateManager = GameStateManager();
+
+    t.test("Single Alive player, alive false on others", (ts)=>{
+        let playerArray = [
+            {alive: false},
+            {alive: true},
+            {alive:false},
+            {alive:false},
+        ]
+
+       ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 }), 1, "Next alive player from index 0 is in index 1")
+       ts.equals(stateManager.nextAlivePlayerByIndex({playerArray, currentTargetIndex:1 }), 1, "Next alive player from index 1 is index 1")
+       ts.equals(stateManager.nextAlivePlayerByIndex({playerArray, currentTargetIndex:2 }), 1, "Next alive player from index 2 is index 1")
+
+       ts.end()
+
+    })
+
+    t.test("Multiple alive players, alive false on others", (ts)=>{
+        let playerArray = [
+            {alive: true},
+            {alive: false},
+            {alive: true},
+            {alive: true},
+            {alive: false},
+            {alive: false},
+        ]
+
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 0 }), 2, "Next alive player from [0] is [2]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 2 }), 3, "Next alive player from [2] is [3]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 4 }), 0, "Next alive player from [4] is [0]");
+
+        ts.end()
+    })
+
+    t.test("Multiple alive players, alive undefined on others", (ts)=>{
+        let playerArray = [
+            {alive: true},
+            {alive: undefined},
+            {alive: true},
+            {alive: true},
+            {},
+            {},
+        ]
+
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 0 }), 2, "Next alive player from [0] is [2]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 2 }), 3, "Next alive player from [2] is [3]");
+        ts.equals(stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex: 4 }), 0, "Next alive player from [4] is [0]");
+
+        ts.end()
+    })
+
+    t.test("No Players alive", (ts)=>{
+        let playerArray = [
+            {alive:false},
+            {alive:false},
+            {alive:false},
+        ]
+
+        ts.throws(()=>{ stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 })}, /Searched whole list/i, "Checking exit condition on recursive loop");
+
+        ts.end()
+    })
+
+    t.test("No Players alive - alive undefined", (ts)=>{
+        let playerArray = [
+            {},
+            {},
+            {},
+        ]
+
+        ts.throws(()=>{ stateManager.nextAlivePlayerByIndex({ playerArray, currentTargetIndex:0 })}, /Searched whole list/i, "Checking exit condition on recursive loop");
+
+        ts.end()
+    })
+
+    t.end()
+
+})
