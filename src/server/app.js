@@ -5,6 +5,7 @@ const express = require('express');
 const http = require('http');
 const io = require('socket.io')
 const util = require('util')
+const socketioSession = require('express-socket.io-session')
  
 const GameStateManager = require('./GameStateManager')
 
@@ -17,9 +18,9 @@ var stateManager = GameStateManager()
 
 // we need the same instance of the session parser in express and websocket servers
 sessionParser = session({
-    saveUninitialized: false,
+    saveUninitialized: true,
     secret: 'passOpen',
-    resave: false
+    resave: true
 })
 
 // CONFIGURE EXPRESS APP - serve files from the right folder
@@ -52,20 +53,37 @@ server = http.createServer(app)
 
 // CREATE THE WEBSOCKET SERVER
 wss = io(server);
-
+wss.use(socketioSession(sessionParser, {autoSave:true}))
 // CONFIGURE WEBSOCKET SERVER
 wss.on('connection', (ws)=>{
 
-    let userId = ws.id;
-    console.log(`connection from user: ${userId}`)
+    let currentUserId = ws.id; // current socket
+    let oldUserId = ws.handshake.session.wsId
+    console.log(`connection from user: ${currentUserId}`)
 
-    if(userId && ws.currentGame){ // already in a game
-        let gameRef = stateManager.getGameForPlayer(userId)
-        wss.broadcast(gameRef)
-        ws.id = userId
-        ws.currentGame = gameRef
-    }else{ // Never connected before
+    if(!oldUserId){ // NOT visited before
+        console.log(`First time visitor: ${currentUserId}`);
+        // set the session userId
+        ws.handshake.session.wsId = currentUserId;
+        ws.handshake.session.save();
+        // tell the websocket it connected
+        ws.emit("connectSuccess");
+    }else{ // visited before
+        console.log(`returning visitor: ${oldUserId}`)
         
+        // find out what game they used to be in
+        let gameRef = stateManager.getGameForPlayer(oldUserId)
+        // get the player object they used to be (look for players & spectators?)
+        // TODO - should this be in an "update playerRef function"
+        let oldPlayerObject = stateManager.searchPlayers({ gameRef, searchPairs:{ playerRef:oldUserId }, singleResponseExpected:true })[0];
+        oldPlayerObject.playerRef = currentUserId;
+
+        // set the new userID
+        ws.handshake.session.wsId = currentUserId;
+        ws.handshake.session.save()
+
+        // send the gameState to all players in the game
+        wss.broadcast(gameRef)
     }
 
     ws.on("createGame", ()=>{
@@ -95,7 +113,7 @@ wss.on('connection', (ws)=>{
     ws.on("joinGame", ( {playerName = "someName", gameRef="XXXX"} = {} )=>{
         try{
             stateManager.joinGame(gameRef, ws.id, playerName)   // add the player to the game
-            ws.currentGame = gameRef; // make sure the websocket knows which game its in
+            
             let data = {
                 gameState: stateManager.getGameState(gameRef),
                 gameRef: gameRef
@@ -122,7 +140,7 @@ wss.on('connection', (ws)=>{
         try{
             console.log(`Someone trying to spectate gameRef ${gameRef}`)
             stateManager.joinSpectator({gameRef: gameRef, spectatorRef: ws.id })
-            ws.currentGame = gameRef;
+
             ws.emit('spectatorJoined',{
                 "result":"OK",
                 "type": "joinGame",
@@ -145,17 +163,16 @@ wss.on('connection', (ws)=>{
 
     ws.on("leaveGame", ( )=>{
         try{
-            let gameRef = ws.currentGame;
             let userId = ws.id;
+            let gameRef = stateManager.getGameForPlayer(userId);
 
             if(stateManager.getPlayerRefs(gameRef).includes(userId)){   // if the leaving client is a player
                 stateManager.leaveGame(gameRef, userId);
-                ws.currentGame = undefined;
             }else if(stateManager.getSpectatorRefs({gameRef}).includes(userId)){ // if the leaving user is a spectator
                 stateManager.removeSpectator({gameRef, spectatorRef: userId}) 
-                ws.currentGame = undefined;
             }
 
+            ws.handshake.session.wsId = undefined;
             ws.emit("gameLeft", {result: "OK", type:"leaveGame", data:{message:`Left game ${gameRef}`}})
             wss.broadcast(gameRef)
         }catch(e){
@@ -174,8 +191,8 @@ wss.on('connection', (ws)=>{
     // ready up in lobby
     ws.on("readyUp", ()=>{
         try{
-            let gameRef = ws.currentGame;
             let userId = ws.id;
+            let gameRef = stateManager.getGameForPlayer(userId);
             let gameState = stateManager.readyPlayer(gameRef, userId)
 
             gameState = stateManager.update(gameRef)
@@ -202,8 +219,9 @@ wss.on('connection', (ws)=>{
     ws.on("selectPlayer", ({ targetPlayerName="someName" } = {})=>{
         
         try{
-            let gameRef = ws.currentGame;
             let actingPlayer = ws.id;
+            let gameRef = stateManager.getGameForPlayer(oldUserId);
+            
             let targetPlayerRef = stateManager.nameToRef(gameRef, targetPlayerName)
 
             stateManager.selectPlayer({
@@ -228,8 +246,8 @@ wss.on('connection', (ws)=>{
     // vote on a government - vote:Boolean
     ws.on("castVote", ( {vote = undefined} = {})=>{
         try{
-            let gameRef = ws.currentGame;
             let userId = ws.id;
+            let gameRef = stateManager.getGameForPlayer(userId);
 
             stateManager.castVote(gameRef, userId, vote)
             stateManager.update(gameRef)
@@ -250,8 +268,8 @@ wss.on('connection', (ws)=>{
     ws.on("discardPolicy", ( {policyDiscard="fascist/liberal"} = {} )=>{
         
         try{
-            let gameRef = ws.currentGame;
-            let playerID = ws.id;
+            let userId = ws.id;
+            let gameRef = stateManager.getGameForPlayer(userId);
             let startPhase = stateManager.getGameState(gameRef).gamePhase;
             let endPhase
 
@@ -276,10 +294,6 @@ wss.on('connection', (ws)=>{
         }
 
     })
-
-    // tell the websocket that it is connected
-
-    ws.emit("connectSuccess")
 });
 
 wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privateInfo)=>{
@@ -339,7 +353,7 @@ server.listen(app.get('port'), ()=> console.log(`Listening on port ${app.get('po
 {
 
     // login to the game
-    app.post('/login', (req, res)=>{
+    app.post('/createSession', (req, res)=>{
         if (!req.session.userId){
             res.send({result:"OK", message: 'Session updated '})
         } else {

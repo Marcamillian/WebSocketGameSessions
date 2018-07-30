@@ -812,7 +812,7 @@ const gameStateManager = function(){
         return gameState
     }
 
-    const searchPlayers = ( {gameState, searchPairs, singleResponseExpected = false } = {} )=>{
+    const searchPlayers = ( {gameRef, gameState = gameStates[gameRef], searchPairs, singleResponseExpected = false } = {} )=>{
         
         let searchKeys = Object.keys(searchPairs);
         let matchedPlayers = undefined;

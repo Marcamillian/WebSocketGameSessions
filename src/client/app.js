@@ -586,7 +586,10 @@ let exposedFunctions = (()=>{
  
     wsButton.onclick = ()=>{
 
-        setupWsSession()
+        fetch('/createSession', {method:'POST', credentials:'same-origin'})
+        .then(handleResponse)
+        .then((response)=>{ console.log(response) })
+        .then(setupWsSession)
         .then(addWsEventListeners)
         .then((socket)=>{
             ws = socket;
