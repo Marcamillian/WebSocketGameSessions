@@ -220,7 +220,7 @@ wss.on('connection', (ws)=>{
         
         try{
             let actingPlayer = ws.id;
-            let gameRef = stateManager.getGameForPlayer(oldUserId);
+            let gameRef = stateManager.getGameForPlayer(actingPlayer);
             
             let targetPlayerRef = stateManager.nameToRef(gameRef, targetPlayerName)
 
