@@ -36,8 +36,11 @@ p,div{
     div.envelope,
     div.connect-items,
     div.join-controls,
+    div.game-tracks,
     button#ready-button,
-    #power-display{
+    div#power-display,
+    .game-result,
+    .end-game-controls{
         visibility:hidden;
     }
 
@@ -57,7 +60,8 @@ p,div{
 
     .in-game .gref-block,
     .in-game .player-list,
-    .in-game .envelope{
+    .in-game .envelope,
+    .in-game .game-tracks{
         visibility:visible;
     }
 
@@ -77,6 +81,44 @@ p,div{
     .power .card-area{
         visibility:visible;
     }
+
+    .end-game .game-result,
+    .end-game .player-list,
+    .end-game .end-game-controls,
+    .end-game .gref-block{
+        visibility:visible;
+    }
+
+
+
+/** GAME TRACK BLOCK **/
+.game-tracks{
+    display:flex;
+    grid-column:1 / 5;
+    grid-row: 1/3;
+}
+
+.track-container{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+}
+
+.track-container div{
+    display:flex;
+    height:33%;
+    width:100%;
+}
+
+.track-container p{
+    width:100%;
+    text-align:center;
+}
+
+.track-container div .marker{
+    height: calc(100%-10px);
+    margin:5px;
+}
 
 
 /** GAME REF BLOCK **/
@@ -203,3 +245,24 @@ p,div{
     grid-row:2/3;
 }
 
+/* Endgame content */
+.game-result{
+    display:flex;
+    grid-column:1 / 5;
+    grid-row: 1/3;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content: space-around;
+}
+
+.end-game-controls{
+    grid-column: 3/5;
+    grid-row: buttons-start / envelope-end;
+
+    display:flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+}

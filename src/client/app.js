@@ -11,6 +11,8 @@ let exposedFunctions = (()=>{
     const urlJoinGame = document.querySelector('#url-join');
     const spectatorJoin = document.querySelector('#spectator-join')
 
+    const gameTracks = document.querySelector('.game-tracks');
+
     const playerNameInput = document.querySelector('#player-name');
     const gameRefInput = document.querySelector('#game-ref');
     let playerDisplay = document.querySelector('.player-list');
@@ -121,12 +123,73 @@ let exposedFunctions = (()=>{
             return htmlElement
         }
 
+        const generateGameTracks = ({
+          voteFailTrack = [false,false, false],
+          policyTrackFascist = [false, false, false, false, false, false],
+          policyTrackLiberal = [false,false, false, false, false]
+        } = {})=>{
+          let trackContainer = document.createElement('div');
+          trackContainer.classList.add('track-container')
+
+          let trackFascist = document.createElement('div');
+          trackFascist.classList.add('track-fascist');
+          let trackFascistLabel = document.createElement('p');
+          trackFascistLabel.innerText = 'Fascist Policies'
+
+          let trackLiberal = document.createElement('div');
+          trackLiberal.classList.add('track-liberal');
+          let trackLiberalLabel = document.createElement('p');
+          trackLiberalLabel.innerText = "Liberal Policies";
+
+          let trackFail = document.createElement('div');
+          trackFail.classList.add('track-fail');
+          let trackFailLabel = document.createElement('p');
+          trackFailLabel.innerText = "Failed Votes";
+
+          policyTrackFascist.forEach((policy)=>{
+            let trackMarker = document.createElement('div')
+            trackMarker.classList.add('marker')
+
+            if (policy == true){ trackMarker.classList.add('passed') }
+
+            trackFascist.appendChild(trackMarker)
+          })
+
+          policyTrackLiberal.forEach((policy)=>{
+            let trackMarker = document.createElement('div')
+            trackMarker.classList.add('marker')
+            
+            if (policy == true){ trackMarker.classList.add('passed') }
+
+            trackLiberal.appendChild(trackMarker)
+          })
+
+          voteFailTrack.forEach((voteFail)=>{
+            let trackMarker = document.createElement('div')
+            trackMarker.classList.add('marker')
+            
+            if (voteFail == true){ trackMarker.classList.add('passed') }
+
+            trackFail.appendChild(trackMarker)
+          })
+
+          trackContainer.appendChild(trackFascistLabel);
+          trackContainer.appendChild(trackFascist);
+          trackContainer.appendChild(trackLiberalLabel);
+          trackContainer.appendChild(trackLiberal);
+          trackContainer.appendChild(trackFailLabel);
+          trackContainer.appendChild(trackFail);
+
+          return trackContainer;
+        }
+
         return {
             getSomeHTML,
             generatePlayerCard,
             generateVoteCard,
             generateEnvelopeContents,
-            emptyElement
+            emptyElement,
+            generateGameTracks
         }
     }()
 
@@ -147,7 +210,7 @@ let exposedFunctions = (()=>{
 
     const gameStateDisplay = ( gamePhase ) =>{
 
-        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative", "power")
+        displayBody.classList.remove("connect", "join-game", "lobby", "in-game", "proposal", "election", "legislative", "power", "end-game")
 
         console.log(`GAME PHASE: ${gamePhase}`)
 
@@ -175,6 +238,9 @@ let exposedFunctions = (()=>{
             break
             case "power":
                 displayBody.classList.add('power', 'in-game');
+            break;
+            case "endgame":
+                displayBody.classList.add('end-game');
             break;
             default:
                 throw new Error(`gamePhase not recognised: ${gamePhase}`)
@@ -210,6 +276,7 @@ let exposedFunctions = (()=>{
             showPlayers(gameState.players,gameState, thisPlayerObject) // show all of the players
             powerDisplay({gameState, playerObject: thisPlayerObject, privateInfo});
             showCards(gameState, thisPlayerObject, privateInfo);
+            showGameTracks(gameState)
             showPrivateInfo(privateInfo)
         })
 
@@ -476,6 +543,16 @@ let exposedFunctions = (()=>{
         return 
 
     }
+
+    const showGameTracks = ({
+      policyTrackFascist,
+      policyTrackLiberal,
+      voteFailTrack
+    } = {})=>{
+        displayModule.emptyElement(gameTracks);
+        gameTracks.appendChild(displayModule.generateGameTracks({policyTrackFascist, policyTrackLiberal, voteFailTrack}))
+    }
+
 
     const clearElement = (element)=>{
         while(element.children.length > 0){
