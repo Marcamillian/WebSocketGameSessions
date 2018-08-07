@@ -6,7 +6,7 @@ let exposedFunctions = (()=>{
     const logout = document.querySelector('#logout');
     const login = document.querySelector('#login');
     const createGame = document.querySelector('#create-game');
-    const leaveGame = document.querySelector('#leave-game');
+    const leaveGameButtons = document.querySelectorAll('.leave-game');
     const displayBody = document.querySelector('body');
     const urlJoinGame = document.querySelector('#url-join');
     const spectatorJoin = document.querySelector('#spectator-join')
@@ -22,7 +22,7 @@ let exposedFunctions = (()=>{
     let playerNameDisplay = document.querySelector('#name-display');
     let cardAreaDisplay = document.querySelector('.card-area');
 
-    let lobbyReadyButton = document.querySelector('#ready-button');
+    let readyButtons = document.querySelectorAll('.ready-button');
     let voteYesButton = document.querySelector('#ingame-vote #yes');
     let voteNoButton = document.querySelector('#ingame-vote #no');
     
@@ -681,9 +681,12 @@ let exposedFunctions = (()=>{
         ws.emit('createGame')
     }
 
-    leaveGame.onclick = ()=>{
-        ws.emit("leaveGame")
-    }   
+    leaveGameButtons.forEach((leaveButton)=>{
+        leaveButton.onclick = ()=>{
+            ws.emit("leaveGame")
+            console.log("Leaving game")
+        }   
+    })
 
     urlJoinGame.onclick = ()=>{
         ws.emit("joinGame", {playerName: getPlayerNameInput(), gameRef: getGameRefInput()})
@@ -693,10 +696,11 @@ let exposedFunctions = (()=>{
         ws.emit("joinSpectator", {gameRef: getGameRefInput()})
     }
 
-    lobbyReadyButton.onclick = ()=>{ 
-        ws.emit("readyUp")
-        
-    }
+    readyButtons.forEach((readyButton)=>{
+        readyButton.onclick = ()=>{ 
+            ws.emit("readyUp")
+        }
+    })
     
     envelopeFlap.addEventListener("click", ()=>{
         toggleEnvelopeOpen()
