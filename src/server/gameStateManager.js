@@ -43,7 +43,7 @@ const gameStateManager = function(){
                 // v2 - do we have between 5 & 10 players
             
                 // array of ready values for the players
-                let playersReady = gameState.players.map((player)=>{
+                var playersReady = gameState.players.map((player)=>{
                     return player.ready
                 })
 
@@ -52,13 +52,10 @@ const gameStateManager = function(){
 
                 if(playersReady.includes(false) || playersReady.length < 5){ // someone unready || not enough
                     // do nothing
-
-                        
                 }else{
                     gameState.players.forEach((player)=>{ player.ready = false})
                     assignRoles(gameState.players)
                     gameState.gamePhase = 'proposal'    // go to the next step
-
                 }
 
             break;
@@ -200,6 +197,23 @@ const gameStateManager = function(){
                 }
             break
             case "endgame":
+                // see if all the players in the game are ready to go again
+                var playersReady = gameState.players.map((player)=>{
+                    return player.ready
+                })
+
+
+                if(playersReady.includes(false)){ // someone unready || not enough
+                    // do nothing
+                    console.log("Not everyone ready to go again")
+                }else{
+                    console.log("Players ready to start again")
+                    // reset the game
+                    resetGameState(gameState);
+                    gameState.gamePhase = 'lobby'    // go to the next step
+                }
+
+            break;
 
         }
 
@@ -881,6 +895,43 @@ const gameStateManager = function(){
           ? nextPlayerIndex
           : nextAlivePlayerByIndex({playerArray, currentTargetIndex: nextPlayerIndex, itterationCount: itterationCount+1})
 
+    }
+
+    const resetPlayerState = ( playerObject )=>{
+        playerObject.alignment = undefined;
+        playerObject.character = undefined;
+        playerObject.president = false;
+        playerObject.chancellor = false;
+        playerObject.ready = false;
+        playerObject.prevGov = false;
+        playerObject.proposedChancellor = false;
+        playerObject.voteCast = undefined;
+        playerObject.alive = true
+
+        return playerObject;
+    }
+
+    const resetGameState = (gameState)=>{
+        gameState.policyDeck = genPolicyDeck();
+        gameState.policyDiscardPile = [];
+        gameState.policyHand = [];
+
+        // progressTracks
+        gameState.voteFailTrack = [false, false, false];
+        gameState.policyTrackFascist = [false, false, false, false, false, false];
+        gameState.policyTrackLiberal = [false, false, false, false, false]; 
+        
+        // power information
+        gameState.powerTarget = undefined;
+        gameState.powerActive = undefined; 
+        gameState.powerComplete = false;
+        gameState.specialPresident = undefined; 
+        gameState.postSpecialPresident = undefined;
+
+        // reset the players
+        gameState.players.forEach(resetPlayerState)
+
+        return gameState;
     }
 
     // function to search for playerRef

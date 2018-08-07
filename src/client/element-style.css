@@ -35,10 +35,12 @@ button{
     }
 
 /* PLAYER CARD DEPENDING ON GAMESTATE*/
-    .lobby .player-card .player-action{
+    .lobby .player-card .player-action,
+    .end-game .player-card .player-action{
         background-image:url('./assets/Checkmark_Wait.svg')
     }
-    .lobby .player-card.ready .player-action{
+    .lobby .player-card.ready .player-action,
+    .end-game .player-card.ready .player-action{
         background-image:url('./assets/Checkmark_Yes.svg')
     }
 

@@ -37,7 +37,7 @@ p,div{
     div.connect-items,
     div.join-controls,
     div.game-tracks,
-    button#ready-button,
+    .ready-button.start-game,
     div#power-display,
     .game-result,
     .end-game-controls{
@@ -54,7 +54,7 @@ p,div{
 
     .lobby div.player-list,
     .lobby div.gref-block,
-    .lobby button#ready-button{
+    .lobby .ready-button.start-game{
         visibility: visible;
     }
 
@@ -232,7 +232,7 @@ p,div{
 
 /** LOBBY ITEMS **/
 
-#ready-button{
+.ready-button{
     grid-column:2/6;
     grid-row: buttons-start/buttons-end;
 
