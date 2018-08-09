@@ -7,7 +7,8 @@ const io = require('socket.io')
 const util = require('util')
 const socketioSession = require('express-socket.io-session')
  
-const GameStateManager = require('./GameStateManager')
+//const GameStateManager = require('./GameStateManager')
+const GameStateManager = require('./gameStateManager');
 
 // game objects
 var app = express();  // express app - for handelling routes
