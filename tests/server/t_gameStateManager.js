@@ -18,7 +18,7 @@ let getTestBase = ()=>{
     }
 }
 
-test.skip("Testing the gameCreation process", (t)=>{
+test("Testing the gameCreation process", (t)=>{
 
     let gsManager = GameStateManager();
 
@@ -360,8 +360,7 @@ test("Testing the update stateMachine - vote to legislative/proposal/endGame", (
     t.end()
 })
 
-test("Testing the update stateMachine - legislative to endgame/power", (t)=>{
-    
+test.skip("Testing the update stateMachine - legislative to endgame/power", (t)=>{
     
     t.test("Fascist passed - no power", (ts)=>{
         let gsManager = GameStateManager();
