@@ -303,11 +303,12 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
         let playersInGame = stateManager.getPlayerRefs(gameRef) // some call to the state manager for the playerRefs
         let spectatorsInGame = stateManager.getSpectatorRefs({gameRef:gameRef});
 
-        let clientsInGame = Object.keys(wss.sockets.connected).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
+        //TODO:Marc Issue seems to be here - this is now a map - need an array of the keys
+        let clientsInGame = Array.from(wss.sockets.sockets.keys()).filter((socketKey)=>{ return playersInGame.includes(socketKey) })
 
         clientsInGame.forEach((socketKey)=>{ // if the clients playerRef is included in game - broadcast to them
 
-            let ws = wss.sockets.connected[socketKey]
+            let ws = wss.sockets.sockets.get(socketKey)
             let hiddenInfo = (privateInfo == undefined) ? stateManager.getPrivatePlayerInfo(gameRef,ws.id) : privateInfo;
 
             let response = {
@@ -325,7 +326,7 @@ wss.broadcast = (gameRef, gameState = stateManager.getGameState(gameRef), privat
         })
 
         spectatorsInGame.forEach((socketKey)=>{
-            let ws = wss.sockets.connected[socketKey];
+            let ws = wss.sockets.sockets.get(socketKey);
             let response = {
                 result: "OK",
                 type: "updateSpectator",
